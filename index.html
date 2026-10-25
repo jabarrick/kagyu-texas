@@ -440,6 +440,7 @@ body.g.wide .pg-tech .pgitems,body.g.wide .pg-biz .pgitems{display:grid;grid-tem
 .tre .tfx{font-size:12px;line-height:18px;color:#9ff0c8;margin:0 0 4px}
 
 .mem .rl .tr{color:var(--azurite);font-weight:400}
+.dilfx{margin:2px 0 0;line-height:18px}
 </style>
 
 
@@ -3497,7 +3498,7 @@ app.addEventListener('click',e=>{
   else if(farmAction(a,t)){}
   else if(a==='rosa'){S.f.rosaReplied=1;S.T+=.6;S.feed.unshift({t:S.turn,x:'Rosa（社区守护者）：他们是好邻居。上周还帮我搬了冰箱。'});clampAll();save();render();}
 });
-app.addEventListener('input',e=>{if(e.target.id==='dil'){const am=allowedMax();let v=Number(e.target.value);if(v>am){v=am;e.target.value=v;}S.dil=v;const n=e.target.closest('.dil').querySelector('.num');if(n)n.textContent=v;}});
+app.addEventListener('input',e=>{if(e.target.id==='dil'){const am=allowedMax();let v=Number(e.target.value);if(v>am){v=am;e.target.value=v;}S.dil=v;const n=e.target.closest('.dil').querySelector('.num');if(n)n.textContent=v;const f=document.getElementById('dilfx');if(f)f.textContent=dilFxStr(v);}});
 app.addEventListener('change',e=>{if(e.target.id==='dil') save();if(e.target.id==='dbgev')UI.dbgEv=e.target.value;});
 const obs=new MutationObserver(()=>{const b=document.getElementById('silentBtn');if(b&&b.disabled&&!b.dataset.t){b.dataset.t=1;setTimeout(()=>{b.disabled=false;b.textContent='这一周过去了';},4000);}});
 obs.observe(app,{childList:true,subtree:true});
@@ -3722,6 +3723,7 @@ function planHTML(){
     <div class="step"><i>2</i><span>周日讲多深</span><span class="num">${S.dil}</span><span class="lock">韦科允许到 ${am}</span></div>
     <div class="dilwrap"><input id="dil" type="range" min="0" max="100" value="${S.dil}" aria-label="术语深度"></div>
     <div class="ends"><span>0 正念·减压</span><span>100 全藏文仪轨</span></div>
+    <p class="label dilfx" id="dilfx">${dilFxStr(S.dil)}</p>
   </div>
   <div class="go"><span class="step" style="margin:0"><i>3</i></span><button class="btn" data-a="start">开始这一周</button>${S.lastActs&&S.lastActs.length?'<button class="btn ghost" data-a="repeat">按上周安排</button>':''}${S.wk<3&&S.acts.length?'<button class="btn ghost" data-a="automonth">连跑到月末</button>':''}<button class="iconbtn" data-a="build">建设与采购</button></div>
   ${S.HP<40?`<p class="label lastrep" style="color:var(--cinnabar)">体力只剩 ${Math.round(S.HP)}：低于30会少一个行动格，安排休息或体检与锻炼吧。</p>`:''}${lr?`<p class="label lastrep">上周：净额 ${fmtS(lr.net)} · 出席 ${lr.attend} 人${lr.monthEnd?' · 已结算月度账单':''}</p>`:''}`;
@@ -4445,6 +4447,17 @@ E({id:'tre_horn',tag:'法宝 · 喜剧',title:'牛角法号',rep:1,cd:999,w:4,co
   opts:[{t:'在下次法会上试试',e:{HA:3,T:1,H:2,L:-.5},fx(){S.f.horn=1;return '声音传到了对岸。Chuy的牛全部抬起了头。';}},{t:'收下，但只在茶歇吹',e:{HA:2},fx(){S.f.horn=1;return 'Hank很满意。他说这叫“德州法螺”。';}}]});
 /* 新人物专长也进百科 */
 
+
+/* ---------- v14：术语深度的即时预览 ---------- */
+function dilFxStr(d){
+  const dL=(d-50)/35/WK,dT=(50-d)/100*2.4/WK;const pres=here();
+  const deep=pres.filter(m=>m.pref<d-15).length,shallow=pres.filter(m=>m.pref>d+15).length;
+  const LB=S.layout?layoutEval():{park:6,visMult:1};const cap=capacity();
+  const vis=Math.max(0,Math.min(Math.round(LB.park*1.6*LB.visMult),Math.round(cap*.55*(1-d/100)*(.25+S.T/100)+S.H/14)));
+  const nw=Math.round((100-d)/100*.14*100)/10;
+  const sg=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2);
+  return `每周 纯度 ${sg(dL)} · 信任 ${sg(dT)} · 访客约 ${vis} 人 · 新人机会 ${nw>0?'+':''}${nw} · 嫌深 ${deep} 人 / 嫌浅 ${shallow} 人`;
+}
 </script>
 <script id="kw-en" type="text/x-kagyu">
 /* ============================================================
@@ -7502,7 +7515,7 @@ app.addEventListener('click',e=>{
   else if(farmAction(a,t)){}
   else if(a==='rosa'){S.f.rosaReplied=1;S.T+=.6;S.feed.unshift({t:S.turn,x:"Rosa (Community Guardian): They're good neighbors. Helped me move a fridge just last week."});clampAll();save();render();}
 });
-app.addEventListener('input',e=>{if(e.target.id==='dil'){const am=allowedMax();let v=Number(e.target.value);if(v>am){v=am;e.target.value=v;}S.dil=v;const n=e.target.closest('.dil').querySelector('.num');if(n)n.textContent=v;}});
+app.addEventListener('input',e=>{if(e.target.id==='dil'){const am=allowedMax();let v=Number(e.target.value);if(v>am){v=am;e.target.value=v;}S.dil=v;const n=e.target.closest('.dil').querySelector('.num');if(n)n.textContent=v;const f=document.getElementById('dilfx');if(f)f.textContent=dilFxStr(v);}});
 app.addEventListener('change',e=>{if(e.target.id==='dil') save();if(e.target.id==='dbgev')UI.dbgEv=e.target.value;});
 const obs=new MutationObserver(()=>{const b=document.getElementById('silentBtn');if(b&&b.disabled&&!b.dataset.t){b.dataset.t=1;setTimeout(()=>{b.disabled=false;b.textContent="The week passes";},4000);}});
 obs.observe(app,{childList:true,subtree:true});
@@ -7727,6 +7740,7 @@ function planHTML(){
     <div class="step"><i>2</i><span>How deep on Sunday</span><span class="num">${S.dil}</span><span class="lock">Waco allows up to ${am}</span></div>
     <div class="dilwrap"><input id="dil" type="range" min="0" max="100" value="${S.dil}" aria-label="Depth"></div>
     <div class="ends"><span>0 Mindfulness</span><span>100 Full Tibetan liturgy</span></div>
+    <p class="label dilfx" id="dilfx">${dilFxStr(S.dil)}</p>
   </div>
   <div class="go"><span class="step" style="margin:0"><i>3</i></span><button class="btn" data-a="start">Begin the week</button>${S.lastActs&&S.lastActs.length?"<button class=\"btn ghost\" data-a=\"repeat\">Same as last week</button>":''}${S.wk<3&&S.acts.length?"<button class=\"btn ghost\" data-a=\"automonth\">Run to month's end</button>":''}<button class="iconbtn" data-a="build">Build & Buy</button></div>
   ${S.HP<40?`<p class="label lastrep" style="color:var(--cinnabar)">Vitality is down to ${Math.round(S.HP)}: below 30 you lose an action slot. Schedule some rest or a checkup and exercise.</p>`:''}${lr?`<p class="label lastrep">Last week: net ${fmtS(lr.net)} · attendance ${lr.attend}${lr.monthEnd?" · monthly bills settled":''}</p>`:''}`;
@@ -8450,6 +8464,17 @@ E({id:'tre_horn',tag:"Treasures · Comedy",title:"Longhorn dharma horn",rep:1,cd
   opts:[{t:"Try it at the next gathering",e:{HA:3,T:1,H:2,L:-.5},fx(){S.f.horn=1;return "The sound carried across the lake. Every one of Chuy's cows raised its head.";}},{t:"Accept it, but only blow it at tea break",e:{HA:2},fx(){S.f.horn=1;return "Hank is very pleased. He calls it \"the Texas conch.\"";}}]});
 /* 新人物专长也进百科 */
 
+
+/* ---------- v14：术语深度的即时预览 ---------- */
+function dilFxStr(d){
+  const dL=(d-50)/35/WK,dT=(50-d)/100*2.4/WK;const pres=here();
+  const deep=pres.filter(m=>m.pref<d-15).length,shallow=pres.filter(m=>m.pref>d+15).length;
+  const LB=S.layout?layoutEval():{park:6,visMult:1};const cap=capacity();
+  const vis=Math.max(0,Math.min(Math.round(LB.park*1.6*LB.visMult),Math.round(cap*.55*(1-d/100)*(.25+S.T/100)+S.H/14)));
+  const nw=Math.round((100-d)/100*.14*100)/10;
+  const sg=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2);
+  return `Per week: Lineage ${sg(dL)} · Trust ${sg(dT)} · ≈${vis} visitors · newcomer chance ${nw>0?'+':''}${nw} · ${deep} find it too deep / ${shallow} too shallow`;
+}
 </script>
 <script>(function(){var l='zh';try{l=localStorage.getItem('kagyu-lang')||'zh';}catch(e){}
 if(/lang=en/.test(location.hash))l='en';if(/lang=zh/.test(location.hash))l='zh';
