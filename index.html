@@ -1393,7 +1393,7 @@ function settle0(){
   // 漂移（月末）
   if(monthEnd){
   const sinceVisit=S.turn-S.lastVisit;
-  if(sinceVisit>(tk('D4')?24:18)) S.L-=.8;
+  if(sinceVisit>(tk('D4')?24:18)&&!(S.f.rinpocheGone&&(S.f.designated||S.f.localGuide||S.f.guide))) S.L-=.8;
   if(on('protector')) S.L+=.5;
   if(on('cabin')&&(S.f.guide||S.f.localGuide)) S.L+=.3;
   if(S.self<30) S.RT-=.5;
@@ -1457,7 +1457,7 @@ const ENDINGS={
   bridge:{n:'桥',en:'THE BRIDGE',img:'感恩节晚餐上，一位浸信会牧师和一位喇嘛同坐一桌，为谁先祷告客气了五分钟。',
     t:()=>`法脉变薄了一些，但韦科因你而不同。跨信仰理事会的名牌上写着“${S.center}”。`},
   brand:{n:'品牌',en:'THE BRAND',img:'道场成了“Lake Waco Wellness Retreat”。你是这里的雇员，工牌上写着Head of Authenticity。',
-    t:()=>`账上有 $${Math.round(S.D).toLocaleString()}。周末静修营排到了明年四月。佛堂里的唐卡被换成了高清复制品，原件在Brooke的办公室。`},
+    t:()=>`账上有 $${Math.round(S.D).toLocaleString()}。周末静修营排到了明年四月。${S.f.brookeAlly?`佛堂里的唐卡被换成了高清复制品，原件在Brooke的办公室。`:`佛堂里的唐卡被换成了高清复制品，原件在管理公司的仓库里。`}`},
   diss:{n:'消散',en:'DISSOLUTION',img:'客厅里又只剩下几个人。他们在做大礼拜。',
     t:()=>{const d=act().filter(x=>x.done);return d.length?`只剩 ${act().length} 个人，但其中 ${d.map(x=>x.n).join('、')} 圆满了全部五个十万。这是失败还是胜利，由你判断。`:`只剩 ${act().length} 个人，也没有人完成加行。你们还是每周日聚在一起。也许这就是全部。`;}},
   exile:{n:'流亡',en:'EXILE',img:'你们被迫迁往奥斯汀。韦科的论坛上，有人发帖怀念那座白色的佛塔。',
@@ -3266,7 +3266,7 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)+(100-S.L)*.6+(S.f.brookeAlly?15:0),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f','结局预测'],['e','事件'],['p','人心'],['b','底账']];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">内参：游戏里通常看不到的数字。仅供住持本人阅读。</p>`;
@@ -7140,7 +7140,7 @@ function settle0(){
   // 漂移（月末）
   if(monthEnd){
   const sinceVisit=S.turn-S.lastVisit;
-  if(sinceVisit>(tk('D4')?24:18)) S.L-=.8;
+  if(sinceVisit>(tk('D4')?24:18)&&!(S.f.rinpocheGone&&(S.f.designated||S.f.localGuide||S.f.guide))) S.L-=.8;
   if(on('protector')) S.L+=.5;
   if(on('cabin')&&(S.f.guide||S.f.localGuide)) S.L+=.3;
   if(S.self<30) S.RT-=.5;
@@ -7204,7 +7204,7 @@ const ENDINGS={
   bridge:{n:"The Bridge",en:'THE BRIDGE',img:"At Thanksgiving dinner, a Baptist pastor and a lama share a table and spend five minutes politely insisting the other say grace first.",
     t:()=>`The lineage has thinned a little, but Waco is different because of you. The nameplate on the interfaith council reads "${S.center}."`},
   brand:{n:"The Brand",en:'THE BRAND',img:"The center has become \"Lake Waco Wellness Retreat.\" You are an employee here; your badge reads Head of Authenticity.",
-    t:()=>`There's $${Math.round(S.D).toLocaleString()} in the account. Weekend retreats are booked through next April. The thangkas in the shrine room have been swapped for high-resolution reproductions; the originals hang in Brooke's office.`},
+    t:()=>`There's $${Math.round(S.D).toLocaleString()} in the account. Weekend retreats are booked through next April. ${S.f.brookeAlly?`The thangkas in the shrine room have been swapped for high-resolution reproductions; the originals hang in Brooke's office.`:`The thangkas in the shrine room have been swapped for high-resolution reproductions; the originals are in the management company's storage unit.`}`},
   diss:{n:"Dissolution",en:'DISSOLUTION',img:"Once again only a few people are left in the living room. They are doing prostrations.",
     t:()=>{const d=act().filter(x=>x.done);return d.length?`Only ${act().length} remain, but ${d.map(x=>x.n).join(", ")} completed all five hundred-thousands. Whether this is failure or victory is for you to decide.`:`Only ${act().length} remain, and none of them has finished ngöndro. You still gather every Sunday. Perhaps that's all there is.`;}},
   exile:{n:"Exile",en:'EXILE',img:"You are forced to move to Austin. On a Waco forum, someone posts about missing that white stupa.",
@@ -9014,7 +9014,7 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)+(100-S.L)*.6+(S.f.brookeAlly?15:0),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f',"Fates"],['e',"Events"],['p',"Hearts"],['b',"Ledger"]];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">Intel: numbers the game usually keeps out of sight. For the Abbot's eyes only.</p>`;
@@ -9720,7 +9720,7 @@ const WIKI_CONCEPTS=[
   ["Media Heat","Media attention. Amplifies how events hit Trust, brings visitors and newcomers, and brings risk. Cools on its own."],
   ["Rinpoche's Trust","Your teacher's trust in you. Rises with self-practice, retreats and doing things properly; falls when you practice too little. Gates empowerments and certification."],
   ["Commitment","Each member's investment in the center. Drifts toward how well Sunday matches their preferred depth; stuck below 25 for too long, they think about leaving."],
-  ["Depth","How deep Sunday practice goes (0 mindfulness and stress relief ～ 100 full Tibetan liturgy). Trust and Learning set the ceiling Waco allows. Shallow draws crowds but drains Lineage."],
+  ["Depth","How deep Sunday practice goes (0 mindfulness and stress relief – 100 full Tibetan liturgy). Trust and Learning set the ceiling Waco allows. Shallow draws crowds but drains Lineage."],
   ["Ngöndro","Each member's practice progress: a hundred thousand each of prostrations, refuge, Vajrasattva, mandala offering and guru yoga. Higher commitment goes faster; completion qualifies them for yidam practice."],
   ["Capacity and Attendance","Shrine room area × 0.8 = seats. Attendance is limited by capacity, commitment and visitors (parking)."],
   ["Connected","Buildings and road-side venues must link by gravel road or footpath to the highway on the far right, or they do nothing."],
@@ -12888,7 +12888,7 @@ function settle0(){
   // 漂移（月末）
   if(monthEnd){
   const sinceVisit=S.turn-S.lastVisit;
-  if(sinceVisit>(tk('D4')?24:18)) S.L-=.8;
+  if(sinceVisit>(tk('D4')?24:18)&&!(S.f.rinpocheGone&&(S.f.designated||S.f.localGuide||S.f.guide))) S.L-=.8;
   if(on('protector')) S.L+=.5;
   if(on('cabin')&&(S.f.guide||S.f.localGuide)) S.L+=.3;
   if(S.self<30) S.RT-=.5;
@@ -12952,7 +12952,7 @@ const ENDINGS={
   bridge:{n:"A Ponte",en:'THE BRIDGE',img:"No jantar de Ação de Graças, um pastor batista e um lama partilham a mesa e passam cinco minutos a insistir, educadamente, que seja o outro a dar graças primeiro.",
     t:()=>`A linhagem ficou um pouco mais rala, mas Waco é diferente por tua causa. A placa no conselho inter-religioso diz «${S.center}».`},
   brand:{n:"A Marca",en:'THE BRAND',img:"O centro tornou-se o «Lake Waco Wellness Retreat». És aqui funcionário; o teu crachá diz Head of Authenticity.",
-    t:()=>`Há $${Math.round(S.D).toLocaleString()} na conta. Os retiros de fim de semana estão esgotados até ao próximo abril. As thangkas da sala do santuário foram trocadas por reproduções em alta resolução; as originais estão penduradas no gabinete da Brooke.`},
+    t:()=>`Há $${Math.round(S.D).toLocaleString()} na conta. Os retiros de fim de semana estão esgotados até ao próximo abril. ${S.f.brookeAlly?`As thangkas da sala do santuário foram trocadas por reproduções em alta resolução; as originais estão penduradas no gabinete da Brooke.`:`As thangkas da sala do santuário foram trocadas por reproduções em alta resolução; as originais estão no armazém da empresa gestora.`}`},
   diss:{n:"Dissolução",en:'DISSOLUTION',img:"Mais uma vez, restam apenas algumas pessoas na sala de estar. Estão a fazer prostrações.",
     t:()=>{const d=act().filter(x=>x.done);return d.length?`Restam apenas ${act().length}, mas os cinco cem-mil foram completados por ${d.map(x=>x.n).join(", ")}. Se isto é derrota ou vitória, cabe-te a ti decidir.`:`Restam apenas ${act().length}, e nenhum terminou o ngöndro. Continuam a reunir-se todos os domingos. Talvez seja tudo o que há.`;}},
   exile:{n:"Exílio",en:'EXILE',img:"Sois obrigados a mudar-vos para Austin. Num fórum de Waco, alguém escreve que tem saudades daquela stupa branca.",
@@ -14762,7 +14762,7 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)+(100-S.L)*.6+(S.f.brookeAlly?15:0),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f',"Finais"],['e',"Eventos"],['p',"Ânimos"],['b',"Contas"]];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">Dossiê: números que o jogo normalmente esconde. Só para os olhos do Abade.</p>`;
