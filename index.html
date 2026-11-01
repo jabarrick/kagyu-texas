@@ -601,7 +601,7 @@ function expenses(){
   if(maint) lines.push(['设施维护',Math.round(maint*(S.bld&&roomsOn('storage').length?.7:1)*(1-.03*traitN('build')-.02*traitN('craft')))]);
   if(om().remit)lines.push(['寄给达兰萨拉的家人',om().remit]);
   {const ti=Math.round(treInsurance()*(1-.1*traitN('law')));if(ti>0)lines.push(['法宝保险',ti]);}
-  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(['建筑维护（屋顶、管道、白蚁）',Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?['项目协调员 ×2',2400]:['兼职项目协调员',1200]);if(nm>8)lines.push(['成员杂费（茶点、坐垫、保险）',Math.round((nm-8)*18)]);if(nm>30)lines.push([nm>60?'常住管理员 ×2':'常住管理员',nm>60?1800:900]);
+  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(['建筑维护（屋顶、管道、白蚁）',Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?['项目协调员 ×2',Math.min(2400,1200+(nm-90)*25)]:['兼职项目协调员',Math.min(1200,(nm-45)*25)]);if(nm>8)lines.push(['成员杂费（茶点、坐垫、保险）',Math.round((nm-8)*14)]);if(nm>30)lines.push([nm>60?'常住管理员 ×2':'常住管理员',nm>60?1800:900]);
   if(boon('thrift')){const s=lines.reduce((a,b)=>a+b[1],0);lines.push(['节俭年 · 省下',-Math.round(s*.12)]);}
   const df=DIFF();if(df.exp!==1){const s=lines.reduce((a,b)=>a+b[1],0);lines.push([`难度调整（${df.n}）`,Math.round(s*(df.exp-1))]);}
   return lines;
@@ -1246,8 +1246,8 @@ E({id:'el_yangsi_visit',tag:`无尽 · 传承`,title:`小仁波切来了`,rep:1,
 Object.assign(ACH,{nowruz:[`七种粮食`,`在佛堂的厨房里熬过诺鲁孜粥`],kora:[`山不会走`,`在卓玛拉山口前转身下山`],yawn:[`哈欠`,`收到仁波切转世的第一张照片`]});
 
 /* ===== v26 · 十年之后：结局与无尽模式的衔接；旧存档补发新事件 ===== */
-const CV=26; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
-const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[]};
+const CV=27; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
+const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[],27:['ethan_wedding','nyungne','tx_250']};
 function backfill(){
   if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
   const from=S.cv||24;S.cv=CV;const ids=[];
@@ -1323,6 +1323,26 @@ E({id:'el_heat',tag:`无尽 · 天气`,title:`热穹`,rep:1,cd:30,w:4,months:[7,
   opts:[{t:`把佛堂开放为纳凉中心`,req:()=>S.D>=700,rq:`需要 $700`,e:{D:-700,T:4,M:4,H:3,B:5},r:`白天佛堂里坐满了陌生人：带孩子的母亲、送外卖的、一位一直在念玫瑰经的老太太。没有人被要求打坐。`},
     {t:`给草坪装遮阳棚和喷雾`,req:()=>S.D>=400,rq:`需要 $400`,e:{D:-400,HA:3,T:1},r:`孩子们在喷雾下面跑来跑去。大人们坐在棚下，第一次觉得湖边的风是凉的。`},
     {t:`照常运作，提醒大家多喝水`,e:{c:{all:-1}},r:`周日有两位老成员没来。你打电话过去，他们说：太热了，在家念。`}]});
+
+/* ===== v26 · 2026 年（第七年）补强 ===== */
+E({id:'ethan_wedding',tag:`人物`,title:`Ethan的婚礼`,at:'2026-04',cond:()=>!!mem('ethan'),
+  text:()=>`Ethan Cole从休斯顿打来电话。当年那个替你写英文周报的贝勒宗教系学生，要结婚了。未婚妻叫Grace，家里是南方浸信会。
+“我们会在她家的教会办婚礼，”他说，“但我想要一个祝福。你的。”`,
+  opts:[{t:`开车去休斯顿，在婚宴上念吉祥祈愿`,req:()=>S.D>=200,rq:`需要 $200`,e:{D:-200,B:4,T:1,HA:2},r:`Grace的外婆问你是不是“那位和尚”。你说不是，只是个管道场的。她点点头，说：“那也差不多。”`},
+    {t:`请他们来佛堂，系上金刚结`,e:{L:1,HA:3,M:2},r:`你在佛前为两人系上加持过的红绳。Grace问能不能洗澡时也戴着。Ethan替你回答：可以。`},
+    {t:`寄一条哈达和一张卡片`,e:{M:1},r:`卡片上你只写了一句：“愿你们彼此是对方的善知识。”Ethan回信说，Grace把它贴在了冰箱上。`}]});
+E({id:'nyungne',tag:`修行 · 萨嘎达瓦`,title:`纽涅`,at:'2026-05',
+  text:()=>`萨嘎达瓦月。Tenzin提议办一次纽涅：吉祥比丘尼（格隆玛·巴嫫）传下来的观音斋戒法。第一天过午不食，第二天不吃、不喝、不说话，还有几百个大礼拜。传说她当年就是靠这个法门治好了麻风病。
+两位成员来问你：一位怀孕了，一位每天打胰岛素。`,
+  opts:[{t:`带满八轮纽涅（十六天）`,e:{L:5,M:8,KN:1,HP:-10,B:12,c:{all:3}},r:`到第六天，佛堂里只剩酥油灯的味道。孕妇和打胰岛素的那位只守八关斋戒、过午不食，每天照样来。没有人觉得他们修得少。`},
+    {t:`只办一轮；身体不便的人守八关斋戒`,e:{L:2,M:4,HA:2,HP:-3,B:4},r:`第二天傍晚破斋，大家喝的第一口是Tenzin熬的米汤。有人哭了，说不清为什么。`},
+    {t:`今年不办`,e:{B:-3,c:{tenzin:-3}},r:`Tenzin说：“那明年。”他把日期写在了日历上。`}]});
+E({id:'tx_250',tag:`德州 · 社区`,title:`第二百五十个七月四日`,at:'2026-07',
+  text:()=>`2026年7月4日，《独立宣言》二百五十周年。韦科的游行委员会邀请道场派一队人走在游行里，“各个社区都有”。
+Dale已经把他的老军装熨好了。几位成员觉得这个夏天的旗子太多、太吵。Tenzin说，在他长大的地方，挂一面旗子是会被抓的。`,
+  opts:[{t:`带着美国国旗、德州州旗和经幡一起走`,e:{T:4,H:4,c:{dale:6,tenzin:-2}},r:`队伍从奥斯汀大道走过。路边有人鼓掌，有人皱眉，一个小孩一直追着经幡跑。Dale走在最前面，步子一点没乱。`},
+    {t:`周日共修上请Dale朗读《独立宣言》，然后回向`,req:()=>has('dale'),rq:`需要Dale`,e:{T:2,L:1,M:2,c:{dale:8}},r:`Dale读到“生命、自由和追求幸福的权利”时停了一下。回向的时候，你把“一切众生”说得比平时慢。`},
+    {t:`道场不参加`,e:{L:1,T:-1,c:{dale:-4}},r:`你说道场不站队。Dale一个人去了，回来给每个人带了一面小旗子，没有人扔掉。`}]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:'成员人生',title:'想离开',qonly:1,
@@ -1869,7 +1889,7 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`林悦 Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur',ethan_wedding:'ethan',nyungne:'tenzin',tx_250:'dale'});
 ENDINGS.refuge={n:`庇护所`,en:'SANCTUARY',img:`诺鲁孜节的草地上，伊玛目、Marcus和你坐在同一块野餐布上。Dilnur的女儿在给每个人的盘子里分抓饭。`,t:()=>`后来，韦科的人说起这个地方，不再说“那个佛教组织”，而是说“湖边那家，出事的时候门是开着的”。${S.f.uyGarden?`Ablikim的葡萄架上，今年挂了几串还很酸的葡萄。`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin在日喀则开了一间小茶馆，墙上挂着韦科佛堂的合影。`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin还在H-E-B上班，周日在佛堂领诵。`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin按仁波切信里说的，周日讲法。他还在H-E-B上早班。`);
@@ -6513,7 +6533,7 @@ function expenses(){
   if(maint) lines.push(["Facility upkeep",Math.round(maint*(S.bld&&roomsOn('storage').length?.7:1)*(1-.03*traitN('build')-.02*traitN('craft')))]);
   if(om().remit)lines.push(["Sent home to family in Dharamsala",om().remit]);
   {const ti=Math.round(treInsurance()*(1-.1*traitN('law')));if(ti>0)lines.push(["Treasure insurance",ti]);}
-  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(["Building maintenance (roofs, plumbing, termites)",Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?["Program coordinators ×2",2400]:["Part-time program coordinator",1200]);if(nm>8)lines.push(["Member costs (tea, cushions, insurance)",Math.round((nm-8)*18)]);if(nm>30)lines.push([nm>60?"Resident caretakers ×2":"Resident caretaker",nm>60?1800:900]);
+  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(["Building maintenance (roofs, plumbing, termites)",Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?["Program coordinators ×2",Math.min(2400,1200+(nm-90)*25)]:["Part-time program coordinator",Math.min(1200,(nm-45)*25)]);if(nm>8)lines.push(["Member costs (tea, cushions, insurance)",Math.round((nm-8)*14)]);if(nm>30)lines.push([nm>60?"Resident caretakers ×2":"Resident caretaker",nm>60?1800:900]);
   if(boon('thrift')){const s=lines.reduce((a,b)=>a+b[1],0);lines.push(["Thrift Year · saved",-Math.round(s*.12)]);}
   const df=DIFF();if(df.exp!==1){const s=lines.reduce((a,b)=>a+b[1],0);lines.push([`Difficulty adjustment (${df.n})`,Math.round(s*(df.exp-1))]);}
   return lines;
@@ -7163,8 +7183,8 @@ E({id:'el_yangsi_visit',tag:`Endless · Lineage`,title:`The Young Rinpoche Comes
 Object.assign(ACH,{nowruz:[`Seven Grains`,`Cook Nowruz porridge in the center's kitchen`],kora:[`The Mountain Isn't Going Anywhere`,`Turn back below the Drölma La`],yawn:[`Yawn`,`Receive the first photo of Rinpoche's reincarnation`]});
 
 /* ===== v26 · 十年之后：结局与无尽模式的衔接；旧存档补发新事件 ===== */
-const CV=26; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
-const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[]};
+const CV=27; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
+const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[],27:['ethan_wedding','nyungne','tx_250']};
 function backfill(){
   if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
   const from=S.cv||24;S.cv=CV;const ids=[];
@@ -7240,6 +7260,26 @@ The county is looking for places to serve as cooling centers.`,
   opts:[{t:`Open the shrine room as a cooling center`,req:()=>S.D>=700,rq:`Requires $700`,e:{D:-700,T:4,M:4,H:3,B:5},r:`All day the shrine room fills with strangers: mothers with children, delivery drivers, an old woman saying the rosary the whole time. Nobody is asked to meditate.`},
     {t:`Put up shade canopies and misters on the lawn`,req:()=>S.D>=400,rq:`Requires $400`,e:{D:-400,HA:3,T:1},r:`The children run back and forth under the mist. The adults sit under the canopy and, for the first time, find the lake breeze cool.`},
     {t:`Carry on as usual; remind everyone to drink water`,e:{c:{all:-1}},r:`Two older members miss Sunday. You call them. Too hot, they say; they're practicing at home.`}]});
+
+/* ===== v26 · 2026 年（第七年）补强 ===== */
+E({id:'ethan_wedding',tag:`People`,title:`Ethan's Wedding`,at:'2026-04',cond:()=>!!mem('ethan'),
+  text:()=>`Ethan Cole calls from Houston. The Baylor religion student who used to write your English summaries is getting married. His fiancée is Grace; her family is Southern Baptist.
+"We're having the wedding at her family's church," he says. "But I want a blessing. Yours."`,
+  opts:[{t:`Drive to Houston and recite prayers of auspiciousness at the reception`,req:()=>S.D>=200,rq:`Requires $200`,e:{D:-200,B:4,T:1,HA:2},r:`Grace's grandmother asks if you're "the monk." You say no, you just run the center. She nods. "Close enough."`},
+    {t:`Invite them to the shrine room and tie blessing cords`,e:{L:1,HA:3,M:2},r:`In front of the shrine you tie a blessed red cord on each of them. Grace asks whether she can keep it on in the shower. Ethan answers for you: yes.`},
+    {t:`Mail a khata and a card`,e:{M:1},r:`You write just one line on the card: "May each of you be the other's spiritual friend." Ethan writes back that Grace has stuck it on the fridge.`}]});
+E({id:'nyungne',tag:`Practice · Saga Dawa`,title:`Nyungne`,at:'2026-05',
+  text:()=>`It is the month of Saga Dawa. Tenzin suggests holding a nyungne: the fasting practice of Chenrezig handed down from the nun Gelongma Palmo. On the first day, one meal before noon; on the second, no food, no water, no speaking, and several hundred prostrations. It is said she was cured of leprosy through this practice.
+Two members come to you with questions: one is pregnant, the other takes insulin every day.`,
+  opts:[{t:`Lead a full set of eight nyungnes (sixteen days)`,e:{L:5,M:8,KN:1,HP:-10,B:12,c:{all:3}},r:`By the sixth day the shrine room smells of nothing but butter lamps. The pregnant member and the one on insulin keep the eight precepts and eat one meal before noon, and come every day. Nobody thinks they are practicing any less.`},
+    {t:`Hold just one; anyone with a medical reason keeps the eight precepts`,e:{L:2,M:4,HA:2,HP:-3,B:4},r:`On the evening of the second day you break the fast with the rice broth Tenzin has made. Someone cries and can't say why.`},
+    {t:`Not this year`,e:{B:-3,c:{tenzin:-3}},r:`Tenzin says, "Next year, then." He writes the dates on the calendar.`}]});
+E({id:'tx_250',tag:`Texas · Community`,title:`The Two Hundred and Fiftieth Fourth of July`,at:'2026-07',
+  text:()=>`July 4, 2026: two hundred and fifty years since the Declaration of Independence. Waco's parade committee invites the center to send a group to walk in the parade, "every community is."
+Dale has already pressed his old uniform. Some members feel there are too many flags this summer, and too much noise. Tenzin says that where he grew up, hanging a flag could get you arrested.`,
+  opts:[{t:`Walk with the US flag, the Texas flag and prayer flags together`,e:{T:4,H:4,c:{dale:6,tenzin:-2}},r:`The group walks down Austin Avenue. Some people along the curb applaud, some frown, and a small child keeps running after the prayer flags. Dale marches at the front without missing a step.`},
+    {t:`Have Dale read the Declaration at Sunday practice, then dedicate the merit`,req:()=>has('dale'),rq:`Requires Dale`,e:{T:2,L:1,M:2,c:{dale:8}},r:`Dale pauses at "Life, Liberty and the pursuit of Happiness." At the dedication you say "all sentient beings" more slowly than usual.`},
+    {t:`The center stays out of it`,e:{L:1,T:-1,c:{dale:-4}},r:`You say the center doesn't take sides. Dale goes on his own and comes back with a little flag for everyone. Nobody throws theirs away.`}]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Members' Lives",title:"Wants to Leave",qonly:1,
@@ -7786,7 +7826,7 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur',ethan_wedding:'ethan',nyungne:'tenzin',tx_250:'dale'});
 ENDINGS.refuge={n:`Sanctuary`,en:'SANCTUARY',img:`On the lawn at Nowruz, the imam, Marcus and you share one picnic blanket. Dilnur's daughter is spooning polo onto everyone's plate.`,t:()=>`Later, when people in Waco talk about this place, they no longer say "that Buddhist group." They say "the place by the lake that kept its door open when it all happened."${S.f.uyGarden?` This year, a few very sour bunches hang from Ablikim's trellis.`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin opened a small teahouse in Shigatse. A photo of the Waco sangha hangs on the wall.`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin still works at H-E-B and leads the chanting on Sundays.`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin gives the Sunday teachings, as Rinpoche's letter asked. He still works the early shift at H-E-B.`);
@@ -12431,7 +12471,7 @@ function expenses(){
   if(maint) lines.push(["Manutenção das instalações",Math.round(maint*(S.bld&&roomsOn('storage').length?.7:1)*(1-.03*traitN('build')-.02*traitN('craft')))]);
   if(om().remit)lines.push(["Enviado à família em Dharamsala",om().remit]);
   {const ti=Math.round(treInsurance()*(1-.1*traitN('law')));if(ti>0)lines.push(["Seguro dos tesouros",ti]);}
-  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(["Manutenção dos edifícios (telhados, canalização, térmitas)",Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?["Coordenadores de programas ×2",2400]:["Coordenador de programas a tempo parcial",1200]);if(nm>8)lines.push(["Custos dos membros (chá, almofadas, seguro)",Math.round((nm-8)*18)]);if(nm>30)lines.push([nm>60?"Caseiros residentes ×2":"Caseiro residente",nm>60?1800:900]);
+  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(["Manutenção dos edifícios (telhados, canalização, térmitas)",Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?["Coordenadores de programas ×2",Math.min(2400,1200+(nm-90)*25)]:["Coordenador de programas a tempo parcial",Math.min(1200,(nm-45)*25)]);if(nm>8)lines.push(["Custos dos membros (chá, almofadas, seguro)",Math.round((nm-8)*14)]);if(nm>30)lines.push([nm>60?"Caseiros residentes ×2":"Caseiro residente",nm>60?1800:900]);
   if(boon('thrift')){const s=lines.reduce((a,b)=>a+b[1],0);lines.push(["Ano de Poupança · poupado",-Math.round(s*.12)]);}
   const df=DIFF();if(df.exp!==1){const s=lines.reduce((a,b)=>a+b[1],0);lines.push([`Ajuste de dificuldade (${df.n})`,Math.round(s*(df.exp-1))]);}
   return lines;
@@ -13081,8 +13121,8 @@ E({id:'el_yangsi_visit',tag:`Infinito · Linhagem`,title:`O jovem Rinpoche chega
 Object.assign(ACH,{nowruz:[`Sete cereais`,`Cozer a papa do Nowruz na cozinha do centro`],kora:[`A montanha não foge`,`Dar meia-volta antes do Drölma La`],yawn:[`Bocejo`,`Receber a primeira fotografia da reencarnação do Rinpoche`]});
 
 /* ===== v26 · 十年之后：结局与无尽模式的衔接；旧存档补发新事件 ===== */
-const CV=26; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
-const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[]};
+const CV=27; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
+const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[],27:['ethan_wedding','nyungne','tx_250']};
 function backfill(){
   if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
   const from=S.cv||24;S.cv=CV;const ids=[];
@@ -13158,6 +13198,26 @@ O condado procura locais que sirvam de centros de arrefecimento.`,
   opts:[{t:`Abrir a sala do santuário como centro de arrefecimento`,req:()=>S.D>=700,rq:`Requer $700`,e:{D:-700,T:4,M:4,H:3,B:5},r:`O dia inteiro, a sala enche-se de desconhecidos: mães com crianças, estafetas, uma senhora idosa a rezar o terço o tempo todo. Ninguém é convidado a meditar.`},
     {t:`Montar toldos e nebulizadores no relvado`,req:()=>S.D>=400,rq:`Requer $400`,e:{D:-400,HA:3,T:1},r:`As crianças correm de um lado para o outro debaixo da névoa. Os adultos sentam-se à sombra e, pela primeira vez, acham fresca a brisa do lago.`},
     {t:`Continuar como sempre e lembrar todos de beber água`,e:{c:{all:-1}},r:`Dois membros mais velhos faltam no domingo. Telefonas-lhes. Está calor demais, dizem; estão a praticar em casa.`}]});
+
+/* ===== v26 · 2026 年（第七年）补强 ===== */
+E({id:'ethan_wedding',tag:`Pessoas`,title:`O casamento do Ethan`,at:'2026-04',cond:()=>!!mem('ethan'),
+  text:()=>`O Ethan Cole telefona de Houston. O estudante de religião da Baylor que te escrevia os resumos em inglês vai casar. A noiva chama-se Grace; a família dela é batista do Sul.
+«Vamos casar na igreja da família dela», diz ele. «Mas quero uma bênção. A tua.»`,
+  opts:[{t:`Ir de carro a Houston e recitar preces auspiciosas na boda`,req:()=>S.D>=200,rq:`Requer $200`,e:{D:-200,B:4,T:1,HA:2},r:`A avó da Grace pergunta se és «o monge». Dizes que não, que só diriges o centro. Ela acena. «Vai dar ao mesmo.»`},
+    {t:`Convidá-los para a sala do santuário e atar-lhes cordões de bênção`,e:{L:1,HA:3,M:2},r:`Diante do altar atas um cordão vermelho abençoado a cada um. A Grace pergunta se pode ficar com ele no duche. O Ethan responde por ti: pode.`},
+    {t:`Enviar um khata e um cartão`,e:{M:1},r:`No cartão escreves só uma frase: «Que cada um de vós seja o amigo espiritual do outro.» O Ethan responde que a Grace o colou no frigorífico.`}]});
+E({id:'nyungne',tag:`Prática · Saga Dawa`,title:`Nyungne`,at:'2026-05',
+  text:()=>`É o mês de Saga Dawa. O Tenzin sugere fazer um nyungne: a prática de jejum de Chenrezig transmitida pela monja Gelongma Palmo. No primeiro dia, uma refeição antes do meio-dia; no segundo, sem comida, sem água, sem falar, e várias centenas de prostrações. Diz-se que ela se curou da lepra através desta prática.
+Dois membros vêm fazer-te perguntas: uma está grávida, o outro toma insulina todos os dias.`,
+  opts:[{t:`Dirigir um ciclo completo de oito nyungnes (dezasseis dias)`,e:{L:5,M:8,KN:1,HP:-10,B:12,c:{all:3}},r:`Ao sexto dia, a sala do santuário já só cheira a lamparinas de manteiga. A grávida e o da insulina guardam os oito preceitos e fazem uma refeição antes do meio-dia, e vêm todos os dias. Ninguém acha que praticam menos.`},
+    {t:`Fazer só um; quem tem razões médicas guarda os oito preceitos`,e:{L:2,M:4,HA:2,HP:-3,B:4},r:`Ao fim da tarde do segundo dia quebram o jejum com a canja de arroz que o Tenzin fez. Alguém chora e não sabe dizer porquê.`},
+    {t:`Este ano não`,e:{B:-3,c:{tenzin:-3}},r:`O Tenzin diz: «Então para o ano.» Escreve as datas no calendário.`}]});
+E({id:'tx_250',tag:`Texas · Comunidade`,title:`O ducentésimo quinquagésimo 4 de Julho`,at:'2026-07',
+  text:()=>`4 de julho de 2026: duzentos e cinquenta anos da Declaração de Independência. A comissão do desfile de Waco convida o centro a enviar um grupo para desfilar, «todas as comunidades vão».
+O Dale já passou a ferro a velha farda. Alguns membros acham que este verão há bandeiras e barulho a mais. O Tenzin diz que, onde cresceu, pendurar uma bandeira podia dar prisão.`,
+  opts:[{t:`Desfilar com a bandeira dos EUA, a do Texas e bandeiras de oração juntas`,e:{T:4,H:4,c:{dale:6,tenzin:-2}},r:`O grupo desce a Austin Avenue. Há quem aplauda no passeio e quem franza o sobrolho, e uma criança pequena não para de correr atrás das bandeiras de oração. O Dale vai à frente sem perder o passo.`},
+    {t:`Pedir ao Dale que leia a Declaração na prática de domingo e depois dedicar o mérito`,req:()=>has('dale'),rq:`Requer o Dale`,e:{T:2,L:1,M:2,c:{dale:8}},r:`O Dale para em «a Vida, a Liberdade e a busca da Felicidade». Na dedicação, dizes «todos os seres sencientes» mais devagar do que o costume.`},
+    {t:`O centro não participa`,e:{L:1,T:-1,c:{dale:-4}},r:`Dizes que o centro não toma partido. O Dale vai sozinho e volta com uma bandeirinha para cada um. Ninguém deita a sua fora.`}]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Vidas dos membros",title:"Quer ir embora",qonly:1,
@@ -13704,7 +13764,7 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur',ethan_wedding:'ethan',nyungne:'tenzin',tx_250:'dale'});
 ENDINGS.refuge={n:`Refúgio`,en:'SANCTUARY',img:`No relvado, no Nowruz, o imã, o Marcus e tu partilham a mesma toalha de piquenique. A filha da Dilnur serve polo no prato de cada um.`,t:()=>`Mais tarde, quando em Waco se fala deste sítio, já não se diz «aquele grupo budista». Diz-se «a casa junto ao lago que manteve a porta aberta quando tudo aconteceu».${S.f.uyGarden?` Este ano, a latada do Ablikim já tem uns cachos ainda muito azedos.`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(t&&t.left&&S.seen.tibet_india!=null)o.push(`O Tenzin abriu uma pequena casa de chá em Shigatse. Na parede está uma fotografia da sangha de Waco.`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`O Tenzin continua a trabalhar no H-E-B e dirige os cânticos aos domingos.`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`O Tenzin dá os ensinamentos de domingo, como a carta do Rinpoche pedia. Continua a fazer o turno da manhã no H-E-B.`);

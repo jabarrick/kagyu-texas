@@ -21,7 +21,7 @@ const opt = {
 function BOT_SRC() {
   let seed = 1;
   const R = () => (seed = seed * 16807 % 2147483647) / 2147483647;
-  const BOT = window.BOT = { months: [], buys: [], stuck: [], events: {}, style: 'balanced' };
+  const BOT = window.BOT = { months: [], buys: [], stuck: [], events: {}, evYear: {}, style: 'balanced' };
   BOT.seed = s => { seed = s || 1; Math.random = R; };
   // where do Lineage / Trust / Dana come from? (per year: events, actions, weekly settle)
   BOT.contrib = {};
@@ -120,6 +120,7 @@ function BOT_SRC() {
   }
   function answer() {
     const ev = EV[S.cur.id]; S.ctx = S.cur.ctx; const os = getOpts(ev);
+    { const y = BOT.evYear[Y()] = BOT.evYear[Y()] || { n: 0, story: 0 }; y.n++; if (ev.at || ev.qonly) y.story++; }
     if (BOT.style === 'idle') { const k = os.findIndex(o => !o.req || o.req()); BOT.events[S.cur.id] = (BOT.events[S.cur.id] || 0) + 1; return choose(Math.max(0, k)); }
     let best = -1, bs = -1e9;
     if (S.cur.id === 'final' && BOT.final) { const k = os.findIndex(o => o.e && o.e.f && o.e.f.final === BOT.final && (!o.req || o.req())); if (k >= 0) { BOT.events.final = 1; return choose(k); } }
@@ -180,7 +181,7 @@ if (require.main === module) (async () => {
     let n = 0; while (n < opt.endless * 4) { await page.evaluate(() => BOT.week()); n++; }
     endless = await page.evaluate(() => ({ snap: BOT.snapshot(), seen: Object.keys(S.seen).filter(k => /^el_/.test(k)), log: S.log.slice(0, 40).map(l => ds(l.t) + ' ' + l.x) }));
   }
-  const data = await page.evaluate(() => ({ contrib: BOT.contrib, months: BOT.months, buys: BOT.buys, stuck: BOT.stuck, events: BOT.events }));
+  const data = await page.evaluate(() => ({ evYear: BOT.evYear, contrib: BOT.contrib, months: BOT.months, buys: BOT.buys, stuck: BOT.stuck, events: BOT.events }));
   await browser.close();
   const out = { opt, end, endless, errors, ...data };
   if (opt.json) fs.writeFileSync(opt.json, JSON.stringify(out, null, 1));

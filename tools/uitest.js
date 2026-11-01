@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
 const A = process.argv.slice(2), arg = (k, d) => { const i = A.indexOf('--' + k); return i >= 0 ? A[i + 1] : d; };
 const file = path.resolve(arg('file', path.join(__dirname, '..', 'index.html')));
 const langs = arg('langs', 'zh,en,pt').split(','), shots = arg('shots', null);
-const EVENTS = arg('events', 'tre_flea,designate,final,el_after,el_mila_out,el_rosa,el_windmill,el_three_year,el_citizen,el_hunan_voice,el_heat').split(',');
+const EVENTS = arg('events', 'tre_flea,designate,final,el_after,el_mila_out,el_rosa,el_windmill,el_three_year,el_citizen,el_hunan_voice,el_heat,ethan_wedding,nyungne,tx_250').split(',');
 const VPS = [[1280, 800], [390, 844]];
 (async () => {
   const browser = await chromium.launch(); let fails = 0;
