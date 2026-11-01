@@ -560,7 +560,7 @@ function newGame(o){
     phase:'plan',acts:[],pending:[],cur:null,res:null,report:null,
     stats:{bypass:0,totalAttend:0,admin:0,council:0,guide:0,retreat:0,visits:0,negD:0,flagReplies:0,grant:0},endless:false,ended:null,
     HA:60,HP:80,KN:({monk:60,tibetan:50,asian:35,convert:25,black:28,hispanic:26})[o.origin]||30,TP:0,tech:{},opt:{diff:'normal',evf:1,quick:false},cheat:{}};
-  ['rosa','ethan','tenzin'].forEach(id=>addMember(id));
+  ['rosa','ethan','tenzin'].forEach(id=>addMember(id));S.cv=CV;
   addGeneric(false); addGeneric(false);
   if(o.origin==='convert') mem('tenzin').c=42;
   if(o.origin==='asian') S.f.asian=true;
@@ -601,7 +601,7 @@ function expenses(){
   if(maint) lines.push(['设施维护',Math.round(maint*(S.bld&&roomsOn('storage').length?.7:1)*(1-.03*traitN('build')-.02*traitN('craft')))]);
   if(om().remit)lines.push(['寄给达兰萨拉的家人',om().remit]);
   {const ti=Math.round(treInsurance()*(1-.1*traitN('law')));if(ti>0)lines.push(['法宝保险',ti]);}
-  const nm=act().length;if(nm>8)lines.push(['成员杂费（茶点、坐垫、保险）',Math.round((nm-8)*14)]);if(nm>30)lines.push([nm>60?'常住管理员 ×2':'常住管理员',nm>60?1800:900]);
+  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(['建筑维护（屋顶、管道、白蚁）',Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?['项目协调员 ×2',2400]:['兼职项目协调员',1200]);if(nm>8)lines.push(['成员杂费（茶点、坐垫、保险）',Math.round((nm-8)*18)]);if(nm>30)lines.push([nm>60?'常住管理员 ×2':'常住管理员',nm>60?1800:900]);
   if(boon('thrift')){const s=lines.reduce((a,b)=>a+b[1],0);lines.push(['节俭年 · 省下',-Math.round(s*.12)]);}
   const df=DIFF();if(df.exp!==1){const s=lines.reduce((a,b)=>a+b[1],0);lines.push([`难度调整（${df.n}）`,Math.round(s*(df.exp-1))]);}
   return lines;
@@ -725,7 +725,7 @@ function clampAll(){
   S.members.forEach(x=>x.c=clamp(x.c,0,100));
   S.auth.you=clamp(S.auth.you,0,100);S.auth.chad=clamp(S.auth.chad,0,100);
 }
-function sc(d,v){return d>0?d*clamp((100-v)/55,.08,1):d*clamp(v/55,.15,1);}
+function sc(d,v){return d>0?d*clamp(Math.pow(Math.max(0,100-v)/55,1.5),.05,1):d*clamp(v/55,.15,1);} // v26：高位收益更陡地递减
 function soft(fn){const l=S.L,t=S.T;const r=fn();S.L=clamp(l+sc(S.L-l,l),0,100);S.T=clamp(t+sc(S.T-t,t),0,100);return r;}
 const C=()=>S.ctx||{};
 const ctxMem=()=>mem(C().m);
@@ -1165,15 +1165,15 @@ E({id:'designate',tag:'上师与传承',title:'指定',at:'2029-06',
   },
   text:()=>{const d=S.f.designated;
     const who=d==='player'?'你':d==='tenzin'?'Tenzin Dorjee':'侍者Lobsang Tsering';
-    return `仁波切的信由Lobsang亲手送来。信很短。他指定${who}为这里的本地导师。${S.f.cert?'信的最后一行是：“这个道场，是如法的。”':''}`;},
+    return `仁波切的信由Lobsang亲手送来。信很短。他指定${who}为这里的本地导师。${d!=='player'?`至于道场本身——房子、钱、它以后变成什么——他说，留给你在年底之前决定。`:''}${S.f.cert?'信的最后一行是：“这个道场，是如法的。”':''}`;},
   opts:()=>{const d=S.f.designated;
     if(d==='player') return [{t:'接受',e:{L:4,S:4},r:'你把信放在佛龛上，然后去扫地了。'}];
-    return [{t:'接受仁波切的安排',e:{L:3,M:3},r:'你把住持的钥匙交出去时，手很稳。'},{t:'心里不服',e:{L:-3,B:10},r:'你没说出来。但你知道自己没修好。'}];}});
+    return [{t:'接受仁波切的安排',e:{L:3,M:3},r:`你把自己的坐垫从法座上搬到了第一排。手很稳。`},{t:'心里不服',e:{L:-3,B:10},r:'你没说出来。但你知道自己没修好。'}];}});
 E({id:'final',tag:'传承 · 终章',title:'这个道场的以后',at:'2029-11',
-  text:()=>`${S.f.rinpocheGone?`仁波切走了三个月了。`:''}十年了。你要为这个法会点定下长期的制度。${act().length}位成员在等你开口。`,
+  text:()=>`${S.f.rinpocheGone?`仁波切走了三个月了。`:''}十年了。${S.f.designated&&S.f.designated!=='player'?`现在周日是${S.f.designated==='tenzin'?'Tenzin':'Lobsang'}在讲法；但房子、钱、道场以后的样子，还要你来定。`:''}你要为这个法会点定下长期的制度。${act().length}位成员在等你开口。`,
   opts:()=>{const o=[
-    {t:'依赖远程上师，维持现状',e:{f:{final:'remote'}},r:'你说：“就像以前一样。”'},
-    {t:'由本地导师接手教学',req:()=>S.f.guide||S.f.localGuide,rq:'需要合格的本地导师',e:{L:3,f:{final:'local'}},r:'本地导师第一次独自主持周日共修。你坐在最后一排。'},
+    {t:S.f.rinpocheGone?`继续依止仁波切在印度的寺院，维持现状`:'依赖远程上师，维持现状',e:{f:{final:'remote'}},r:S.f.rinpocheGone?`你说：“就像以前一样。”Lobsang说寺里会尽量派老师来。`:'你说：“就像以前一样。”'},
+    {t:'由本地导师接手教学',req:()=>S.f.guide||S.f.localGuide||(S.f.designated&&S.f.designated!=='player'),rq:'需要合格的本地导师',e:{L:3,f:{final:'local'}},r:'本地导师第一次独自主持周日共修。你坐在最后一排。'},
     {t:'并入休斯顿一家更大的噶举中心',e:{L:3,T:-2,f:{final:'merge'}},r:'门口的牌子换了。周日共修照常。'}];
     ['tenzin','dale','rosa'].forEach(id=>{const m=mem(id);if(m&&!m.left&&m.c>=55)o.push({t:`退位，交给 ${m.n}`,e:{f:{final:'succ',heir:id}},r:'你把钥匙放在他手心里。'});});
     o.push({t:'进入三年三月三日闭关，放下一切经营',req:()=>S.self>=85&&S.L>=60&&S.M>=35,rq:'需要住持自修≥85、纯度≥60，以及足够的功德',e:{f:{final:'mila'}},r:'你走进闭关小屋，关上了门。'});
@@ -1245,6 +1245,47 @@ E({id:'el_yangsi_visit',tag:`无尽 · 传承`,title:`小仁波切来了`,rep:1,
     {t:`什么仪式都不办，带他去湖边玩一天`,e:{HA:8,M:8,L:3,S:3},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.renown=(S.renown||0)+40;return '';},r:`他抓到一只小龙虾，看了很久，又放回了水里。Lobsang在旁边念了一句什么，眼眶红了。`}]});
 Object.assign(ACH,{nowruz:[`七种粮食`,`在佛堂的厨房里熬过诺鲁孜粥`],kora:[`山不会走`,`在卓玛拉山口前转身下山`],yawn:[`哈欠`,`收到仁波切转世的第一张照片`]});
 
+/* ===== v26 · 十年之后：结局与无尽模式的衔接；旧存档补发新事件 ===== */
+const CV=26; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
+const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[]};
+function backfill(){
+  if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
+  const from=S.cv||24;S.cv=CV;const ids=[];
+  for(const v in CV_EV)if(Number(v)>from)CV_EV[v].forEach(id=>{const ev=EV[id];if(!ev||!ev.at||S.seen[id]!=null)return;const t=ds2t(ev.at);if(t>S.turn||(t===S.turn&&S.wk===0&&S.phase==='plan'))return;if(S.endless&&['final','designate'].includes(id))return;if(S.queue.some(q=>q.id===id))return;ids.push(id);});
+  ids.sort((a,b)=>ds2t(EV[a].at)-ds2t(EV[b].at));
+  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?3:2; // 临近十年结局：每月三件，仁波切的线放最前
+  if(late)['parinirvana','tsurphu_call'].forEach(id=>{const i=ids.indexOf(id);if(i>0){ids.splice(i,1);ids.unshift(id);}});
+  ids.forEach((id,i)=>S.queue.push({id,at:S.turn+Math.floor(i/per),ctx:{bf:1}}));
+  if(S.endless&&S.seen.el_after==null&&!S.queue.some(q=>q.id==='el_after'))S.queue.push({id:'el_after',at:S.turn+Math.ceil(ids.length/per),ctx:null});
+  if(ids.length)log(`新版本补上了 ${ids.length} 段你错过的故事，会在接下来几个月里陆续到来。`);
+}
+E({id:'el_after',tag:`无尽 · 十年之后`,title:`第二天早上`,qonly:1,
+  text:()=>{const f=S.f,k=S.ended,h=mem(f.heir);
+    if(f.final==='mila')return `闭关小屋的门关上已经一个多月了。按规矩，闭关的人不见外人，也不管事。理事会接过了道场：Rosa每月把账本放进门口的木箱，但没人指望你翻开它。
+从这里开始，游戏跟着的是道场本身——理事会、本地导师和整个僧团替你做决定。小屋里的你，在三年三月三日之后才会出来。`;
+    if(f.final==='succ')return `${h?h.n:'新住持'}拿着钥匙。2030年的第一个周日，他们请你留下——不是坐法座，而是坐办公室：屋顶、银行、停车场。“你知道东西都放在哪儿。”`;
+    if(k==='exile')return `你现在住在奥斯汀，Riverside附近一间一居室。湖边的农场还在你名下。每个周五，你沿着I-35往北开九十分钟。中间那几天，Rosa替你添酥油灯。`;
+    if(k==='brand')return `Brooke的管理公司接管了周末静修营。合同上写着：佛堂的周日上午归你，“视预订情况而定”。`;
+    if(k==='diss')return `还剩下的几个人在客厅里坐成一圈。有人问：“下周日还是这个时间？”`;
+    if(f.final==='merge')return `门口的牌子现在写着：“休斯顿噶举中心 · 韦科分部”。休斯顿每两个月派一位老师来；账单还是寄给你。`;
+    return `2030年1月。什么都没有结束。酥油灯要添，空调滤网该换了，Rosa想跟你聊聊停车场。`;},
+  opts:()=>{const f=S.f,k=S.ended;
+    const out=()=>{const left=(S.seen.final??118)+39-S.turn;queue('el_mila_out',Math.max(1,left));};
+    if(f.final==='mila')return [{t:`由Rosa主持理事会`,e:{HA:2},fx(){f.boardRuns='rosa';out();return '';},r:`Rosa把理事会议程写在一张卡片上，第一条是“不打扰小屋”。`},
+      {t:`由本地导师主持道场`,req:()=>!!(f.guide||f.localGuide||(f.designated&&f.designated!=='player')),rq:`需要本地导师`,e:{L:2},fx(){f.boardRuns='teacher';out();return '';},r:`周日共修照常。法座空着的那一侧，有人每周放一杯新换的水。`}];
+    if(f.final==='succ')return [{t:`留下来做管家`,e:{HA:3,L:1,f:{steward:1}},r:`你的新名片上只有一个头衔：“管钥匙的”。`},{t:`坐回最后一排，做个普通成员`,e:{B:-15,S:4,f:{steward:1}},r:`你坚持了两个月。三月，你又在修空调了。`}];
+    if(k==='exile')return [{t:`继续每周开车回来`,e:{B:6,L:1,T:1},r:`I-35上的每一个出口你都认得了。`},{t:`请Rosa做常住看护`,req:()=>has('rosa'),rq:`需要Rosa`,e:{T:2,c:{rosa:6}},r:`Rosa搬进了农舍的客房。她说这比养老院强。`}];
+    if(k==='brand')return [{t:`重新谈判：周日上午不接受预订`,req:()=>S.D>=1500,rq:`需要 $1,500`,e:{D:-1500,L:4,T:-1},r:`律师费花了一千五。周日上午又是佛堂的了。`},{t:`算了，在品牌里面做事`,e:{D:800,L:-2},r:`你学会了把“灌顶”写成“沉浸式体验”。你不喜欢自己学会了这个。`}];
+    if(k==='diss')return [{t:`“下周日还是这个时间。”`,e:{HA:5,L:1},r:`就这样又过了一年。`}];
+    if(f.final==='merge')return [{t:`接受`,e:{L:1},r:`门牌不重要。周日共修照常。`},{t:`向休斯顿争取更多自主`,e:{T:1,L:-1,f:{houstonFree:1}},r:`休斯顿同意你们自己决定共修时间。别的再说。`}];
+    return [{t:`去添灯`,e:{M:2,HA:2},r:`第一盏灯是你2020年在客厅点的那一盏。`}];}});
+E({id:'el_mila_out',tag:`无尽 · 出关`,title:`出关`,qonly:1,
+  text:()=>`出关的早上，Rosa和理事会走到湖边，把你当年放下的界石一块块收起来。门开了。
+三年三月三日：再一遍加行，本尊修法，那洛六法，大手印，每天黄昏的护法祈请。你眯着眼看风车，它还在转。僧团站在小屋外面，每个人手里拿着一条哈达。`,
+  opts:[{t:`回到法座`,e:{L:6,RT:6,S:15,B:-30,f:{milaOut:1}},r:`你出关后第一次开示，比你以前讲过的任何一次都短。没有人介意。`},
+    {t:`留在小屋，做下一期的闭关导师`,req:()=>on('cabin'),rq:`需要闭关小屋`,e:{L:8,S:10,f:{milaOut:1}},fx(){S.f.localGuide=S.f.localGuide||S.name;return '';},r:`等候名单上已经有三个名字。你把界石又放了回去。`},
+    {t:`先绕湖走一圈，别的再说`,e:{HP:15,HA:5,M:5,f:{milaOut:1}},r:`你走了一整个下午。一只苍鹭陪你走了一段。`}]});
+
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:'成员人生',title:'想离开',qonly:1,
   text:()=>{const m=ctxMem();return m?`${m.n}已经连续几个月心不在焉了。今天他说：“我想我需要暂停一下。”${m.pref<35?'他说这里“越来越像一个宗教”。':m.pref>70?'他说这里“越来越不像一个道场”。':'他没说为什么。'}`:'有人想离开。';},
@@ -1282,8 +1323,8 @@ function eligible(ev){
 function buildPending(){
   const p=[];
   const d=ds();
-  for(const id in EV){const ev=EV[id]; if(ev.at===d&&S.seen[id]==null&&(!ev.cond||ev.cond())) p.push({id});}
-  S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx});return false;}return true;});
+  for(const id in EV){const ev=EV[id]; if(ev.at===d&&S.seen[id]==null&&(!ev.cond||ev.cond())) p.push({id,q:1});}
+  S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx,q:1});return false;}return true;});
   // departure / burnout / debt
   here().forEach(m=>{if(m.low>=12&&!m.flagged&&p.length<4){m.flagged=1;p.push({id:'departure',ctx:{m:m.id}});}});
   if(S.B>=88&&!p.some(x=>x.id==='burnout')) p.push({id:'burnout'});
@@ -1302,6 +1343,7 @@ function buildPending(){
   }
   // silent event overrides month
   const si=p.find(x=>x.id==='silent'); if(si) return [si];
+  p.slice(6).filter(x=>x.q).forEach(x=>S.queue.push({id:x.id,at:S.turn+1,ctx:x.ctx||{bf:1}}));
   return p.slice(0,6);
 }
 function eligibleRep(id){const ev=EV[id];return S.seen[id]==null||S.turn-S.seen[id]>=(ev.cd??6);}
@@ -1319,6 +1361,7 @@ function nextEvent(){
     S.ctx=p.ctx||null;
     if(ev.prep&&!ev.prep()) continue;
     if(p.id==='departure'&&!ctxMem()) continue;
+    if(p.ctx&&p.ctx.bf&&(S.seen[p.id]!=null||(ev.cond&&!ev.cond()))) continue;
     if(p.id==='departure'){const m=ctxMem(); if(m.left) continue;}
     S.seen[p.id]=S.turn;
     if(ev.silent){S.phase='silent';S.cur={id:p.id};return true;}
@@ -1355,13 +1398,14 @@ function weekEvents(){
   let p=[];
   if(S.wk===0){
     const all=buildPending();all.forEach(e=>e.wk=e.r?ri(0,WK-1):0);
-    S.mplan=all.filter(e=>e.wk>0);p=all.filter(e=>e.wk===0);
+    S.mplan=all.filter(e=>e.wk>0);p=all.filter(e=>e.wk===0);p.slice(4).forEach((e,i)=>{e.wk=1+i%(WK-1);S.mplan.push(e);});
   } else {
     p=(S.mplan||[]).filter(e=>e.wk===S.wk);S.mplan=(S.mplan||[]).filter(e=>e.wk!==S.wk);
     S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx});return false;}return true;});
     here().forEach(m=>{if(m.low>=12&&!m.flagged&&p.length<4){m.flagged=1;p.push({id:'departure',ctx:{m:m.id}});}});
     if(S.B>=88&&!p.some(x=>x.id==='burnout')&&eligibleRep('burnout'))p.push({id:'burnout'});
   }
+  p.slice(4).filter(x=>x.q||!x.r).forEach(x=>S.queue.push({id:x.id,at:S.turn+1,ctx:x.ctx||{bf:1}}));
   return p.slice(0,4);
 }
 function startMonth(){
@@ -1433,7 +1477,7 @@ function settle0(){
   let other=0,et=0;
   if(monthEnd){
   if(on('wheels')){const g=Math.round(220*LB.wheel);other+=g;lines.push([LB.wheel>1?'转经轮长廊 · 游客（挨着停车场）':'转经轮长廊 · 游客',g]);}
-  S.L+=LB.L; S.T+=LB.T; S.H+=LB.H; S.B+=LB.B; if(LB.M)S.M+=LB.M;
+  S.L+=dimR(LB.L,1); S.T+=dimR(LB.T,.8); S.H+=LB.H; S.B+=LB.B; if(LB.M)S.M+=LB.M;
   if(on('vets')){other+=600;lines.push(['退伍军人项目资助',600]);}
   if(S.f.market){const g=200+60*(LB.stalls||0);other+=g;lines.push(['周六集市摊位费',g]);}
   if(S.f.cattleGraze){other+=120;lines.push(['东牧场放牧费',120]);}
@@ -1454,7 +1498,7 @@ function settle0(){
   if(S.HP<10){other-=400;lines.push(['住持病倒 · 医药费',-400]);S.HP=40;S.B=Math.max(0,S.B-25);notes.push('你病倒了，在医院住了三天。');log('住持病倒住院了三天。');}
   if(monthEnd&&(S.stats.grant||0)>=6){S.stats.grant=0;if(chance(.55+S.T/300)){const g=Math.round((1800+ri(0,1800))*(S.f.c3?1.4:1));other+=g;lines.push(['基金会资助',g]);notes.push('基金申请通过了。');log(`基金申请通过：$${g}。`);}else notes.push('这一轮基金申请没有通过。');}
   if(monthEnd&&S.D<0){const it=Math.round(-S.D*.015);other-=it;lines.push(['透支利息',-it]);if(S.D<-8000){S.T-=1;S.B+=3;notes.push('欠账的消息传开了：信任−，倦怠+');}}
-  S.L-=Math.max(0,S.T-55)*.02;S.T-=Math.max(0,S.L-55)*.02;S.M*=.985;
+  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.985;
   S.D+=inc+other-et;
   // 漂移（月末）
   if(monthEnd){
@@ -1786,10 +1830,11 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`林悦 Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa'});
 ENDINGS.refuge={n:`庇护所`,en:'SANCTUARY',img:`诺鲁孜节的草地上，伊玛目、Marcus和你坐在同一块野餐布上。Dilnur的女儿在给每个人的盘子里分抓饭。`,t:()=>`后来，韦科的人说起这个地方，不再说“那个佛教组织”，而是说“湖边那家，出事的时候门是开着的”。${S.f.uyGarden?`Ablikim的葡萄架上，今年挂了几串还很酸的葡萄。`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
-  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin在日喀则开了一间小茶馆，墙上挂着韦科佛堂的合影。`);else if(t&&!t.left&&f.designated!=='tenzin')o.push(`Tenzin还在H-E-B上班，周日在佛堂领诵。`);
+  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin在日喀则开了一间小茶馆，墙上挂着韦科佛堂的合影。`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin还在H-E-B上班，周日在佛堂领诵。`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin按仁波切信里说的，周日讲法。他还在H-E-B上早班。`);
+  if(f.designated==='lobsang'&&f.rinpocheGone)o.push(`火化之后，Lobsang照仁波切的话回到了韦科。他住在客房里，纠正每个人的藏文发音。`);
   if(f.uyghurFamily)o.push(`Dilnur一家的庇护申请批下来了。Aynur的画还挂在佛堂走廊上。`);
   if(S.seen.dawson_fall!=null)o.push((S.npc.dawson||0)>=8?`Dawson在县食物银行开货车，每月有一个周六来扫佛堂的停车场。`:`Dawson搬去了俄克拉何马，没有留下地址。`);
   if(f.merged)o.push(`Chad还在负责周日的茶水。他的藏语进步了。`);
@@ -2986,7 +3031,7 @@ function planbarHTML(){
 function refreshPlanbar(){const el=document.getElementById('planbar');if(el)el.innerHTML=planbarHTML();}
 function buyParcel(pid){const p=PARCELS.find(q=>q.id===pid);if(!p||!buyable(p))return;const c=cost_(landPrice(p));if(S.D<c)return;S.D-=c;S.parcels.push(pid);farmUI.ask=null;log(`买下了${p.n}（$${c.toLocaleString()}）。`);
   if(EV['land_'+pid]&&S.seen['land_'+pid]==null)queue('land_'+pid,1);if(S.parcels.length>=3&&!S.f.shirleyQ){S.f.shirleyQ=1;queue('shirley',2);}save();render();}
-function buyDecor(t){const d=IT[t];if(S.D<cost_(d.cost))return;S.D-=cost_(d.cost);const ok=placeOrTray(t);log(`添置：${d.n}${ok?'':'（放进了仓库）'}。`);save();render();if(document.getElementById('facbox'))openBuild();}
+function buyDecor(t){const d=IT[t];if(!d||d.cost==null||S.D<cost_(d.cost))return;S.D-=cost_(d.cost);const ok=placeOrTray(t);log(`添置：${d.n}${ok?'':'（放进了仓库）'}。`);save();render();if(document.getElementById('facbox'))openBuild();}
 function farmAction(a,t){
   const setMode=(m,k)=>{if(farmUI.mode===m&&(m!=='paint'||farmUI.paint===k)){farmUI.mode=null;farmUI.paint=null;}else{farmUI.mode=m;farmUI.paint=m==='paint'?k:null;}farmUI.ask=null;farmUI.placing=null;farmUI.rect=null;refreshPlanbar();drawFarm();};
   switch(a){
@@ -3145,7 +3190,7 @@ function migrate(){
   if(S.KN==null)S.KN=({monk:60,tibetan:50,asian:35,convert:25,black:28,hispanic:26})[S.origin]||30;
   if(!S.opt)S.opt={diff:'normal',evf:1,quick:false}; if(!S.cheat)S.cheat={}; if(!S.tech)S.tech={}; if(S.TP==null)S.TP=0;
   if(S.stats.grant==null)S.stats.grant=0;
-  v8Init();entInit();treInit();
+  v8Init();entInit();treInit();backfill();
 }
 function applyCheats(){const c=S.cheat||{};
   if(c.money&&S.D<999999)S.D=999999;
@@ -3484,7 +3529,7 @@ function renderIntro(){
       <p>2020年3月，德克萨斯州韦科。你在Lake Waco西岸买下一座旧农场，自己住进旧谷仓，在农舍客厅里设了佛龛。接下来十年，你要把这个噶举派法会点经营成一座道场，也可能看着它变成冥想品牌、社区活动中心，乃至彻底消散。</p>
       <p style="color:var(--mute)">核心不是赚多少钱，是在<b style="color:var(--gold)">法脉纯度</b>、<b style="color:var(--malachite)">社区信任</b>与<b style="color:var(--cinnabar)">供养</b>三根钢丝之间走路。每回合一周，界面按页面分开，底部切换。</p>
       <p style="color:var(--dim)">注：2027年起，游戏进入一条虚构的另类历史线（新疆核袭击、三峡溃坝、维吾尔族迁往湖南、汉族大规模皈依基督教、印度人大量前往西藏）。这些都是虚构情节，不是预测。</p>
-      <div class="go">${saved&&saved.phase!=='end'?`<button class="btn" data-i="continue">继续：${esc(saved.name)} · ${2020+Math.floor(saved.turn/12)}年${saved.turn%12+1}月</button>`:''}<button class="btn ${saved&&saved.phase!=='end'?'ghost':''}" data-i="s1">开始新的一局 ›</button>${langBtns('data-i="lang" data-l')}</div>`;
+      <div class="go">${saved?`<button class="btn" data-i="continue">继续：${esc(saved.name)} · ${2020+Math.floor(saved.turn/12)}年${saved.turn%12+1}月</button>`:''}<button class="btn ${saved?'ghost':''}" data-i="s1">开始新的一局 ›</button>${langBtns('data-i="lang" data-l')}</div>`;
     if(st===1) body=`<h2>住持出身</h2><p class="hint">六种出身各有利弊：起点数值、行动收益、开支与专属事件都不同。</p>
       <div class="choices">${Object.entries(ORIGINS).map(([k,o])=>`<button class="choice ${sel.origin===k?'on':''}" data-o="${k}">${pimg(playerTraitsFor(k,'住持'))}<b>${o.n}</b><span>${o.sub} · 纯度 ${o.s.L} 信任 ${o.s.T} 供养 $${o.s.D.toLocaleString()}</span><span class="up">＋ ${o.up}</span><span class="dn">－ ${o.dn}</span></button>`).join('')}</div>
       <div class="go"><button class="iconbtn" data-i="s0">‹ 返回</button><button class="btn" data-i="s2">下一步 ›</button></div>`;
@@ -3567,7 +3612,7 @@ function renderEnd(){
   ovEl.onclick=ev=>{const t=ev.target.closest('button');if(!t)return;
     if(t.dataset.e==='photo'){openPhoto();return;}
     if(t.dataset.e==='new'){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
-    if(t.dataset.e==='endless'){S.endless=true;S.phase='plan';S.turn++;S.wk=0;ovEl.onclick=null;S.f.endlessAt=S.turn;entInit();log('无尽模式：日子照常过。从现在起以名望计分，发愿会不断抬高。');UI.tab='biz';UI.sub.biz='r';save();render();}};
+    if(t.dataset.e==='endless'){S.endless=true;S.phase='plan';S.turn++;S.wk=0;ovEl.onclick=null;S.f.endlessAt=S.turn;entInit();S.cv=CV;queue('el_after',0);log('无尽模式：日子照常过。从现在起以名望计分，发愿会不断抬高。');UI.tab='biz';UI.sub.biz='r';save();render();}};
 }
 
 /* ---------- 交互 ---------- */
@@ -3997,7 +4042,7 @@ E({id:'ent_staff',tag:'经营',title:'经理想加薪',rep:1,cd:9,w:5,cond:()=>e
 /* 无尽模式大事件（2030 年起） */
 const EL=()=>!!S.endless||Y()>=2030;
 E({id:'el_branch',tag:'无尽 · 分院',title:'奥斯汀的邀请',rep:1,cd:36,w:5,cond:()=>EL()&&act().length>=25&&!S.f.branch,
-  text:()=>`奥斯汀的一群成员每周开两小时车来。他们问：能不能在奥斯汀设一个分院？他们已经看好了一个仓库。`,
+  text:()=>`奥斯汀的一群成员每周开两小时车来。他们问：能不能在奥斯汀设一个分院？他们已经看好了一个仓库。${S.f.final==='merge'?`当然，这得先问休斯顿。`:''}`,
   opts:[{t:'出资设立分院（$8,000）',req:()=>S.D>=8000,rq:'需要 $8,000',e:{D:-8000,T:2,H:5},fx(){S.f.branch=1;S.f.branchInc=1;return '分院挂牌那天来了六十个人。此后每月有一笔分院的供养寄来。';}},
     {t:'祝福他们自己办',e:{L:1,T:1},fx(){S.f.branch=1;const n=Math.min(6,act().length-10);act().filter(m=>m.gen||m.ros).slice(0,n).forEach(m=>leave(m,'去奥斯汀办分院了'));return `${n}位成员去了奥斯汀。你们是母院了。`;}},
     {t:'再等两年',e:{},r:'他们继续每周开车来。'}]});
@@ -4050,8 +4095,8 @@ const WIKI_CONCEPTS=[
   ['资粮','修学科技树用的点数。每周按学识、自修与功德积累。'],
   ['功德','看不见的东西。放生、临终关怀、社区服务、节日法会会积累，上限 100，每周流失 1.5%。影响修学速度、结局与密勒日巴式闭关。'],
   ['捐款人疲劳','义卖、有偿静修营、直播随喜，连续做回报递减（每做一次 −35% 叠加，每周恢复四分之一）。隔几周做一次最划算。'],
-  ['富足效应','账上超过 18 个月开支时，周日随喜和筹款按 √(18/月数) 递减，最低 55%。钱是拿来用的。'],
-  ['规模成本','超过 20 位成员后，每多一人，所有人的承诺度漂移 −0.01。大道场需要角色、集体修法与和合来维持。'],
+  ['富足效应','账上超过 12 个月开支时，周日随喜和筹款按 √(12/月数) 递减，最低 45%。钱是拿来用的。'],
+  ['规模成本','超过 20 位成员后，每多一人，所有人的承诺度漂移 −0.015。大道场需要角色、集体修法与和合来维持。'],
   ['舆论热度','媒体关注度。放大事件对信任的影响，带来访客与新人，也带来风险。会自然冷却。'],
   ['仁波切信任','上师对你的信任。自修、闭关、如法会升；自修太少会降。影响灌顶与认证。'],
   ['承诺度','每位成员对道场的投入。向他偏好的深度靠拢；低于 25 持续太久会想离开。'],
@@ -4346,7 +4391,7 @@ function treFx(){const o={L:0,T:0,H:0,HA:0,M:0,KN:0,RT:0,HP:0,self:0,disc:{},ng:
   treList().forEach(id=>{const d=TRE[id];if(!d)return;o.value+=d.v;if(!treShown(id))return;o.shown++;for(const k in d.fx)o[k]+=d.fx[k];if(d.disc)for(const k in d.disc)o.disc[k]=Math.min(o.disc[k]||1,d.disc[k]);const s=d.sp||{};
     if(s.ng)o.ng*=s.ng;if(s.intro)o.intro*=s.intro;if(s.hospice)o.hospice*=s.hospice;if(s.tsok)o.tsok*=s.tsok;if(s.fest)o.fest*=s.fest;if(s.vis)o.vis+=s.vis;if(s.newP)o.newP+=s.newP;if(s.commit)o.commit+=s.commit;if(s.renown)o.renown+=s.renown;if(s.cap)o.cap+=s.cap;if(s.theft)o.theft++;});
   return o;}
-function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n}从博物馆回来了。`);}});const f=treFx();S.L+=f.L;S.T+=f.T;S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
+function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n}从博物馆回来了。`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
   if(treShown('kangling')&&!roomsOn('protector').length){/* 不可能：pl=protector */}
   if(treShown('milarepa_songs')&&has('tenzin')){const m=mem('tenzin');if(m&&!m.left)m.c+=.1;}
   if(f.commit)act().forEach(m=>m.c+=f.commit/WK);}
@@ -4547,7 +4592,8 @@ E({id:'tre_pilgrim',tag:'法宝 · 朝圣',title:'从菩提迦耶回来',ch:[2,3
   opts:()=>{const pool=['stupa_model','khata','aspiration_prayer','offering_bowls','gau'].filter(id=>!treHas(id));const id=pool[0]||'cord';return [{t:'郑重接受',e:{L:1,HA:2},fx(){treGain(id,'朝圣带回');return `是${TRE[id].n}。`;}},{t:'请他在周日讲讲这一路',e:{HA:3,T:1,M:1},fx(){treGain(id,'朝圣带回');return `他讲了一个小时。最后拿出${TRE[id].n}，大家都安静了。`;}}];}});
 E({id:'tre_flea',tag:'法宝',title:'跳蚤市场',months:[4,5,10],rep:1,cd:14,w:4,cond:()=>S.D>=200&&['damaru','phurba','mandala_set','mila_statue'].some(id=>!treHas(id)),
   text:()=>`Hewitt的跳蚤市场。一个摊位上堆着“亚洲东西”，摊主说是他叔叔从尼泊尔带回来的。`,
-  opts:()=>{const pool=['damaru','phurba','mandala_set','mila_statue'].filter(id=>!treHas(id));const id=pick(pool);const c=Math.round(TRE[id].v*.3);return [{t:`花 $${c} 买下${TRE[id].n}`,req:()=>S.D>=c,rq:`需要 $${c}`,e:{D:-c},fx(){treGain(id,'跳蚤市场');return '摊主说：“你们是干这个的？那给你便宜点。”没有。';}},{t:'看看就走',e:{},r:'下个月它还在那儿。'}];}});
+  prep(){const pool=['damaru','phurba','mandala_set','mila_statue'].filter(id=>!treHas(id));if(!pool.length)return false;S.ctx={tre:pick(pool)};return true;},
+  opts:()=>{const id=(C().tre&&TRE[C().tre])?C().tre:'damaru';const c=Math.round(TRE[id].v*.3);return [{t:`花 $${c} 买下${TRE[id].n}`,req:()=>S.D>=c,rq:`需要 $${c}`,e:{D:-c},fx(){treGain(id,'跳蚤市场');return '摊主说：“你们是干这个的？那给你便宜点。”没有。';}},{t:'看看就走',e:{},r:'下个月它还在那儿。'}];}});
 E({id:'tre_bequest',tag:'法宝 · 长者',title:'遗赠',ch:[2,3,4],rep:1,cd:30,w:3,cond:()=>here().some(m=>m.tag==='elder'&&m.c>=50),
   prep(){const a=here().filter(m=>m.tag==='elder'&&m.c>=50);if(!a.length)return false;S.ctx={m:pick(a).id};return true;},
   text:()=>{const m=ctxMem();return `${m?m.n:'一位老成员'}去世了。家属来电：遗嘱里有一行写给佛堂。他们带来一个盒子和一张支票。`;},
@@ -4753,10 +4799,12 @@ const FATK={fund:'义卖',camp:'静修营',live:'直播'};
 function fatMul(id){const f=(S.fat&&S.fat[id])||0;return 1/(1+.35*f);}
 function fatAdd(id){S.fat=S.fat||{};S.fat[id]=(S.fat[id]||0)+1;}
 function fatTick(){if(!S.fat)return;for(const k in S.fat){S.fat[k]*=.75;if(S.fat[k]<.05)delete S.fat[k];}}
-/* 2. 富足效应：账上超过 18 个月开支，随喜与筹款按 √(18/月数) 递减，最低 55% */
-function wealthMul(){const r=runway();return r>18?Math.max(.55,Math.sqrt(18/r)):1;}
-/* 3. 规模成本：成员越多，每个人分到的注意力越少——承诺度漂移 −0.01/人（20 人以上） */
-function scaleDrag(){return Math.max(0,act().length-20)*.01;}
+/* 2. 富足效应：账上超过 12 个月开支，随喜与筹款按 √(12/月数) 递减，最低 45%（v26） */
+function wealthMul(){const r=runway();return r>12?Math.max(.45,Math.sqrt(12/r)):1;}
+/* 3. 规模成本：成员越多，每个人分到的注意力越少——承诺度漂移 −0.015/人（20 人以上，v26 由 0.01 上调） */
+function scaleDrag(){return Math.max(0,act().length-20)*.015;}
+/* v26：被动加成边际递减——超出 k 的部分只算 35%（布局与宝物的传承/信任） */
+function dimR(x,k){return x>k?k+(x-k)*.35:x;}
 /* 4. 新行动：对外布施——把多余的钱变成信任与功德 */
 ACTS.push({id:'dana',c:'社区',n:'对外布施',d:'把存款的一成（$500–5,000）捐给食物银行、灾区或西藏的学校。信任+、功德++、纯度略+',ok:()=>S.D>=2500,
   run(){const g=clamp(Math.round(S.D*.1/50)*50,500,5000);S.D-=g/ACT_SCALE;S.T+=1.5+g/1500;S.M+=3+g/800;S.L+=.5;S.B+=2;S.stats.dana=(S.stats.dana||0)+g;
@@ -6385,7 +6433,7 @@ function newGame(o){
     phase:'plan',acts:[],pending:[],cur:null,res:null,report:null,
     stats:{bypass:0,totalAttend:0,admin:0,council:0,guide:0,retreat:0,visits:0,negD:0,flagReplies:0,grant:0},endless:false,ended:null,
     HA:60,HP:80,KN:({monk:60,tibetan:50,asian:35,convert:25,black:28,hispanic:26})[o.origin]||30,TP:0,tech:{},opt:{diff:'normal',evf:1,quick:false},cheat:{}};
-  ['rosa','ethan','tenzin'].forEach(id=>addMember(id));
+  ['rosa','ethan','tenzin'].forEach(id=>addMember(id));S.cv=CV;
   addGeneric(false); addGeneric(false);
   if(o.origin==='convert') mem('tenzin').c=42;
   if(o.origin==='asian') S.f.asian=true;
@@ -6426,7 +6474,7 @@ function expenses(){
   if(maint) lines.push(["Facility upkeep",Math.round(maint*(S.bld&&roomsOn('storage').length?.7:1)*(1-.03*traitN('build')-.02*traitN('craft')))]);
   if(om().remit)lines.push(["Sent home to family in Dharamsala",om().remit]);
   {const ti=Math.round(treInsurance()*(1-.1*traitN('law')));if(ti>0)lines.push(["Treasure insurance",ti]);}
-  const nm=act().length;if(nm>8)lines.push(["Member costs (tea, cushions, insurance)",Math.round((nm-8)*14)]);if(nm>30)lines.push([nm>60?"Resident caretakers ×2":"Resident caretaker",nm>60?1800:900]);
+  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(["Building maintenance (roofs, plumbing, termites)",Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?["Program coordinators ×2",2400]:["Part-time program coordinator",1200]);if(nm>8)lines.push(["Member costs (tea, cushions, insurance)",Math.round((nm-8)*18)]);if(nm>30)lines.push([nm>60?"Resident caretakers ×2":"Resident caretaker",nm>60?1800:900]);
   if(boon('thrift')){const s=lines.reduce((a,b)=>a+b[1],0);lines.push(["Thrift Year · saved",-Math.round(s*.12)]);}
   const df=DIFF();if(df.exp!==1){const s=lines.reduce((a,b)=>a+b[1],0);lines.push([`Difficulty adjustment (${df.n})`,Math.round(s*(df.exp-1))]);}
   return lines;
@@ -6550,7 +6598,7 @@ function clampAll(){
   S.members.forEach(x=>x.c=clamp(x.c,0,100));
   S.auth.you=clamp(S.auth.you,0,100);S.auth.chad=clamp(S.auth.chad,0,100);
 }
-function sc(d,v){return d>0?d*clamp((100-v)/55,.08,1):d*clamp(v/55,.15,1);}
+function sc(d,v){return d>0?d*clamp(Math.pow(Math.max(0,100-v)/55,1.5),.05,1):d*clamp(v/55,.15,1);} // v26：高位收益更陡地递减
 function soft(fn){const l=S.L,t=S.T;const r=fn();S.L=clamp(l+sc(S.L-l,l),0,100);S.T=clamp(t+sc(S.T-t,t),0,100);return r;}
 const C=()=>S.ctx||{};
 const ctxMem=()=>mem(C().m);
@@ -6995,15 +7043,15 @@ E({id:'designate',tag:"Teacher & Lineage",title:"The Appointment",at:'2029-06',
   },
   text:()=>{const d=S.f.designated;
     const who=d==='player'?"you":d==='tenzin'?'Tenzin Dorjee':"the attendant Lobsang Tsering";
-    return `Rinpoche's letter is delivered by Lobsang in person. It is short. He appoints ${who} as the local teacher here.${S.f.cert?" The last line reads: \"This center is in accord with the Dharma.\"":''}`;},
+    return `Rinpoche's letter is delivered by Lobsang in person. It is short. He appoints ${who} as the local teacher here.${d!=='player'?` As for the center itself (the house, the money, what it becomes), he leaves that to you to decide before the year is out.`:''}${S.f.cert?" The last line reads: \"This center is in accord with the Dharma.\"":''}`;},
   opts:()=>{const d=S.f.designated;
     if(d==='player') return [{t:"Accept",e:{L:4,S:4},r:"You place the letter on the altar, then go sweep the floor."}];
-    return [{t:"Accept Rinpoche's decision",e:{L:3,M:3},r:"When you hand over the Abbot's keys, your hand is steady."},{t:"Resent it inwardly",e:{L:-3,B:10},r:"You don't say it. But you know your own practice wasn't good enough."}];}});
+    return [{t:"Accept Rinpoche's decision",e:{L:3,M:3},r:`You move your cushion down from the teaching seat to the front row. Your hand is steady.`},{t:"Resent it inwardly",e:{L:-3,B:10},r:"You don't say it. But you know your own practice wasn't good enough."}];}});
 E({id:'final',tag:"Lineage · Finale",title:"The Center's Future",at:'2029-11',
-  text:()=>`${S.f.rinpocheGone?`Rinpoche has been gone three months. `:''}Ten years. You must set lasting arrangements for this dharma group. ${act().length} members are waiting for you to speak.`,
+  text:()=>`${S.f.rinpocheGone?`Rinpoche has been gone three months. `:''}Ten years. ${S.f.designated&&S.f.designated!=='player'?`${S.f.designated==='tenzin'?'Tenzin':'Lobsang'} gives the Sunday teachings now, but the house, the money and the shape of the place are still yours to settle. `:''}You must set lasting arrangements for this dharma group. ${act().length} members are waiting for you to speak.`,
   opts:()=>{const o=[
-    {t:"Rely on a remote teacher; keep things as they are",e:{f:{final:'remote'}},r:"You say, \"Same as always.\""},
-    {t:"Hand the teaching to the local teacher",req:()=>S.f.guide||S.f.localGuide,rq:"Requires a qualified local teacher",e:{L:3,f:{final:'local'}},r:"The local teacher leads Sunday practice alone for the first time. You sit in the back row."},
+    {t:S.f.rinpocheGone?`Stay under Rinpoche's monastery in India; keep things as they are`:"Rely on a remote teacher; keep things as they are",e:{f:{final:'remote'}},r:S.f.rinpocheGone?`You say, "Same as always." Lobsang says the monastery will send teachers when it can.`:"You say, \"Same as always.\""},
+    {t:"Hand the teaching to the local teacher",req:()=>S.f.guide||S.f.localGuide||(S.f.designated&&S.f.designated!=='player'),rq:"Requires a qualified local teacher",e:{L:3,f:{final:'local'}},r:"The local teacher leads Sunday practice alone for the first time. You sit in the back row."},
     {t:"Merge into a larger Kagyu center in Houston",e:{L:3,T:-2,f:{final:'merge'}},r:"The sign at the gate changes. Sunday practice goes on as usual."}];
     ['tenzin','dale','rosa'].forEach(id=>{const m=mem(id);if(m&&!m.left&&m.c>=55)o.push({t:`Step down; hand over to ${m.n}`,e:{f:{final:'succ',heir:id}},r:"You set the keys in their palm."});});
     o.push({t:"Enter three-year, three-month, three-day retreat; let go of all management",req:()=>S.self>=85&&S.L>=60&&S.M>=35,rq:"Requires Abbot Self-practice ≥85, Lineage ≥60, and enough Merit",e:{f:{final:'mila'}},r:"You walk into the retreat cabin and close the door."});
@@ -7075,6 +7123,47 @@ E({id:'el_yangsi_visit',tag:`Endless · Lineage`,title:`The Young Rinpoche Comes
     {t:`No ceremony; take him to play by the lake for a day`,e:{HA:8,M:8,L:3,S:3},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.renown=(S.renown||0)+40;return '';},r:`He catches a crayfish, studies it for a long time, and puts it back in the water. Beside him, Lobsang murmurs something, his eyes red.`}]});
 Object.assign(ACH,{nowruz:[`Seven Grains`,`Cook Nowruz porridge in the center's kitchen`],kora:[`The Mountain Isn't Going Anywhere`,`Turn back below the Drölma La`],yawn:[`Yawn`,`Receive the first photo of Rinpoche's reincarnation`]});
 
+/* ===== v26 · 十年之后：结局与无尽模式的衔接；旧存档补发新事件 ===== */
+const CV=26; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
+const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[]};
+function backfill(){
+  if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
+  const from=S.cv||24;S.cv=CV;const ids=[];
+  for(const v in CV_EV)if(Number(v)>from)CV_EV[v].forEach(id=>{const ev=EV[id];if(!ev||!ev.at||S.seen[id]!=null)return;const t=ds2t(ev.at);if(t>S.turn||(t===S.turn&&S.wk===0&&S.phase==='plan'))return;if(S.endless&&['final','designate'].includes(id))return;if(S.queue.some(q=>q.id===id))return;ids.push(id);});
+  ids.sort((a,b)=>ds2t(EV[a].at)-ds2t(EV[b].at));
+  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?3:2; // 临近十年结局：每月三件，仁波切的线放最前
+  if(late)['parinirvana','tsurphu_call'].forEach(id=>{const i=ids.indexOf(id);if(i>0){ids.splice(i,1);ids.unshift(id);}});
+  ids.forEach((id,i)=>S.queue.push({id,at:S.turn+Math.floor(i/per),ctx:{bf:1}}));
+  if(S.endless&&S.seen.el_after==null&&!S.queue.some(q=>q.id==='el_after'))S.queue.push({id:'el_after',at:S.turn+Math.ceil(ids.length/per),ctx:null});
+  if(ids.length)log(`This update fills in ${ids.length} parts of the story you missed. They will arrive over the next few months.`);
+}
+E({id:'el_after',tag:`Endless · After Ten Years`,title:`The Morning After`,qonly:1,
+  text:()=>{const f=S.f,k=S.ended,h=mem(f.heir);
+    if(f.final==='mila')return `The cabin door has been shut for more than a month. By the rules of retreat you see no one and run nothing. The board has taken over the center: each month Rosa leaves the accounts in the wooden box by the door, though nobody expects you to open it.
+From here on, the game follows the center itself: the board, the local teacher and the sangha decide in your place. You will come out of the cabin after three years, three months and three days.`;
+    if(f.final==='succ')return `${h?h.n:'The new abbot'} has the keys now. On the first Sunday of 2030 they ask you to stay: not on the teaching seat, but in the office. The roof, the bank, the parking lot. "You know where everything is."`;
+    if(k==='exile')return `You live in Austin now, in a one-bedroom off Riverside. The farm by the lake is still in your name. Every Friday you drive ninety minutes north on I-35. In between, Rosa keeps the butter lamps lit.`;
+    if(k==='brand')return `Brooke's management company runs the weekend retreats now. Your contract says the shrine room is yours on Sunday mornings, "subject to bookings."`;
+    if(k==='diss')return `The few who are left sit in a circle in the living room. Someone asks, "Same time next Sunday?"`;
+    if(f.final==='merge')return `The sign at the gate now reads "Houston Kagyu Center · Waco Branch." Houston sends a teacher every other month; the bills still come to you.`;
+    return `January 2030. Nothing has ended. The lamps need filling, the AC filter is due, and Rosa wants to talk about the parking lot.`;},
+  opts:()=>{const f=S.f,k=S.ended;
+    const out=()=>{const left=(S.seen.final??118)+39-S.turn;queue('el_mila_out',Math.max(1,left));};
+    if(f.final==='mila')return [{t:`Rosa chairs the board`,e:{HA:2},fx(){f.boardRuns='rosa';out();return '';},r:`Rosa writes the board's agenda on an index card. Item one: "Leave the cabin alone."`},
+      {t:`The local teacher runs the center`,req:()=>!!(f.guide||f.localGuide||(f.designated&&f.designated!=='player')),rq:`Requires a local teacher`,e:{L:2},fx(){f.boardRuns='teacher';out();return '';},r:`Sunday practice goes on as usual. On the empty side of the teaching seat, someone sets out a fresh cup of water every week.`}];
+    if(f.final==='succ')return [{t:`Stay on as steward`,e:{HA:3,L:1,f:{steward:1}},r:`Your new business card has a single title: "Keeper of the Keys."`},{t:`Sit in the back row as an ordinary member`,e:{B:-15,S:4,f:{steward:1}},r:`You last two months. By March you are fixing the AC again.`}];
+    if(k==='exile')return [{t:`Keep driving up every week`,e:{B:6,L:1,T:1},r:`You know every exit on I-35 by now.`},{t:`Ask Rosa to be the resident caretaker`,req:()=>has('rosa'),rq:`Requires Rosa`,e:{T:2,c:{rosa:6}},r:`Rosa moves into the farmhouse guest room. She says it beats a retirement home.`}];
+    if(k==='brand')return [{t:`Renegotiate: no bookings on Sunday mornings`,req:()=>S.D>=1500,rq:`Requires $1,500`,e:{D:-1500,L:4,T:-1},r:`The lawyer costs fifteen hundred dollars. Sunday mornings belong to the shrine room again.`},{t:`Let it go; work from inside the brand`,e:{D:800,L:-2},r:`You learn to write "immersive experience" where you used to write "empowerment." You don't like that you learned it.`}];
+    if(k==='diss')return [{t:`"Same time next Sunday."`,e:{HA:5,L:1},r:`And so another year goes by.`}];
+    if(f.final==='merge')return [{t:`Accept it`,e:{L:1},r:`The sign doesn't matter. Sunday practice goes on as usual.`},{t:`Ask Houston for more say`,e:{T:1,L:-1,f:{houstonFree:1}},r:`Houston agrees you can set your own practice times. Everything else, later.`}];
+    return [{t:`Go and fill the lamps`,e:{M:2,HA:2},r:`The first one is the lamp you lit in the living room in 2020.`}];}});
+E({id:'el_mila_out',tag:`Endless · Out of Retreat`,title:`Out of Retreat`,qonly:1,
+  text:()=>`On the morning the retreat ends, Rosa and the board walk down to the lake and take up, one by one, the boundary stones you set out years ago. The door opens.
+Three years, three months and three days: the preliminaries once more, the yidam practice, the Six Dharmas of Naropa, Mahamudra, and the protector prayers every evening at dusk. You squint at the windmill. It is still turning. The sangha stands outside the cabin, each of them holding a khata.`,
+  opts:[{t:`Return to the teaching seat`,e:{L:6,RT:6,S:15,B:-30,f:{milaOut:1}},r:`Your first talk out of retreat is shorter than any you gave before. Nobody minds.`},
+    {t:`Stay in the cabin as retreat master for the next group`,req:()=>on('cabin'),rq:`Requires a retreat cabin`,e:{L:8,S:10,f:{milaOut:1}},fx(){S.f.localGuide=S.f.localGuide||S.name;return '';},r:`There are already three names on the waiting list. You put the boundary stones back.`},
+    {t:`Walk once around the lake before anything else`,e:{HP:15,HA:5,M:5,f:{milaOut:1}},r:`It takes the whole afternoon. A heron keeps you company for part of the way.`}]});
+
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Members' Lives",title:"Wants to Leave",qonly:1,
   text:()=>{const m=ctxMem();return m?`${m.n} has been somewhere else for months. Today he says, "I think I need to take a break."${m.pref<35?" He says this place is \"turning into a religion.\"":m.pref>70?" He says this place is \"turning into less of a dharma center.\"":" He doesn't say why."}`:"Someone wants to leave.";},
@@ -7112,8 +7201,8 @@ function eligible(ev){
 function buildPending(){
   const p=[];
   const d=ds();
-  for(const id in EV){const ev=EV[id]; if(ev.at===d&&S.seen[id]==null&&(!ev.cond||ev.cond())) p.push({id});}
-  S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx});return false;}return true;});
+  for(const id in EV){const ev=EV[id]; if(ev.at===d&&S.seen[id]==null&&(!ev.cond||ev.cond())) p.push({id,q:1});}
+  S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx,q:1});return false;}return true;});
   // departure / burnout / debt
   here().forEach(m=>{if(m.low>=12&&!m.flagged&&p.length<4){m.flagged=1;p.push({id:'departure',ctx:{m:m.id}});}});
   if(S.B>=88&&!p.some(x=>x.id==='burnout')) p.push({id:'burnout'});
@@ -7132,6 +7221,7 @@ function buildPending(){
   }
   // silent event overrides month
   const si=p.find(x=>x.id==='silent'); if(si) return [si];
+  p.slice(6).filter(x=>x.q).forEach(x=>S.queue.push({id:x.id,at:S.turn+1,ctx:x.ctx||{bf:1}}));
   return p.slice(0,6);
 }
 function eligibleRep(id){const ev=EV[id];return S.seen[id]==null||S.turn-S.seen[id]>=(ev.cd??6);}
@@ -7149,6 +7239,7 @@ function nextEvent(){
     S.ctx=p.ctx||null;
     if(ev.prep&&!ev.prep()) continue;
     if(p.id==='departure'&&!ctxMem()) continue;
+    if(p.ctx&&p.ctx.bf&&(S.seen[p.id]!=null||(ev.cond&&!ev.cond()))) continue;
     if(p.id==='departure'){const m=ctxMem(); if(m.left) continue;}
     S.seen[p.id]=S.turn;
     if(ev.silent){S.phase='silent';S.cur={id:p.id};return true;}
@@ -7185,13 +7276,14 @@ function weekEvents(){
   let p=[];
   if(S.wk===0){
     const all=buildPending();all.forEach(e=>e.wk=e.r?ri(0,WK-1):0);
-    S.mplan=all.filter(e=>e.wk>0);p=all.filter(e=>e.wk===0);
+    S.mplan=all.filter(e=>e.wk>0);p=all.filter(e=>e.wk===0);p.slice(4).forEach((e,i)=>{e.wk=1+i%(WK-1);S.mplan.push(e);});
   } else {
     p=(S.mplan||[]).filter(e=>e.wk===S.wk);S.mplan=(S.mplan||[]).filter(e=>e.wk!==S.wk);
     S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx});return false;}return true;});
     here().forEach(m=>{if(m.low>=12&&!m.flagged&&p.length<4){m.flagged=1;p.push({id:'departure',ctx:{m:m.id}});}});
     if(S.B>=88&&!p.some(x=>x.id==='burnout')&&eligibleRep('burnout'))p.push({id:'burnout'});
   }
+  p.slice(4).filter(x=>x.q||!x.r).forEach(x=>S.queue.push({id:x.id,at:S.turn+1,ctx:x.ctx||{bf:1}}));
   return p.slice(0,4);
 }
 function startMonth(){
@@ -7263,7 +7355,7 @@ function settle0(){
   let other=0,et=0;
   if(monthEnd){
   if(on('wheels')){const g=Math.round(220*LB.wheel);other+=g;lines.push([LB.wheel>1?"Prayer wheel arcade · visitors (by the parking lot)":"Prayer wheel arcade · visitors",g]);}
-  S.L+=LB.L; S.T+=LB.T; S.H+=LB.H; S.B+=LB.B; if(LB.M)S.M+=LB.M;
+  S.L+=dimR(LB.L,1); S.T+=dimR(LB.T,.8); S.H+=LB.H; S.B+=LB.B; if(LB.M)S.M+=LB.M;
   if(on('vets')){other+=600;lines.push(["Veterans program grant",600]);}
   if(S.f.market){const g=200+60*(LB.stalls||0);other+=g;lines.push(["Saturday market stall fees",g]);}
   if(S.f.cattleGraze){other+=120;lines.push(["East pasture grazing fee",120]);}
@@ -7284,7 +7376,7 @@ function settle0(){
   if(S.HP<10){other-=400;lines.push(["Abbot ill · medical bills",-400]);S.HP=40;S.B=Math.max(0,S.B-25);notes.push("You fell ill and spent three days in the hospital.");log("The Abbot fell ill and spent three days in the hospital.");}
   if(monthEnd&&(S.stats.grant||0)>=6){S.stats.grant=0;if(chance(.55+S.T/300)){const g=Math.round((1800+ri(0,1800))*(S.f.c3?1.4:1));other+=g;lines.push(["Foundation grant",g]);notes.push("The grant application was approved.");log(`Grant approved: $${g}.`);}else notes.push("This round's grant application was turned down.");}
   if(monthEnd&&S.D<0){const it=Math.round(-S.D*.015);other-=it;lines.push(["Overdraft interest",-it]);if(S.D<-8000){S.T-=1;S.B+=3;notes.push("Word of the debts gets around: Trust −, Burnout +");}}
-  S.L-=Math.max(0,S.T-55)*.02;S.T-=Math.max(0,S.L-55)*.02;S.M*=.985;
+  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.985;
   S.D+=inc+other-et;
   // 漂移（月末）
   if(monthEnd){
@@ -7616,10 +7708,11 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa'});
 ENDINGS.refuge={n:`Sanctuary`,en:'SANCTUARY',img:`On the lawn at Nowruz, the imam, Marcus and you share one picnic blanket. Dilnur's daughter is spooning polo onto everyone's plate.`,t:()=>`Later, when people in Waco talk about this place, they no longer say "that Buddhist group." They say "the place by the lake that kept its door open when it all happened."${S.f.uyGarden?` This year, a few very sour bunches hang from Ablikim's trellis.`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
-  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin opened a small teahouse in Shigatse. A photo of the Waco sangha hangs on the wall.`);else if(t&&!t.left&&f.designated!=='tenzin')o.push(`Tenzin still works at H-E-B and leads the chanting on Sundays.`);
+  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin opened a small teahouse in Shigatse. A photo of the Waco sangha hangs on the wall.`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin still works at H-E-B and leads the chanting on Sundays.`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin gives the Sunday teachings, as Rinpoche's letter asked. He still works the early shift at H-E-B.`);
+  if(f.designated==='lobsang'&&f.rinpocheGone)o.push(`After the cremation, Lobsang came back to Waco as Rinpoche had told him to. He lives in the guest room and corrects everyone's Tibetan pronunciation.`);
   if(f.uyghurFamily)o.push(`Dilnur's family were granted asylum. Aynur's drawing still hangs in the shrine room corridor.`);
   if(S.seen.dawson_fall!=null)o.push((S.npc.dawson||0)>=8?`Dawson drives a truck for the county food bank, and one Saturday a month he sweeps the center's parking lot.`:`Dawson moved to Oklahoma and left no forwarding address.`);
   if(f.merged)o.push(`Chad still makes the Sunday tea. His Tibetan has improved.`);
@@ -8817,7 +8910,7 @@ function planbarHTML(){
 function refreshPlanbar(){const el=document.getElementById('planbar');if(el)el.innerHTML=planbarHTML();}
 function buyParcel(pid){const p=PARCELS.find(q=>q.id===pid);if(!p||!buyable(p))return;const c=cost_(landPrice(p));if(S.D<c)return;S.D-=c;S.parcels.push(pid);farmUI.ask=null;log(`Bought ${p.n} ($${c.toLocaleString()}).`);
   if(EV['land_'+pid]&&S.seen['land_'+pid]==null)queue('land_'+pid,1);if(S.parcels.length>=3&&!S.f.shirleyQ){S.f.shirleyQ=1;queue('shirley',2);}save();render();}
-function buyDecor(t){const d=IT[t];if(S.D<cost_(d.cost))return;S.D-=cost_(d.cost);const ok=placeOrTray(t);log(`Acquired: ${d.n}${ok?'':" (sent to storage)"}.`);save();render();if(document.getElementById('facbox'))openBuild();}
+function buyDecor(t){const d=IT[t];if(!d||d.cost==null||S.D<cost_(d.cost))return;S.D-=cost_(d.cost);const ok=placeOrTray(t);log(`Acquired: ${d.n}${ok?'':" (sent to storage)"}.`);save();render();if(document.getElementById('facbox'))openBuild();}
 function farmAction(a,t){
   const setMode=(m,k)=>{if(farmUI.mode===m&&(m!=='paint'||farmUI.paint===k)){farmUI.mode=null;farmUI.paint=null;}else{farmUI.mode=m;farmUI.paint=m==='paint'?k:null;}farmUI.ask=null;farmUI.placing=null;farmUI.rect=null;refreshPlanbar();drawFarm();};
   switch(a){
@@ -8976,7 +9069,7 @@ function migrate(){
   if(S.KN==null)S.KN=({monk:60,tibetan:50,asian:35,convert:25,black:28,hispanic:26})[S.origin]||30;
   if(!S.opt)S.opt={diff:'normal',evf:1,quick:false}; if(!S.cheat)S.cheat={}; if(!S.tech)S.tech={}; if(S.TP==null)S.TP=0;
   if(S.stats.grant==null)S.stats.grant=0;
-  v8Init();entInit();treInit();
+  v8Init();entInit();treInit();backfill();
 }
 function applyCheats(){const c=S.cheat||{};
   if(c.money&&S.D<999999)S.D=999999;
@@ -9315,7 +9408,7 @@ function renderIntro(){
       <p>March 2020, Waco, Texas. You have bought an old farm on the west shore of Lake Waco. You move into the converted barn and set up an altar in the farmhouse living room. Over the next ten years you will try to turn this little Kagyu dharma group into a real dharma center — or watch it become a meditation brand, a community activity hall, or simply dissolve.</p>
       <p style="color:var(--mute)">The point is not how much money you make. It is walking three tightropes at once: <b style="color:var(--gold)">Lineage Purity</b>, <b style="color:var(--malachite)">Community Trust</b> and <b style="color:var(--cinnabar)">Dana</b>. Each turn is one week; the screens are split into pages, switched from the bar at the bottom.</p>
       <p style="color:var(--dim)">Note: from 2027 the game enters a fictional alternate history (a nuclear strike in southern Xinjiang, the Three Gorges Dam collapse, Uyghurs relocated to Hunan, mass Han Chinese conversion to Christianity, large numbers of Indians moving to Tibet). These are fictional plot events, not predictions.</p>
-      <div class="go">${saved&&saved.phase!=='end'?`<button class="btn" data-i="continue">Continue: ${esc(saved.name)} · ${saved.turn%12+1}/${2020+Math.floor(saved.turn/12)}</button>`:''}<button class="btn ${saved&&saved.phase!=='end'?'ghost':''}" data-i="s1">Start a new game ›</button>${langBtns('data-i="lang" data-l')}</div>`;
+      <div class="go">${saved?`<button class="btn" data-i="continue">Continue: ${esc(saved.name)} · ${saved.turn%12+1}/${2020+Math.floor(saved.turn/12)}</button>`:''}<button class="btn ${saved?'ghost':''}" data-i="s1">Start a new game ›</button>${langBtns('data-i="lang" data-l')}</div>`;
     if(st===1) body=`<h2>The Abbot's Background</h2><p class="hint">Six backgrounds, each with real trade-offs: starting stats, action yields, expenses and their own events all differ.</p>
       <div class="choices">${Object.entries(ORIGINS).map(([k,o])=>`<button class="choice ${sel.origin===k?'on':''}" data-o="${k}">${pimg(playerTraitsFor(k,"Abbot"))}<b>${o.n}</b><span>${o.sub} · Lineage ${o.s.L} Trust ${o.s.T} Dana $${o.s.D.toLocaleString()}</span><span class="up">+ ${o.up}</span><span class="dn">− ${o.dn}</span></button>`).join('')}</div>
       <div class="go"><button class="iconbtn" data-i="s0">‹ Back</button><button class="btn" data-i="s2">Next ›</button></div>`;
@@ -9398,7 +9491,7 @@ function renderEnd(){
   ovEl.onclick=ev=>{const t=ev.target.closest('button');if(!t)return;
     if(t.dataset.e==='photo'){openPhoto();return;}
     if(t.dataset.e==='new'){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
-    if(t.dataset.e==='endless'){S.endless=true;S.phase='plan';S.turn++;S.wk=0;ovEl.onclick=null;S.f.endlessAt=S.turn;entInit();log("Endless mode: the days go on. From here on, Renown keeps score and the aspirations keep climbing.");UI.tab='biz';UI.sub.biz='r';save();render();}};
+    if(t.dataset.e==='endless'){S.endless=true;S.phase='plan';S.turn++;S.wk=0;ovEl.onclick=null;S.f.endlessAt=S.turn;entInit();S.cv=CV;queue('el_after',0);log("Endless mode: the days go on. From here on, Renown keeps score and the aspirations keep climbing.");UI.tab='biz';UI.sub.biz='r';save();render();}};
 }
 
 /* ---------- 交互 ---------- */
@@ -9828,7 +9921,7 @@ E({id:'ent_staff',tag:"Operations",title:"The Manager Wants a Raise",rep:1,cd:9,
 /* 无尽模式大事件（2030 年起） */
 const EL=()=>!!S.endless||Y()>=2030;
 E({id:'el_branch',tag:"Endless · Branch",title:"An Invitation from Austin",rep:1,cd:36,w:5,cond:()=>EL()&&act().length>=25&&!S.f.branch,
-  text:()=>`A group of members drives two hours from Austin every week. They ask: could there be a branch in Austin? They've already found a warehouse.`,
+  text:()=>`A group of members drives two hours from Austin every week. They ask: could there be a branch in Austin? They've already found a warehouse.${S.f.final==='merge'?` Houston would have to sign off, of course.`:''}`,
   opts:[{t:"Fund a branch center ($8,000)",req:()=>S.D>=8000,rq:"Needs $8,000",e:{D:-8000,T:2,H:5},fx(){S.f.branch=1;S.f.branchInc=1;return "Sixty people came the day the branch opened. Every month since, a branch offering arrives in the mail.";}},
     {t:"Give your blessing; let them do it themselves",e:{L:1,T:1},fx(){S.f.branch=1;const n=Math.min(6,act().length-10);act().filter(m=>m.gen||m.ros).slice(0,n).forEach(m=>leave(m,"left to run the Austin branch"));return `${n} members went to Austin. You are the mother center now.`;}},
     {t:"Wait another two years",e:{},r:"They keep driving up every week."}]});
@@ -9881,8 +9974,8 @@ const WIKI_CONCEPTS=[
   ["Accum.","Points for studying the tech tree. Accrue weekly from Learning, self-practice and Merit."],
   ["Merit","The invisible thing. Built up by life release, hospice, community service and festival pujas; capped at 100 and loses 1.5% a week. Affects study speed, endings and the Milarepa retreat."],
   ["Donor Fatigue","Bake sales, paid retreats and livestream offerings pay less when repeated (each use stacks −35%; a quarter recovers each week). Spacing them a few weeks apart pays best."],
-  ["Comfortable Center","With more than 18 months of expenses in the bank, Sunday offerings and fundraising scale by √(18/months), down to 55%. Money is for using."],
-  ["Cost of Size","Beyond 20 members, each additional person lowers everyone's commitment drift by 0.01. A large sangha needs roles, group practice and Harmony to hold together."],
+  ["Comfortable Center","With more than 12 months of expenses in the bank, Sunday offerings and fundraising scale by √(12/months), down to 45%. Money is for using."],
+  ["Cost of Size","Beyond 20 members, each additional person lowers everyone's commitment drift by 0.015. A large sangha needs roles, group practice and Harmony to hold together."],
   ["Media Heat","Media attention. Amplifies how events hit Trust, brings visitors and newcomers, and brings risk. Cools on its own."],
   ["Rinpoche's Trust","Your teacher's trust in you. Rises with self-practice, retreats and doing things properly; falls when you practice too little. Gates empowerments and certification."],
   ["Commitment","Each member's investment in the center. Drifts toward how well Sunday matches their preferred depth; stuck below 25 for too long, they think about leaving."],
@@ -10177,7 +10270,7 @@ function treFx(){const o={L:0,T:0,H:0,HA:0,M:0,KN:0,RT:0,HP:0,self:0,disc:{},ng:
   treList().forEach(id=>{const d=TRE[id];if(!d)return;o.value+=d.v;if(!treShown(id))return;o.shown++;for(const k in d.fx)o[k]+=d.fx[k];if(d.disc)for(const k in d.disc)o.disc[k]=Math.min(o.disc[k]||1,d.disc[k]);const s=d.sp||{};
     if(s.ng)o.ng*=s.ng;if(s.intro)o.intro*=s.intro;if(s.hospice)o.hospice*=s.hospice;if(s.tsok)o.tsok*=s.tsok;if(s.fest)o.fest*=s.fest;if(s.vis)o.vis+=s.vis;if(s.newP)o.newP+=s.newP;if(s.commit)o.commit+=s.commit;if(s.renown)o.renown+=s.renown;if(s.cap)o.cap+=s.cap;if(s.theft)o.theft++;});
   return o;}
-function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} has come back from the museum.`);}});const f=treFx();S.L+=f.L;S.T+=f.T;S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
+function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} has come back from the museum.`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
   if(treShown('kangling')&&!roomsOn('protector').length){/* 不可能：pl=protector */}
   if(treShown('milarepa_songs')&&has('tenzin')){const m=mem('tenzin');if(m&&!m.left)m.c+=.1;}
   if(f.commit)act().forEach(m=>m.c+=f.commit/WK);}
@@ -10378,7 +10471,8 @@ E({id:'tre_pilgrim',tag:"Treasures · Pilgrimage",title:"Back from Bodh Gaya",ch
   opts:()=>{const pool=['stupa_model','khata','aspiration_prayer','offering_bowls','gau'].filter(id=>!treHas(id));const id=pool[0]||'cord';return [{t:"Accept with due ceremony",e:{L:1,HA:2},fx(){treGain(id,"Brought back from pilgrimage");return `It is ${TRE[id].n}.`;}},{t:"Ask them to talk about the journey on Sunday",e:{HA:3,T:1,M:1},fx(){treGain(id,"Brought back from pilgrimage");return `They talked for an hour. At the end they brought out ${TRE[id].n}, and everyone went quiet.`;}}];}});
 E({id:'tre_flea',tag:"Treasures",title:"Flea market",months:[4,5,10],rep:1,cd:14,w:4,cond:()=>S.D>=200&&['damaru','phurba','mandala_set','mila_statue'].some(id=>!treHas(id)),
   text:()=>`The flea market in Hewitt. One stall is piled with "Asian stuff"; the vendor says his uncle brought it back from Nepal.`,
-  opts:()=>{const pool=['damaru','phurba','mandala_set','mila_statue'].filter(id=>!treHas(id));const id=pick(pool);const c=Math.round(TRE[id].v*.3);return [{t:`Pay $${c} for ${TRE[id].n}`,req:()=>S.D>=c,rq:`Requires $${c}`,e:{D:-c},fx(){treGain(id,"Flea market");return "The vendor said: \"You folks are in this line of work? I'll give you a discount, then.\" He did not.";}},{t:"Just look and leave",e:{},r:"Next month it is still there."}];}});
+  prep(){const pool=['damaru','phurba','mandala_set','mila_statue'].filter(id=>!treHas(id));if(!pool.length)return false;S.ctx={tre:pick(pool)};return true;},
+  opts:()=>{const id=(C().tre&&TRE[C().tre])?C().tre:'damaru';const c=Math.round(TRE[id].v*.3);return [{t:`Pay $${c} for ${TRE[id].n}`,req:()=>S.D>=c,rq:`Requires $${c}`,e:{D:-c},fx(){treGain(id,"Flea market");return "The vendor said: \"You folks are in this line of work? I'll give you a discount, then.\" He did not.";}},{t:"Just look and leave",e:{},r:"Next month it is still there."}];}});
 E({id:'tre_bequest',tag:"Treasures · Elder",title:"Bequest",ch:[2,3,4],rep:1,cd:30,w:3,cond:()=>here().some(m=>m.tag==='elder'&&m.c>=50),
   prep(){const a=here().filter(m=>m.tag==='elder'&&m.c>=50);if(!a.length)return false;S.ctx={m:pick(a).id};return true;},
   text:()=>{const m=ctxMem();return `${m?m.n:"A senior member"} has died. The family called: there is a line in the will for the center. They brought a box and a check.`;},
@@ -10584,10 +10678,12 @@ const FATK={fund:"bake sale",camp:"paid retreat",live:"livestream"};
 function fatMul(id){const f=(S.fat&&S.fat[id])||0;return 1/(1+.35*f);}
 function fatAdd(id){S.fat=S.fat||{};S.fat[id]=(S.fat[id]||0)+1;}
 function fatTick(){if(!S.fat)return;for(const k in S.fat){S.fat[k]*=.75;if(S.fat[k]<.05)delete S.fat[k];}}
-/* 2. 富足效应：账上超过 18 个月开支，随喜与筹款按 √(18/月数) 递减，最低 55% */
-function wealthMul(){const r=runway();return r>18?Math.max(.55,Math.sqrt(18/r)):1;}
-/* 3. 规模成本：成员越多，每个人分到的注意力越少——承诺度漂移 −0.01/人（20 人以上） */
-function scaleDrag(){return Math.max(0,act().length-20)*.01;}
+/* 2. 富足效应：账上超过 12 个月开支，随喜与筹款按 √(12/月数) 递减，最低 45%（v26） */
+function wealthMul(){const r=runway();return r>12?Math.max(.45,Math.sqrt(12/r)):1;}
+/* 3. 规模成本：成员越多，每个人分到的注意力越少——承诺度漂移 −0.015/人（20 人以上，v26 由 0.01 上调） */
+function scaleDrag(){return Math.max(0,act().length-20)*.015;}
+/* v26：被动加成边际递减——超出 k 的部分只算 35%（布局与宝物的传承/信任） */
+function dimR(x,k){return x>k?k+(x-k)*.35:x;}
 /* 4. 新行动：对外布施——把多余的钱变成信任与功德 */
 ACTS.push({id:'dana',c:"Community",n:"Give Outward",d:"Give a tenth of savings ($500–5,000) to a food bank, a disaster fund or a school in Tibet. Trust +, Merit ++, Purity slightly +",ok:()=>S.D>=2500,
   run(){const g=clamp(Math.round(S.D*.1/50)*50,500,5000);S.D-=g/ACT_SCALE;S.T+=1.5+g/1500;S.M+=3+g/800;S.L+=.5;S.B+=2;S.stats.dana=(S.stats.dana||0)+g;
@@ -12216,7 +12312,7 @@ function newGame(o){
     phase:'plan',acts:[],pending:[],cur:null,res:null,report:null,
     stats:{bypass:0,totalAttend:0,admin:0,council:0,guide:0,retreat:0,visits:0,negD:0,flagReplies:0,grant:0},endless:false,ended:null,
     HA:60,HP:80,KN:({monk:60,tibetan:50,asian:35,convert:25,black:28,hispanic:26})[o.origin]||30,TP:0,tech:{},opt:{diff:'normal',evf:1,quick:false},cheat:{}};
-  ['rosa','ethan','tenzin'].forEach(id=>addMember(id));
+  ['rosa','ethan','tenzin'].forEach(id=>addMember(id));S.cv=CV;
   addGeneric(false); addGeneric(false);
   if(o.origin==='convert') mem('tenzin').c=42;
   if(o.origin==='asian') S.f.asian=true;
@@ -12257,7 +12353,7 @@ function expenses(){
   if(maint) lines.push(["Manutenção das instalações",Math.round(maint*(S.bld&&roomsOn('storage').length?.7:1)*(1-.03*traitN('build')-.02*traitN('craft')))]);
   if(om().remit)lines.push(["Enviado à família em Dharamsala",om().remit]);
   {const ti=Math.round(treInsurance()*(1-.1*traitN('law')));if(ti>0)lines.push(["Seguro dos tesouros",ti]);}
-  const nm=act().length;if(nm>8)lines.push(["Custos dos membros (chá, almofadas, seguro)",Math.round((nm-8)*14)]);if(nm>30)lines.push([nm>60?"Caseiros residentes ×2":"Caseiro residente",nm>60?1800:900]);
+  const nm=act().length;{const ar=S.bld?bldArea():0;if(ar>90)lines.push(["Manutenção dos edifícios (telhados, canalização, térmitas)",Math.round((ar-90)*1.3*(S.bld&&roomsOn('storage').length?.85:1))]);}if(nm>45)lines.push(nm>90?["Coordenadores de programas ×2",2400]:["Coordenador de programas a tempo parcial",1200]);if(nm>8)lines.push(["Custos dos membros (chá, almofadas, seguro)",Math.round((nm-8)*18)]);if(nm>30)lines.push([nm>60?"Caseiros residentes ×2":"Caseiro residente",nm>60?1800:900]);
   if(boon('thrift')){const s=lines.reduce((a,b)=>a+b[1],0);lines.push(["Ano de Poupança · poupado",-Math.round(s*.12)]);}
   const df=DIFF();if(df.exp!==1){const s=lines.reduce((a,b)=>a+b[1],0);lines.push([`Ajuste de dificuldade (${df.n})`,Math.round(s*(df.exp-1))]);}
   return lines;
@@ -12381,7 +12477,7 @@ function clampAll(){
   S.members.forEach(x=>x.c=clamp(x.c,0,100));
   S.auth.you=clamp(S.auth.you,0,100);S.auth.chad=clamp(S.auth.chad,0,100);
 }
-function sc(d,v){return d>0?d*clamp((100-v)/55,.08,1):d*clamp(v/55,.15,1);}
+function sc(d,v){return d>0?d*clamp(Math.pow(Math.max(0,100-v)/55,1.5),.05,1):d*clamp(v/55,.15,1);} // v26：高位收益更陡地递减
 function soft(fn){const l=S.L,t=S.T;const r=fn();S.L=clamp(l+sc(S.L-l,l),0,100);S.T=clamp(t+sc(S.T-t,t),0,100);return r;}
 const C=()=>S.ctx||{};
 const ctxMem=()=>mem(C().m);
@@ -12826,15 +12922,15 @@ E({id:'designate',tag:"Mestre e Linhagem",title:"A nomeação",at:'2029-06',
   },
   text:()=>{const d=S.f.designated;
     const who=d==='player'?"ti":d==='tenzin'?'Tenzin Dorjee':"o assistente Lobsang Tsering";
-    return `A carta do Rinpoche é entregue em mão pelo Lobsang. É curta. A escolha para professor local deste centro recai sobre ${who}.${S.f.cert?" A última linha diz: «Este centro está de acordo com o Dharma.»":''}`;},
+    return `A carta do Rinpoche é entregue em mão pelo Lobsang. É curta. A escolha para professor local deste centro recai sobre ${who}.${d!=='player'?` Quanto ao centro em si (a casa, o dinheiro, aquilo em que se vai tornar), deixa-te a decisão até ao fim do ano.`:''}${S.f.cert?" A última linha diz: «Este centro está de acordo com o Dharma.»":''}`;},
   opts:()=>{const d=S.f.designated;
     if(d==='player') return [{t:"Aceitar",e:{L:4,S:4},r:"Pousas a carta no altar e depois vais varrer o chão."}];
-    return [{t:"Aceitar a decisão do Rinpoche",e:{L:3,M:3},r:"Quando entregas as chaves de Abade, a tua mão está firme."},{t:"Ressentir-se por dentro",e:{L:-3,B:10},r:"Não o dizes. Mas sabes que a tua prática não foi suficientemente boa."}];}});
+    return [{t:"Aceitar a decisão do Rinpoche",e:{L:3,M:3},r:`Desces a tua almofada do lugar de ensino para a primeira fila. A tua mão está firme.`},{t:"Ressentir-se por dentro",e:{L:-3,B:10},r:"Não o dizes. Mas sabes que a tua prática não foi suficientemente boa."}];}});
 E({id:'final',tag:"Linhagem · Final",title:"O futuro do centro",at:'2029-11',
-  text:()=>`${S.f.rinpocheGone?`O Rinpoche partiu há três meses. `:''}Dez anos. Tens de definir soluções duradouras para este grupo de Dharma. ${act().length} membros esperam que fales.`,
+  text:()=>`${S.f.rinpocheGone?`O Rinpoche partiu há três meses. `:''}Dez anos. ${S.f.designated&&S.f.designated!=='player'?`Agora é ${S.f.designated==='tenzin'?'o Tenzin':'o Lobsang'} quem dá os ensinamentos de domingo, mas a casa, o dinheiro e a forma do centro ainda são teus para decidir. `:''}Tens de definir soluções duradouras para este grupo de Dharma. ${act().length} membros esperam que fales.`,
   opts:()=>{const o=[
-    {t:"Confiar num professor à distância; manter tudo como está",e:{f:{final:'remote'}},r:"Dizes: «Como sempre.»"},
-    {t:"Entregar o ensino ao professor local",req:()=>S.f.guide||S.f.localGuide,rq:"Requer um professor local qualificado",e:{L:3,f:{final:'local'}},r:"O professor local dirige sozinho a prática de domingo pela primeira vez. Tu sentas-te na última fila."},
+    {t:S.f.rinpocheGone?`Continuar ligado ao mosteiro do Rinpoche na Índia; manter tudo como está`:"Confiar num professor à distância; manter tudo como está",e:{f:{final:'remote'}},r:S.f.rinpocheGone?`Dizes: «Como sempre.» O Lobsang diz que o mosteiro enviará professores quando puder.`:"Dizes: «Como sempre.»"},
+    {t:"Entregar o ensino ao professor local",req:()=>S.f.guide||S.f.localGuide||(S.f.designated&&S.f.designated!=='player'),rq:"Requer um professor local qualificado",e:{L:3,f:{final:'local'}},r:"O professor local dirige sozinho a prática de domingo pela primeira vez. Tu sentas-te na última fila."},
     {t:"Integrar um centro Kagyu maior em Houston",e:{L:3,T:-2,f:{final:'merge'}},r:"A placa no portão muda. A prática de domingo continua como sempre."}];
     ['tenzin','dale','rosa'].forEach(id=>{const m=mem(id);if(m&&!m.left&&m.c>=55)o.push({t:`Retirar-se; passar o testemunho a ${m.n}`,e:{f:{final:'succ',heir:id}},r:"Pousas-lhe as chaves na palma da mão."});});
     o.push({t:"Entrar no retiro de três anos, três meses e três dias; largar toda a gestão",req:()=>S.self>=85&&S.L>=60&&S.M>=35,rq:"Requer Prática pessoal do Abade ≥85, Linhagem ≥60 e Mérito suficiente",e:{f:{final:'mila'}},r:"Entras na cabana de retiro e fechas a porta."});
@@ -12906,6 +13002,47 @@ E({id:'el_yangsi_visit',tag:`Infinito · Linhagem`,title:`O jovem Rinpoche chega
     {t:`Nenhuma cerimónia; levá-lo a brincar um dia junto ao lago`,e:{HA:8,M:8,L:3,S:3},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.renown=(S.renown||0)+40;return '';},r:`Apanha um lagostim, observa-o muito tempo e volta a pô-lo na água. Ao lado, o Lobsang murmura qualquer coisa, de olhos vermelhos.`}]});
 Object.assign(ACH,{nowruz:[`Sete cereais`,`Cozer a papa do Nowruz na cozinha do centro`],kora:[`A montanha não foge`,`Dar meia-volta antes do Drölma La`],yawn:[`Bocejo`,`Receber a primeira fotografia da reencarnação do Rinpoche`]});
 
+/* ===== v26 · 十年之后：结局与无尽模式的衔接；旧存档补发新事件 ===== */
+const CV=26; // 内容版本。新增的定时事件写进 CV_EV，旧存档读取时会补发已经错过日期的
+const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[]};
+function backfill(){
+  if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
+  const from=S.cv||24;S.cv=CV;const ids=[];
+  for(const v in CV_EV)if(Number(v)>from)CV_EV[v].forEach(id=>{const ev=EV[id];if(!ev||!ev.at||S.seen[id]!=null)return;const t=ds2t(ev.at);if(t>S.turn||(t===S.turn&&S.wk===0&&S.phase==='plan'))return;if(S.endless&&['final','designate'].includes(id))return;if(S.queue.some(q=>q.id===id))return;ids.push(id);});
+  ids.sort((a,b)=>ds2t(EV[a].at)-ds2t(EV[b].at));
+  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?3:2; // 临近十年结局：每月三件，仁波切的线放最前
+  if(late)['parinirvana','tsurphu_call'].forEach(id=>{const i=ids.indexOf(id);if(i>0){ids.splice(i,1);ids.unshift(id);}});
+  ids.forEach((id,i)=>S.queue.push({id,at:S.turn+Math.floor(i/per),ctx:{bf:1}}));
+  if(S.endless&&S.seen.el_after==null&&!S.queue.some(q=>q.id==='el_after'))S.queue.push({id:'el_after',at:S.turn+Math.ceil(ids.length/per),ctx:null});
+  if(ids.length)log(`Esta atualização acrescenta ${ids.length} partes da história que perdeste. Vão chegar nos próximos meses.`);
+}
+E({id:'el_after',tag:`Infinito · Dez anos depois`,title:`A manhã seguinte`,qonly:1,
+  text:()=>{const f=S.f,k=S.ended,h=mem(f.heir);
+    if(f.final==='mila')return `A porta da cabana está fechada há mais de um mês. Pelas regras do retiro, não vês ninguém nem geres nada. A direção assumiu o centro: todos os meses a Rosa deixa as contas na caixa de madeira junto à porta, embora ninguém espere que as abras.
+A partir daqui, o jogo segue o próprio centro: a direção, o professor local e a sangha decidem no teu lugar. Sairás da cabana ao fim de três anos, três meses e três dias.`;
+    if(f.final==='succ')return `${h?h.n:'O novo abade'} tem agora as chaves. No primeiro domingo de 2030 pede-te que fiques: não no lugar de ensino, mas no escritório. O telhado, o banco, o parque de estacionamento. «Tu sabes onde está tudo.»`;
+    if(k==='exile')return `Vives agora em Austin, num T1 perto de Riverside. A quinta junto ao lago continua em teu nome. Todas as sextas-feiras fazes noventa minutos para norte pela I-35. Entretanto, a Rosa mantém as lamparinas de manteiga acesas.`;
+    if(k==='brand')return `A empresa de gestão da Brooke dirige agora os retiros de fim de semana. O teu contrato diz que a sala do santuário é tua aos domingos de manhã, «sujeito a reservas».`;
+    if(k==='diss')return `Os poucos que restam sentam-se em círculo na sala. Alguém pergunta: «Mesma hora no próximo domingo?»`;
+    if(f.final==='merge')return `A placa no portão diz agora «Centro Kagyu de Houston · Delegação de Waco». Houston envia um professor de dois em dois meses; as contas continuam a vir para ti.`;
+    return `Janeiro de 2030. Nada acabou. As lamparinas precisam de manteiga, o filtro do ar condicionado tem de ser mudado e a Rosa quer falar do parque de estacionamento.`;},
+  opts:()=>{const f=S.f,k=S.ended;
+    const out=()=>{const left=(S.seen.final??118)+39-S.turn;queue('el_mila_out',Math.max(1,left));};
+    if(f.final==='mila')return [{t:`A Rosa preside à direção`,e:{HA:2},fx(){f.boardRuns='rosa';out();return '';},r:`A Rosa escreve a ordem de trabalhos num cartão. Ponto um: «Deixar a cabana em paz.»`},
+      {t:`O professor local dirige o centro`,req:()=>!!(f.guide||f.localGuide||(f.designated&&f.designated!=='player')),rq:`Requer um professor local`,e:{L:2},fx(){f.boardRuns='teacher';out();return '';},r:`A prática de domingo continua como sempre. Do lado vazio do lugar de ensino, alguém põe todas as semanas um copo de água fresca.`}];
+    if(f.final==='succ')return [{t:`Ficar como administrador`,e:{HA:3,L:1,f:{steward:1}},r:`O teu novo cartão de visita tem um único título: «Guardião das chaves».`},{t:`Sentar-te na última fila como membro comum`,e:{B:-15,S:4,f:{steward:1}},r:`Aguentas dois meses. Em março já estás outra vez a arranjar o ar condicionado.`}];
+    if(k==='exile')return [{t:`Continuar a vir todas as semanas`,e:{B:6,L:1,T:1},r:`Já conheces todas as saídas da I-35.`},{t:`Pedir à Rosa que seja caseira residente`,req:()=>has('rosa'),rq:`Requer a Rosa`,e:{T:2,c:{rosa:6}},r:`A Rosa muda-se para o quarto de hóspedes da casa da quinta. Diz que é melhor do que um lar.`}];
+    if(k==='brand')return [{t:`Renegociar: nada de reservas ao domingo de manhã`,req:()=>S.D>=1500,rq:`Requer $1,500`,e:{D:-1500,L:4,T:-1},r:`O advogado custa mil e quinhentos dólares. As manhãs de domingo voltam a ser da sala do santuário.`},{t:`Deixar estar; trabalhar por dentro da marca`,e:{D:800,L:-2},r:`Aprendes a escrever «experiência imersiva» onde antes escrevias «iniciação». Não gostas de o ter aprendido.`}];
+    if(k==='diss')return [{t:`«Mesma hora no próximo domingo.»`,e:{HA:5,L:1},r:`E assim passa mais um ano.`}];
+    if(f.final==='merge')return [{t:`Aceitar`,e:{L:1},r:`A placa não importa. A prática de domingo continua como sempre.`},{t:`Pedir a Houston mais autonomia`,e:{T:1,L:-1,f:{houstonFree:1}},r:`Houston aceita que marquem vocês os horários da prática. O resto, mais tarde.`}];
+    return [{t:`Ir encher as lamparinas`,e:{M:2,HA:2},r:`A primeira é a lamparina que acendeste na sala em 2020.`}];}});
+E({id:'el_mila_out',tag:`Infinito · Fim do retiro`,title:`Fim do retiro`,qonly:1,
+  text:()=>`Na manhã em que o retiro acaba, a Rosa e a direção descem até ao lago e levantam, uma a uma, as pedras de fronteira que puseste há anos. A porta abre-se.
+Três anos, três meses e três dias: as práticas preliminares outra vez, a prática do yidam, os Seis Dharmas de Naropa, o Mahamudra e as preces aos protetores todas as tardes ao cair do sol. Semicerras os olhos para o moinho de vento. Continua a girar. A sangha está à porta da cabana, cada um com um khata nas mãos.`,
+  opts:[{t:`Voltar ao lugar de ensino`,e:{L:6,RT:6,S:15,B:-30,f:{milaOut:1}},r:`O teu primeiro ensinamento depois do retiro é mais curto do que qualquer outro que deste. Ninguém se importa.`},
+    {t:`Ficar na cabana como mestre de retiro do próximo grupo`,req:()=>on('cabin'),rq:`Requer uma cabana de retiro`,e:{L:8,S:10,f:{milaOut:1}},fx(){S.f.localGuide=S.f.localGuide||S.name;return '';},r:`Já há três nomes na lista de espera. Voltas a pôr as pedras de fronteira no lugar.`},
+    {t:`Dar primeiro uma volta ao lago, o resto depois`,e:{HP:15,HA:5,M:5,f:{milaOut:1}},r:`Leva a tarde inteira. Uma garça faz-te companhia durante parte do caminho.`}]});
+
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Vidas dos membros",title:"Quer ir embora",qonly:1,
   text:()=>{const m=ctxMem();return m?`Há meses que ${m.n} anda com a cabeça noutro lado. Hoje diz: «Acho que preciso de fazer uma pausa.»${m.pref<35?" Diz que isto está «a transformar-se numa religião».":m.pref>70?" Diz que isto está «a deixar de ser um centro de Dharma».":" Não diz porquê."}`:"Alguém quer ir embora.";},
@@ -12943,8 +13080,8 @@ function eligible(ev){
 function buildPending(){
   const p=[];
   const d=ds();
-  for(const id in EV){const ev=EV[id]; if(ev.at===d&&S.seen[id]==null&&(!ev.cond||ev.cond())) p.push({id});}
-  S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx});return false;}return true;});
+  for(const id in EV){const ev=EV[id]; if(ev.at===d&&S.seen[id]==null&&(!ev.cond||ev.cond())) p.push({id,q:1});}
+  S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx,q:1});return false;}return true;});
   // departure / burnout / debt
   here().forEach(m=>{if(m.low>=12&&!m.flagged&&p.length<4){m.flagged=1;p.push({id:'departure',ctx:{m:m.id}});}});
   if(S.B>=88&&!p.some(x=>x.id==='burnout')) p.push({id:'burnout'});
@@ -12963,6 +13100,7 @@ function buildPending(){
   }
   // silent event overrides month
   const si=p.find(x=>x.id==='silent'); if(si) return [si];
+  p.slice(6).filter(x=>x.q).forEach(x=>S.queue.push({id:x.id,at:S.turn+1,ctx:x.ctx||{bf:1}}));
   return p.slice(0,6);
 }
 function eligibleRep(id){const ev=EV[id];return S.seen[id]==null||S.turn-S.seen[id]>=(ev.cd??6);}
@@ -12980,6 +13118,7 @@ function nextEvent(){
     S.ctx=p.ctx||null;
     if(ev.prep&&!ev.prep()) continue;
     if(p.id==='departure'&&!ctxMem()) continue;
+    if(p.ctx&&p.ctx.bf&&(S.seen[p.id]!=null||(ev.cond&&!ev.cond()))) continue;
     if(p.id==='departure'){const m=ctxMem(); if(m.left) continue;}
     S.seen[p.id]=S.turn;
     if(ev.silent){S.phase='silent';S.cur={id:p.id};return true;}
@@ -13016,13 +13155,14 @@ function weekEvents(){
   let p=[];
   if(S.wk===0){
     const all=buildPending();all.forEach(e=>e.wk=e.r?ri(0,WK-1):0);
-    S.mplan=all.filter(e=>e.wk>0);p=all.filter(e=>e.wk===0);
+    S.mplan=all.filter(e=>e.wk>0);p=all.filter(e=>e.wk===0);p.slice(4).forEach((e,i)=>{e.wk=1+i%(WK-1);S.mplan.push(e);});
   } else {
     p=(S.mplan||[]).filter(e=>e.wk===S.wk);S.mplan=(S.mplan||[]).filter(e=>e.wk!==S.wk);
     S.queue=S.queue.filter(q=>{if(q.at<=S.turn){p.push({id:q.id,ctx:q.ctx});return false;}return true;});
     here().forEach(m=>{if(m.low>=12&&!m.flagged&&p.length<4){m.flagged=1;p.push({id:'departure',ctx:{m:m.id}});}});
     if(S.B>=88&&!p.some(x=>x.id==='burnout')&&eligibleRep('burnout'))p.push({id:'burnout'});
   }
+  p.slice(4).filter(x=>x.q||!x.r).forEach(x=>S.queue.push({id:x.id,at:S.turn+1,ctx:x.ctx||{bf:1}}));
   return p.slice(0,4);
 }
 function startMonth(){
@@ -13094,7 +13234,7 @@ function settle0(){
   let other=0,et=0;
   if(monthEnd){
   if(on('wheels')){const g=Math.round(220*LB.wheel);other+=g;lines.push([LB.wheel>1?"Galeria de rodas de oração · visitantes (junto ao parque)":"Galeria de rodas de oração · visitantes",g]);}
-  S.L+=LB.L; S.T+=LB.T; S.H+=LB.H; S.B+=LB.B; if(LB.M)S.M+=LB.M;
+  S.L+=dimR(LB.L,1); S.T+=dimR(LB.T,.8); S.H+=LB.H; S.B+=LB.B; if(LB.M)S.M+=LB.M;
   if(on('vets')){other+=600;lines.push(["Subsídio do programa de veteranos",600]);}
   if(S.f.market){const g=200+60*(LB.stalls||0);other+=g;lines.push(["Taxas das bancas do mercado de sábado",g]);}
   if(S.f.cattleGraze){other+=120;lines.push(["Taxa de pastagem do pasto leste",120]);}
@@ -13115,7 +13255,7 @@ function settle0(){
   if(S.HP<10){other-=400;lines.push(["Abade doente · despesas médicas",-400]);S.HP=40;S.B=Math.max(0,S.B-25);notes.push("Adoeceste e passaste três dias no hospital.");log("O Abade adoeceu e passou três dias no hospital.");}
   if(monthEnd&&(S.stats.grant||0)>=6){S.stats.grant=0;if(chance(.55+S.T/300)){const g=Math.round((1800+ri(0,1800))*(S.f.c3?1.4:1));other+=g;lines.push(["Subsídio de fundação",g]);notes.push("A candidatura ao subsídio foi aprovada.");log(`Subsídio aprovado: $${g}.`);}else notes.push("A candidatura ao subsídio desta ronda foi recusada.");}
   if(monthEnd&&S.D<0){const it=Math.round(-S.D*.015);other-=it;lines.push(["Juros de descoberto",-it]);if(S.D<-8000){S.T-=1;S.B+=3;notes.push("Corre a notícia das dívidas: Confiança −, Exaustão +");}}
-  S.L-=Math.max(0,S.T-55)*.02;S.T-=Math.max(0,S.L-55)*.02;S.M*=.985;
+  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.985;
   S.D+=inc+other-et;
   // 漂移（月末）
   if(monthEnd){
@@ -13447,10 +13587,11 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa'});
 ENDINGS.refuge={n:`Refúgio`,en:'SANCTUARY',img:`No relvado, no Nowruz, o imã, o Marcus e tu partilham a mesma toalha de piquenique. A filha da Dilnur serve polo no prato de cada um.`,t:()=>`Mais tarde, quando em Waco se fala deste sítio, já não se diz «aquele grupo budista». Diz-se «a casa junto ao lago que manteve a porta aberta quando tudo aconteceu».${S.f.uyGarden?` Este ano, a latada do Ablikim já tem uns cachos ainda muito azedos.`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
-  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`O Tenzin abriu uma pequena casa de chá em Shigatse. Na parede está uma fotografia da sangha de Waco.`);else if(t&&!t.left&&f.designated!=='tenzin')o.push(`O Tenzin continua a trabalhar no H-E-B e dirige os cânticos aos domingos.`);
+  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`O Tenzin abriu uma pequena casa de chá em Shigatse. Na parede está uma fotografia da sangha de Waco.`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`O Tenzin continua a trabalhar no H-E-B e dirige os cânticos aos domingos.`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`O Tenzin dá os ensinamentos de domingo, como a carta do Rinpoche pedia. Continua a fazer o turno da manhã no H-E-B.`);
+  if(f.designated==='lobsang'&&f.rinpocheGone)o.push(`Depois da cremação, o Lobsang voltou para Waco, como o Rinpoche lhe tinha pedido. Vive no quarto de hóspedes e corrige a pronúncia tibetana de toda a gente.`);
   if(f.uyghurFamily)o.push(`A família da Dilnur obteve asilo. O desenho da Aynur continua pendurado no corredor da sala do santuário.`);
   if(S.seen.dawson_fall!=null)o.push((S.npc.dawson||0)>=8?`O Dawson conduz uma carrinha do banco alimentar do condado e, um sábado por mês, varre o parque de estacionamento do centro.`:`O Dawson mudou-se para o Oklahoma e não deixou morada.`);
   if(f.merged)o.push(`O Chad continua a fazer o chá de domingo. O tibetano dele melhorou.`);
@@ -14648,7 +14789,7 @@ function planbarHTML(){
 function refreshPlanbar(){const el=document.getElementById('planbar');if(el)el.innerHTML=planbarHTML();}
 function buyParcel(pid){const p=PARCELS.find(q=>q.id===pid);if(!p||!buyable(p))return;const c=cost_(landPrice(p));if(S.D<c)return;S.D-=c;S.parcels.push(pid);farmUI.ask=null;log(`Compraste ${p.n} ($${c.toLocaleString()}).`);
   if(EV['land_'+pid]&&S.seen['land_'+pid]==null)queue('land_'+pid,1);if(S.parcels.length>=3&&!S.f.shirleyQ){S.f.shirleyQ=1;queue('shirley',2);}save();render();}
-function buyDecor(t){const d=IT[t];if(S.D<cost_(d.cost))return;S.D-=cost_(d.cost);const ok=placeOrTray(t);log(`Adquirido: ${d.n}${ok?'':" (enviado para o armazém)"}.`);save();render();if(document.getElementById('facbox'))openBuild();}
+function buyDecor(t){const d=IT[t];if(!d||d.cost==null||S.D<cost_(d.cost))return;S.D-=cost_(d.cost);const ok=placeOrTray(t);log(`Adquirido: ${d.n}${ok?'':" (enviado para o armazém)"}.`);save();render();if(document.getElementById('facbox'))openBuild();}
 function farmAction(a,t){
   const setMode=(m,k)=>{if(farmUI.mode===m&&(m!=='paint'||farmUI.paint===k)){farmUI.mode=null;farmUI.paint=null;}else{farmUI.mode=m;farmUI.paint=m==='paint'?k:null;}farmUI.ask=null;farmUI.placing=null;farmUI.rect=null;refreshPlanbar();drawFarm();};
   switch(a){
@@ -14807,7 +14948,7 @@ function migrate(){
   if(S.KN==null)S.KN=({monk:60,tibetan:50,asian:35,convert:25,black:28,hispanic:26})[S.origin]||30;
   if(!S.opt)S.opt={diff:'normal',evf:1,quick:false}; if(!S.cheat)S.cheat={}; if(!S.tech)S.tech={}; if(S.TP==null)S.TP=0;
   if(S.stats.grant==null)S.stats.grant=0;
-  v8Init();entInit();treInit();
+  v8Init();entInit();treInit();backfill();
 }
 function applyCheats(){const c=S.cheat||{};
   if(c.money&&S.D<999999)S.D=999999;
@@ -15146,7 +15287,7 @@ function renderIntro(){
       <p>Março de 2020, Waco, Texas. Compraste uma velha quinta na margem oeste do Lake Waco. Mudas-te para o celeiro reconvertido e montas um altar na sala da casa da quinta. Nos próximos dez anos vais tentar transformar este pequeno grupo Kagyu num verdadeiro centro de Dharma — ou vê-lo tornar-se uma marca de meditação, um salão de atividades comunitárias, ou simplesmente dissolver-se.</p>
       <p style="color:var(--mute)">O que conta não é quanto dinheiro fazes. É caminhar sobre três cordas bambas ao mesmo tempo: <b style="color:var(--gold)">Pureza da Linhagem</b>, <b style="color:var(--malachite)">Confiança da Comunidade</b> e <b style="color:var(--cinnabar)">Dana</b>. Cada turno é uma semana; os ecrãs estão divididos em páginas, que se mudam na barra de baixo.</p>
       <p style="color:var(--dim)">Nota: a partir de 2027 o jogo entra numa história alternativa fictícia (um ataque nuclear no sul de Xinjiang, o colapso da Barragem das Três Gargantas, uigures realojados em Hunan, uma conversão em massa de chineses han ao cristianismo, grande número de indianos a mudar-se para o Tibete). São acontecimentos fictícios do enredo, não previsões.</p>
-      <div class="go">${saved&&saved.phase!=='end'?`<button class="btn" data-i="continue">Continuar: ${esc(saved.name)} · ${saved.turn%12+1}/${2020+Math.floor(saved.turn/12)}</button>`:''}<button class="btn ${saved&&saved.phase!=='end'?'ghost':''}" data-i="s1">Começar novo jogo ›</button>${langBtns('data-i="lang" data-l')}</div>`;
+      <div class="go">${saved?`<button class="btn" data-i="continue">Continuar: ${esc(saved.name)} · ${saved.turn%12+1}/${2020+Math.floor(saved.turn/12)}</button>`:''}<button class="btn ${saved?'ghost':''}" data-i="s1">Começar novo jogo ›</button>${langBtns('data-i="lang" data-l')}</div>`;
     if(st===1) body=`<h2>O passado do Abade</h2><p class="hint">Seis origens, cada uma com custos e vantagens reais: estatísticas iniciais, rendimento das ações, despesas e acontecimentos próprios, tudo muda.</p>
       <div class="choices">${Object.entries(ORIGINS).map(([k,o])=>`<button class="choice ${sel.origin===k?'on':''}" data-o="${k}">${pimg(playerTraitsFor(k,"Abade"))}<b>${o.n}</b><span>${o.sub} · Linhagem ${o.s.L} Confiança ${o.s.T} Dana $${o.s.D.toLocaleString()}</span><span class="up">+ ${o.up}</span><span class="dn">− ${o.dn}</span></button>`).join('')}</div>
       <div class="go"><button class="iconbtn" data-i="s0">‹ Voltar</button><button class="btn" data-i="s2">Seguinte ›</button></div>`;
@@ -15229,7 +15370,7 @@ function renderEnd(){
   ovEl.onclick=ev=>{const t=ev.target.closest('button');if(!t)return;
     if(t.dataset.e==='photo'){openPhoto();return;}
     if(t.dataset.e==='new'){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
-    if(t.dataset.e==='endless'){S.endless=true;S.phase='plan';S.turn++;S.wk=0;ovEl.onclick=null;S.f.endlessAt=S.turn;entInit();log("Modo infinito: os dias continuam. A partir de agora, o Renome conta os pontos e os votos não param de subir.");UI.tab='biz';UI.sub.biz='r';save();render();}};
+    if(t.dataset.e==='endless'){S.endless=true;S.phase='plan';S.turn++;S.wk=0;ovEl.onclick=null;S.f.endlessAt=S.turn;entInit();S.cv=CV;queue('el_after',0);log("Modo infinito: os dias continuam. A partir de agora, o Renome conta os pontos e os votos não param de subir.");UI.tab='biz';UI.sub.biz='r';save();render();}};
 }
 
 /* ---------- 交互 ---------- */
@@ -15659,7 +15800,7 @@ E({id:'ent_staff',tag:"Gestão",title:"O gestor quer aumento",rep:1,cd:9,w:5,con
 /* 无尽模式大事件（2030 年起） */
 const EL=()=>!!S.endless||Y()>=2030;
 E({id:'el_branch',tag:"Infinito · Filial",title:"Um convite de Austin",rep:1,cd:36,w:5,cond:()=>EL()&&act().length>=25&&!S.f.branch,
-  text:()=>`Um grupo de membros faz duas horas de carro desde Austin todas as semanas. Perguntam: não poderia haver uma filial em Austin? Já encontraram um armazém.`,
+  text:()=>`Um grupo de membros faz duas horas de carro desde Austin todas as semanas. Perguntam: não poderia haver uma filial em Austin? Já encontraram um armazém.${S.f.final==='merge'?` Claro que Houston teria de aprovar.`:''}`,
   opts:[{t:"Financiar um centro filial ($8,000)",req:()=>S.D>=8000,rq:"Requer $8,000",e:{D:-8000,T:2,H:5},fx(){S.f.branch=1;S.f.branchInc=1;return "Vieram sessenta pessoas no dia em que a filial abriu. Desde então, todos os meses chega pelo correio uma oferenda da filial.";}},
     {t:"Dar a tua bênção; que o façam eles",e:{L:1,T:1},fx(){S.f.branch=1;const n=Math.min(6,act().length-10);act().filter(m=>m.gen||m.ros).slice(0,n).forEach(m=>leave(m,"foi gerir a filial de Austin"));return `${n} membros foram para Austin. Agora são o centro-mãe.`;}},
     {t:"Esperar mais dois anos",e:{},r:"Continuam a vir de carro todas as semanas."}]});
@@ -15712,8 +15853,8 @@ const WIKI_CONCEPTS=[
   ["Acum.","Pontos para estudar na árvore de estudos. Acumulam-se todas as semanas com o Saber, a prática pessoal e o Mérito."],
   ["Mérito","A coisa invisível. Constrói-se com libertação de vidas, cuidados paliativos, serviço comunitário e pujas festivas; máximo de 100 e perde 1.5% por semana. Afeta a velocidade de estudo, os finais e o retiro de Milarepa."],
   ["Fadiga dos doadores","Vendas de bolos, retiros pagos e oferendas por transmissão em direto rendem menos quando repetidos (cada uso acumula −35%; recupera-se um quarto por semana). Espaçá-los algumas semanas compensa mais."],
-  ["Centro confortável","Com mais de 18 meses de despesas no banco, as oferendas de domingo e a angariação de fundos escalam por √(18/meses), até um mínimo de 55%. O dinheiro é para usar."],
-  ["Custo da dimensão","Acima de 20 membros, cada pessoa a mais reduz em 0.01 a evolução do empenho de todos. Uma sangha grande precisa de funções, prática em grupo e Harmonia para se manter unida."],
+  ["Centro confortável","Com mais de 12 meses de despesas no banco, as oferendas de domingo e a angariação de fundos escalam por √(12/meses), até um mínimo de 45%. O dinheiro é para usar."],
+  ["Custo da dimensão","Acima de 20 membros, cada pessoa a mais reduz em 0.015 a evolução do empenho de todos. Uma sangha grande precisa de funções, prática em grupo e Harmonia para se manter unida."],
   ["Atenção mediática","Atenção mediática. Amplifica o efeito dos acontecimentos na Confiança, traz visitantes e recém-chegados, e traz riscos. Arrefece sozinha."],
   ["Confiança do Rinpoche","A confiança do teu mestre em ti. Sobe com prática pessoal, retiros e fazendo as coisas como deve ser; desce quando praticas pouco. Condiciona iniciações e certificação."],
   ["Empenho","O investimento de cada membro no centro. Evolui consoante o domingo corresponda à profundidade que prefere; abaixo de 25 durante demasiado tempo, pensa em sair."],
@@ -16008,7 +16149,7 @@ function treFx(){const o={L:0,T:0,H:0,HA:0,M:0,KN:0,RT:0,HP:0,self:0,disc:{},ng:
   treList().forEach(id=>{const d=TRE[id];if(!d)return;o.value+=d.v;if(!treShown(id))return;o.shown++;for(const k in d.fx)o[k]+=d.fx[k];if(d.disc)for(const k in d.disc)o.disc[k]=Math.min(o.disc[k]||1,d.disc[k]);const s=d.sp||{};
     if(s.ng)o.ng*=s.ng;if(s.intro)o.intro*=s.intro;if(s.hospice)o.hospice*=s.hospice;if(s.tsok)o.tsok*=s.tsok;if(s.fest)o.fest*=s.fest;if(s.vis)o.vis+=s.vis;if(s.newP)o.newP+=s.newP;if(s.commit)o.commit+=s.commit;if(s.renown)o.renown+=s.renown;if(s.cap)o.cap+=s.cap;if(s.theft)o.theft++;});
   return o;}
-function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} voltou do museu.`);}});const f=treFx();S.L+=f.L;S.T+=f.T;S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
+function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} voltou do museu.`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
   if(treShown('kangling')&&!roomsOn('protector').length){/* 不可能：pl=protector */}
   if(treShown('milarepa_songs')&&has('tenzin')){const m=mem('tenzin');if(m&&!m.left)m.c+=.1;}
   if(f.commit)act().forEach(m=>m.c+=f.commit/WK);}
@@ -16209,7 +16350,8 @@ E({id:'tre_pilgrim',tag:"Tesouros · Peregrinação",title:"De volta de Bodh Gay
   opts:()=>{const pool=['stupa_model','khata','aspiration_prayer','offering_bowls','gau'].filter(id=>!treHas(id));const id=pool[0]||'cord';return [{t:"Aceita com a devida solenidade",e:{L:1,HA:2},fx(){treGain(id,"Trazido de peregrinação");return `É ${TRE[id].n}.`;}},{t:"Pede-lhe que fale da viagem no domingo",e:{HA:3,T:1,M:1},fx(){treGain(id,"Trazido de peregrinação");return `Falou durante uma hora. No fim mostrou ${TRE[id].n}, e todos se calaram.`;}}];}});
 E({id:'tre_flea',tag:"Tesouros",title:"Feira da ladra",months:[4,5,10],rep:1,cd:14,w:4,cond:()=>S.D>=200&&['damaru','phurba','mandala_set','mila_statue'].some(id=>!treHas(id)),
   text:()=>`A feira da ladra de Hewitt. Uma das bancas está cheia de «coisas asiáticas»; o vendedor diz que foi o tio que as trouxe do Nepal.`,
-  opts:()=>{const pool=['damaru','phurba','mandala_set','mila_statue'].filter(id=>!treHas(id));const id=pick(pool);const c=Math.round(TRE[id].v*.3);return [{t:`Paga $${c} por ${TRE[id].n}`,req:()=>S.D>=c,rq:`Requer $${c}`,e:{D:-c},fx(){treGain(id,"Feira da ladra");return "O vendedor disse: «Vocês são deste ramo? Então faço-vos um desconto.» Não fez.";}},{t:"Só ver e ir embora",e:{},r:"No mês seguinte ainda lá está."}];}});
+  prep(){const pool=['damaru','phurba','mandala_set','mila_statue'].filter(id=>!treHas(id));if(!pool.length)return false;S.ctx={tre:pick(pool)};return true;},
+  opts:()=>{const id=(C().tre&&TRE[C().tre])?C().tre:'damaru';const c=Math.round(TRE[id].v*.3);return [{t:`Paga $${c} por ${TRE[id].n}`,req:()=>S.D>=c,rq:`Requer $${c}`,e:{D:-c},fx(){treGain(id,"Feira da ladra");return "O vendedor disse: «Vocês são deste ramo? Então faço-vos um desconto.» Não fez.";}},{t:"Só ver e ir embora",e:{},r:"No mês seguinte ainda lá está."}];}});
 E({id:'tre_bequest',tag:"Tesouros · Ancião",title:"Legado",ch:[2,3,4],rep:1,cd:30,w:3,cond:()=>here().some(m=>m.tag==='elder'&&m.c>=50),
   prep(){const a=here().filter(m=>m.tag==='elder'&&m.c>=50);if(!a.length)return false;S.ctx={m:pick(a).id};return true;},
   text:()=>{const m=ctxMem();return `${m?m.n:"Um membro antigo"} faleceu. A família telefonou: há uma linha no testamento para o centro. Trouxeram uma caixa e um cheque.`;},
@@ -16415,10 +16557,12 @@ const FATK={fund:"venda solidária",camp:"retiro pago",live:"transmissão"};
 function fatMul(id){const f=(S.fat&&S.fat[id])||0;return 1/(1+.35*f);}
 function fatAdd(id){S.fat=S.fat||{};S.fat[id]=(S.fat[id]||0)+1;}
 function fatTick(){if(!S.fat)return;for(const k in S.fat){S.fat[k]*=.75;if(S.fat[k]<.05)delete S.fat[k];}}
-/* 2. 富足效应：账上超过 18 个月开支，随喜与筹款按 √(18/月数) 递减，最低 55% */
-function wealthMul(){const r=runway();return r>18?Math.max(.55,Math.sqrt(18/r)):1;}
-/* 3. 规模成本：成员越多，每个人分到的注意力越少——承诺度漂移 −0.01/人（20 人以上） */
-function scaleDrag(){return Math.max(0,act().length-20)*.01;}
+/* 2. 富足效应：账上超过 12 个月开支，随喜与筹款按 √(12/月数) 递减，最低 45%（v26） */
+function wealthMul(){const r=runway();return r>12?Math.max(.45,Math.sqrt(12/r)):1;}
+/* 3. 规模成本：成员越多，每个人分到的注意力越少——承诺度漂移 −0.015/人（20 人以上，v26 由 0.01 上调） */
+function scaleDrag(){return Math.max(0,act().length-20)*.015;}
+/* v26：被动加成边际递减——超出 k 的部分只算 35%（布局与宝物的传承/信任） */
+function dimR(x,k){return x>k?k+(x-k)*.35:x;}
 /* 4. 新行动：对外布施——把多余的钱变成信任与功德 */
 ACTS.push({id:'dana',c:"Comunidade",n:"Dar para fora",d:"Dar um décimo das poupanças ($500–5,000) a um banco alimentar, a um fundo de catástrofe ou a uma escola no Tibete. Confiança +, Mérito ++, Pureza ligeiramente +",ok:()=>S.D>=2500,
   run(){const g=clamp(Math.round(S.D*.1/50)*50,500,5000);S.D-=g/ACT_SCALE;S.T+=1.5+g/1500;S.M+=3+g/800;S.L+=.5;S.B+=2;S.stats.dana=(S.stats.dana||0)+g;
