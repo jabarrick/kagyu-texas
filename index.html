@@ -659,8 +659,9 @@ const FAC=[
   {id:'protector',n:'护法殿 · 玛哈嘎拉殿',cost:()=>4000,d:'纯度缓慢+；对外形象有风险',ok:()=>ch()>=3},
   {id:'guest',n:'客房',cost:()=>3500,d:'仁波切来访费用−30%',ok:()=>ch()>=3},
 ];
+function facLv(id){const n=IT[id]&&id!=='stupa'&&S.layout?(S.layout.items.concat(S.layout.tray).some(i=>i.t===id)?1:0):0;return Math.max(S.fac[id]||0,n);} // v27：放进仓库的也算建过
 function build(id){
-  const f=FAC.find(x=>x.id===id); const lv=S.fac[id]; const c=f.cost(lv);
+  const f=FAC.find(x=>x.id===id); const lv=facLv(id); if(lv>=(f.max||1)) return; const c=f.cost(lv);
   if(S.D<cost_(c)) return;
   S.D-=cost_(c); S.fac[id]=lv+1;
   if(IT[id]&&(id!=='stupa'||lv===0)){const ok=placeOrTray(id);if(!ok)log(`${IT[id].n}暂时没有空地，放进了仓库。`);}
@@ -1250,10 +1251,10 @@ const CV=27; // 内容版本。新增的定时事件写进 CV_EV，旧存档读�
 const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[],27:['ethan_wedding','nyungne','tx_250']};
 function backfill(){
   if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
-  const from=S.cv||24;S.cv=CV;const ids=[];
+  const from=S.cv||(CV_EV[25].some(id=>S.seen[id]!=null)||S.f.rinpocheGone?25:24);S.cv=CV;const ids=[];
   for(const v in CV_EV)if(Number(v)>from)CV_EV[v].forEach(id=>{const ev=EV[id];if(!ev||!ev.at||S.seen[id]!=null)return;const t=ds2t(ev.at);if(t>S.turn||(t===S.turn&&S.wk===0&&S.phase==='plan'))return;if(S.endless&&['final','designate'].includes(id))return;if(S.queue.some(q=>q.id===id))return;ids.push(id);});
   ids.sort((a,b)=>ds2t(EV[a].at)-ds2t(EV[b].at));
-  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?3:2; // 临近十年结局：每月三件，仁波切的线放最前
+  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?Math.min(4,Math.max(3,Math.ceil(ids.length/Math.max(1,120-S.turn)))):2; // 临近十年结局：每月三件，仁波切的线放最前
   if(late)['parinirvana','tsurphu_call'].forEach(id=>{const i=ids.indexOf(id);if(i>0){ids.splice(i,1);ids.unshift(id);}});
   ids.forEach((id,i)=>S.queue.push({id,at:S.turn+Math.floor(i/per),ctx:{bf:1}}));
   if(S.endless&&S.seen.el_after==null&&!S.queue.some(q=>q.id==='el_after'))S.queue.push({id:'el_after',at:S.turn+Math.ceil(ids.length/per),ctx:null});
@@ -1343,6 +1344,35 @@ Dale已经把他的老军装熨好了。几位成员觉得这个夏天的旗子�
   opts:[{t:`带着美国国旗、德州州旗和经幡一起走`,e:{T:4,H:4,c:{dale:6,tenzin:-2}},r:`队伍从奥斯汀大道走过。路边有人鼓掌，有人皱眉，一个小孩一直追着经幡跑。Dale走在最前面，步子一点没乱。`},
     {t:`周日共修上请Dale朗读《独立宣言》，然后回向`,req:()=>has('dale'),rq:`需要Dale`,e:{T:2,L:1,M:2,c:{dale:8}},r:`Dale读到“生命、自由和追求幸福的权利”时停了一下。回向的时候，你把“一切众生”说得比平时慢。`},
     {t:`道场不参加`,e:{L:1,T:-1,c:{dale:-4}},r:`你说道场不站队。Dale一个人去了，回来给每个人带了一面小旗子，没有人扔掉。`}]});
+
+/* ===== v27 · 无尽模式的可重复事件（变体在 prep 里选定，存进 ctx，渲染时不会变） ===== */
+E({id:'el_refuge',tag:`无尽 · 传承`,title:`皈依日`,rep:1,cd:12,w:6,cond:()=>EL()&&act().filter(m=>S.turn-m.join<=12).length>=3,
+  prep(){S.ctx={n:act().filter(m=>S.turn-m.join<=12).length};return true;},
+  text:()=>`今年有${C().n}个人请求皈依。按传统，皈依时剪下一小绺头发，给一个法名。${S.f.designated==='lobsang'?'Lobsang说他来主持。':'他们请你来主持。'}
+有人问：法名是不是要用藏文写在证书上？有人问：剪头发疼不疼？`,
+  opts:[{t:`在佛堂办皈依仪式`,e:{L:2,HA:3,M:2},fx(){act().filter(m=>S.turn-m.join<=12).forEach(m=>{m.c+=6;});return '';},r:`一绺一绺头发放进小盘子，烧掉的时候有点焦味。拿到法名的人一遍一遍地看那张纸。`},
+    {t:`先办六周的皈依学习班，再皈依`,e:{L:3,KN:2,B:4},fx(){act().filter(m=>S.turn-m.join<=12).forEach(m=>{m.c+=9;});return '';},r:`六周以后，有一个人说自己还没准备好。你说那就明年。其余的人皈依了，比你预期的更安静。`},
+    {t:`简单一点：周日共修后念三皈依`,e:{M:1,HA:1},r:`没有证书，没有剪发。念完以后，Hank给每个人发了一块饼干。`}]});
+const EL_QS=[`一个新来的工程师问：“如果没有‘我’，那是谁在轮回？”`,`一个从奥斯汀来的女孩问：“我一定要吃素吗？我爸是开烤肉店的。”`,`一位老太太指着护法殿问：“那个蓝色的、戴骷髅的，是魔鬼吗？”`,`一位天主教徒问：“我皈依以后，还能去望弥撒吗？”`,`一个大学生问：“为什么要对着一个人磕头？”`,`一个刚失业的人问：“你说一切都是空的。那我的房租呢？”`];
+E({id:'el_question',tag:`无尽 · 新人`,title:`一个问题`,rep:1,cd:6,w:5,cond:()=>EL(),
+  prep(){S.ctx={q:Math.floor(Math.random()*EL_QS.length)};return true;},
+  text:()=>`${EL_QS[C().q||0]}
+周日共修后，大家都在等你怎么回答。`,
+  opts:[{t:`从经论里答`,e:{KN:1,L:1},r:`你讲了一段，引了两处出处。对方点点头，回去查了半个晚上，下周带着三个新问题回来了。`},{t:`从自己的修行里答`,e:{HA:2,S:1},r:`你讲的是自己第一次遇到这个问题的时候。比引经据典短，但对方记住了。`},{t:`老实说：我也还在弄明白`,e:{M:1,T:1},r:`对方笑了，说这是在德州听过的最诚实的宗教回答。`}]});
+const EL_WX=[`龙卷风预警响了一下午。最后风暴擦着湖北岸过去了，掀走了停车场边的一排围栏，还有三面经幡。`,`一场冰雹，鸡蛋那么大。车顶全是坑，温室的玻璃碎了一半，佛堂的天窗裂了。`,`冻雨。电断了两天，水管冻裂。几位住在拖车房里的邻居没地方去。`,`一夜暴雨，湖水涨上来，淹到了草坪边上。路断了，周日没人进得来。`];
+E({id:'el_weather',tag:`无尽 · 天气`,title:`德州的天`,rep:1,cd:14,w:4,cond:()=>EL(),
+  prep(){S.ctx={v:Math.floor(Math.random()*EL_WX.length)};return true;},
+  text:()=>`${EL_WX[C().v||0]}
+修，要花钱；不修，也要花时间。`,
+  opts:[{t:`请人来修`,req:()=>S.D>=900,rq:`需要 $900`,e:{D:-900},r:`包工头是Chuy的表弟。他说给你打九折，因为“你们帮过我姨妈”。`},
+    {t:`全体成员周末一起动手`,e:{HA:4,B:8,D:-150},r:`修得不算漂亮，但每个人都说那是“我修的那一块”。`},
+    {t:`先去帮邻居`,e:{T:3,M:3,B:5,D:-300},r:`你们先去帮了邻居。自己的那份，晚了一个月才弄好，也没人抱怨。`}]});
+E({id:'el_passing',tag:`无尽 · 僧团`,title:`一位老成员`,rep:1,cd:18,w:3,cond:()=>EL()&&act().some(m=>(m.gen||m.ros)&&S.turn-m.join>=96),
+  prep(){const c=act().filter(m=>(m.gen||m.ros)&&S.turn-m.join>=96);if(!c.length)return false;const m=pick(c);S.ctx={m:m.id,n:m.n,y:2020+Math.floor(m.join/12)};return true;},
+  text:()=>`${C().n}走了。从${C().y}年起，${C().n}几乎每个周日都坐在同一个位置上。家人打电话来，问道场能不能做点什么。家里人信的不是佛教，但他们说：“这是走的人会想要的。”`,
+  opts:[{t:`全体僧团修四十九天`,e:{L:3,M:6,HA:4,B:6,D:-300},fx(){leave(mem(C().m),`安详离世`);return '';},r:`每第七天一场法会。第四十九天，家人第一次走进佛堂，坐在那个位置旁边。`},
+    {t:`按家人的传统办丧礼，你去念一段颇瓦`,e:{T:2,M:4},fx(){leave(mem(C().m),`安详离世`);return '';},r:`你在殡仪馆的角落里念完颇瓦，没有人觉得奇怪。家属后来说：“谢谢你来。”`},
+    {t:`周日共修时为他回向`,e:{M:2,HA:2},fx(){leave(mem(C().m),`安详离世`);return '';},r:`你念到这个名字时，佛堂里安静了一会儿。那个坐垫后来一直没人坐。`}]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:'成员人生',title:'想离开',qonly:1,
@@ -1529,7 +1559,7 @@ function settle0(){
   if(S.f.priyaCFO) inc*=1.05;
   if(roleOK('treasurer')) inc*=1.06;
   if(m===2||m===5) inc*=1.3;
-  inc*=DIFF().inc;
+  inc*=DIFF().inc;inc*=sizeGive();
   {const wm=wealthMul();inc*=wm;if(wm<1&&monthEnd)notes.push(`账上有 ${Math.round(runway())} 个月的开支，大家觉得道场不缺钱：随喜 ×${wm.toFixed(2)}。花掉它——建设、产业、宝物、或捐出去。`);}
   inc=Math.round(inc/WK); S.lastInc=inc*WK;
   lines.push(['本周日共修随喜',inc]);
@@ -1541,6 +1571,7 @@ function settle0(){
   if(S.f.market){const g=200+60*(LB.stalls||0);other+=g;lines.push(['周六集市摊位费',g]);}
   if(S.f.cattleGraze){other+=120;lines.push(['东牧场放牧费',120]);}
   LB.inc.forEach(([n,g])=>{other+=g;lines.push([n,g]);});
+  if(S.endow){const g=Math.round(S.endow*.03/12);other+=g;lines.push(['道场基金收益',g]);}
   if(S.f.huntLease&&(Mo()>=11||Mo()<=1)){other+=400;lines.push(['猎季租金',400]);}
   other+=entSettle(lines,notes);if(EL_INC()){other+=EL_INC();lines.push(['奥斯汀分院供养',EL_INC()]);}
   if(S.merch){const g=S.merch*300;other+=g;lines.push([`周边商品 ×${S.merch}`,g]);S.L-=S.merch*(tk('D5')?.2:.4);}
@@ -1549,7 +1580,7 @@ function settle0(){
   }
   // v6：和合 / 体力 / 学识 / 资粮 / 科技树
   S.HA+=(55-S.HA)*.05-Math.min(1.2,Math.max(0,act().length-14)*.04)-(S.B>=70?.4:0);
-  S.HP+=.4-(S.origin==='hispanic'?.05:0)-.22*(S.actsDone||[]).length-(S.B>=70?1.2:0)-(m>=6&&m<=9?.3:0)-(S.self<20?.2:0)-(Y()-2020)*.05;
+  S.HP+=.4-(S.origin==='hispanic'?.05:0)-.22*(S.actsDone||[]).length-(S.B>=70?1.2:0)-(m>=6&&m<=9?.3:0)-(S.self<20?.2:0)-(Y()-2020)*.07-Math.max(0,S.HP-80)*.04;
   S.KN-=S.KN*.004+.05-(LB.KNw||0); S.L+=(S.KN-40)/500;
   if(tk('A3'))S.B-=.8; if(tk('A5'))S.KN+=.3; if(tk('B2'))S.HP+=.4; if(tk('B5')){S.self+=.5;S.RT+=.1;} if(tk('B6'))S.M+=.1;
   if(tk('C1'))S.L+=.08; if(tk('C2'))S.T+=.15; if(tk('C3')){S.HP+=.3;S.HA+=.3;} if(tk('C6')){S.M+=.2;S.HA+=.2;} if(tk('D4'))S.RT+=.1; if(tk('D6'))S.HA+=.1;
@@ -1569,6 +1600,7 @@ function settle0(){
   S.L+=((tk('A4')?44:38)-S.L)*.06;if(tk('A6'))S.L+=.3;if(tk('C5'))S.L+=Math.min(1,act().filter(x=>x.done).length*.2); S.T+=(35-S.T)*.055; S.L-=Math.max(0,act().length-15)*.03;
   if(S.fac.garden) S.T+=.4;
   if(S.camera>0) S.camera--;
+  if(!(S.cheat&&S.cheat.noleave))churnTick(notes);
   if(S.D<0) S.stats.negD++; else S.stats.negD=0;
   // Chad 正统度
   if(S.f.chadCenter){S.auth.chad+=rnd(-.5,1.5);S.auth.you=S.auth.you*.9+(S.L*.6+S.RT*.2+S.stats.visits*2)*.1;}
@@ -1901,6 +1933,7 @@ function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(f.koraDone)o.push(`转山团的合影挂在走廊尽头，照片上少了一个人，因为他在拍照。`);
   if(f.rinpocheGone&&!f.yangsi)o.push(`Lobsang说，寻访转世的人已经出发了。`);
   if(f.democracy)o.push(`理事会还在开会。今年讨论的依然是停车场。`);
+  if((S.endow||0)>=20000)o.push(`道场基金每年付得起酥油灯、屋顶，还有一个闭关名额的费用。`);
   return o;}
 function epilogueHTML(){const o=epilogue();return o.length?`<div class="label" style="margin-top:12px">后来</div>${o.map(x=>`<p style="margin:4px 0">${esc(x)}</p>`).join('')}`:'';}
 
@@ -3453,7 +3486,8 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  const ew=Math.min(10,(S.endow||0)/5000);
+  return {samye:ew+S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:ew+S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f','结局预测'],['e','事件'],['p','人心'],['b','底账']];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">内参：游戏里通常看不到的数字。仅供住持本人阅读。</p>`;
@@ -3617,9 +3651,10 @@ function openBuild(){
   const cols=Math.min(window.innerWidth,560)>=470?2:1;const n=Math.max(1,Math.floor((avH()-230)/112))*cols;
   const can=c=>S.D>=cost_(c);let cards=[];
   if(cur==='f'){
-    cards=FAC.filter(f=>['stupa','wheels','garden'].includes(f.id)).map(f=>{const lv=S.fac[f.id];const max=f.max||1;const done=lv>=max;const ok=okc(f);const c=done?0:f.cost(lv);
+    cards=FAC.filter(f=>['stupa','wheels','garden'].includes(f.id)).map(f=>{const lv=facLv(f.id);const max=f.max||1;const done=lv>=max;const ok=okc(f);const c=done?0:f.cost(lv);
       return `<div class="f ${lv>0?'built':''}"><b>${f.n}${f.lv?` · ${f.lv[lv]}`:''}</b><span>${f.d}</span><div class="row"><span class="num">${done?'已完成':'$'+c.toLocaleString()}</span>${done?'':`<button class="btn ${ok&&can(c)?'':'ghost'}" data-b="${f.id}" ${ok&&can(c)?'':'disabled'}>${ok?(lv>0?'升级':'建造'):'未解锁'}</button>`}</div></div>`;});
     if(S.f.merchOK||S.f.brookeAlly) cards.push(`<div class="f"><b>周边商品</b><span>T恤、马克杯、“农舍风”佛珠。每件 +$300/月，纯度每月 −0.4。</span><div class="row"><span class="num">在售 ${S.merch} / 3</span><span style="display:flex;gap:6px"><button class="btn ghost" data-m="-1" ${S.merch?'':'disabled'}>下架</button><button class="btn" data-m="1" ${S.merch<3?'':'disabled'}>上架</button></span></div></div>`);
+    if(ch()>=3) cards.push(`<div class="f"><b>道场基金</b><span>把多余的钱放进一个取不出来的基金：每年 3% 的收益按月到账；十年结局和之后的日子都会记得它。</span><div class="row"><span class="num">已存 $${(S.endow||0).toLocaleString()}</span><span style="display:flex;gap:6px"><button class="btn ghost" data-endow="5000" ${S.D>=5000?'':'disabled'}>+$5,000</button><button class="btn" data-endow="20000" ${S.D>=20000?'':'disabled'}>+$20,000</button></span></div></div>`);
     if(S.f.armedEver) cards.push(`<div class="f"><b>安保志愿队</b><span>${S.f.armed?'Dale每周日坐在门口。':'安保队已解散。事件文本会记得。'}</span><div class="row"><span></span><button class="btn ghost" data-sec="1">${S.f.armed?'解散':'重新组建'}</button></div></div>`);
   }
   if(cur==='r') cards=Object.entries(RT).map(([k,r])=>{const ok=okc(r);const m=r.min;return `<div class="f"><b>${r.n} · 至少${m[0]}×${m[1]}格</b><span>${r.d}</span><div class="row"><span class="num">$${r.cost}/格</span><span style="display:flex;gap:6px"><button class="btn ghost" data-room="${k}" ${ok?'':'disabled'}>自己画</button><button class="btn" data-autoroom="${k}" ${ok?'':'disabled'}>自动建</button></span></div></div>`;});
@@ -3633,6 +3668,7 @@ function openBuild(){
     else if(t.dataset.autoroom){if(autoRoom(t.dataset.autoroom)){log(`承包商建好了${RT[t.dataset.autoroom].n}。`);save();render();openBuild();}else{t.textContent='钱或空地不够';}}
     else if(t.dataset.b) build(t.dataset.b);
     else if(t.dataset.m){S.merch=clamp(S.merch+Number(t.dataset.m),0,3);if(S.merch===1&&Number(t.dataset.m)>0)log('第一件T恤上架了。');save();render();openBuild();}
+    else if(t.dataset.endow){const a=Number(t.dataset.endow);if(S.D>=a){S.D-=a;S.endow=(S.endow||0)+a;log(`道场基金存入 $${a.toLocaleString()}`);}save();render();openBuild();}
     else if(t.dataset.sec){S.f.armed=!S.f.armed;log(S.f.armed?'安保志愿队重新组建。':'安保志愿队解散了。');save();render();openBuild();}
     else if(t.dataset.x) close();};
   function close(){ovEl.innerHTML='';ovEl.onclick=null;UI.ovRe=null;}
@@ -3642,7 +3678,7 @@ function openMenu(){
   ovEl.innerHTML=`<div class="ov"><div class="box"><h2>菜单</h2>
   <p class="hint">${esc(S.name)} · ${esc(ORIGINS[S.origin].n)} · ${SM[S.school]?SM[S.school].n:SCHOOLS[S.school]} · ${esc(S.center)}${S.f.debugRun?' · 调试局':''}</p>
   <div class="go"><button class="btn" data-x="1">回到游戏</button><button class="iconbtn" data-set="1">游戏参数</button>${langBtns('data-lang')}<button class="btn ghost" data-r="1">放弃本局，重新开始</button></div>
-  <p class="hint" style="margin-top:14px">玩法提示：低稀释度带来人流与供养，但会掉纯度并吸引“游客佛教徒”；成员承诺度会向他们偏好的深度靠拢。超过18个月没有仁波切来访，纯度会持续下滑。倦怠≥70或体力<30时各少一个行动格。和合低时成员更容易疏远。</p></div></div>`;
+  <p class="hint" style="margin-top:14px">玩法提示：周日共修越浅（深度越低），人流与供养越多，但会掉纯度并吸引“游客佛教徒”；成员承诺度会向他们偏好的深度靠拢。超过18个月没有仁波切来访，纯度会持续下滑。倦怠≥70或体力<30时各少一个行动格。和合低时成员更容易疏远。</p></div></div>`;
   ovEl.onclick=e=>{const t=e.target.closest('button');if(!t){if(e.target.classList.contains('ov')){ovEl.innerHTML='';ovEl.onclick=null;}return;}
     if(t.dataset.r){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
     else if(t.dataset.lang){swLang(t.dataset.lang);}
@@ -3662,7 +3698,7 @@ function renderEnd(){
       <div><span>加行圆满</span><span>${done.length}</span></div><div><span>累计出席</span><span>${S.stats.totalAttend.toLocaleString()}</span></div>
       <div><span>仁波切来访</span><span>${S.stats.visits} 次</span></div><div><span>功德</span><span>${S.M>=60?'深厚':S.M>=30?'有一些':'看不见'}</span></div>
       <div><span>和合</span><span>${Math.round(S.HA)}</span></div><div><span>学识</span><span>${Math.round(S.KN)}</span></div>
-      <div><span>地块</span><span>${S.parcels.length} / ${PARCELS.length}</span></div><div><span>法宝</span><span>${Object.keys(S.tre||{}).length}（供奉 ${treFx().shown}）</span></div><div><span>合影</span><span>${(S.album||[]).length} 张</span></div></div>${S.f.debugRun?'<p class="label">这是一局调试局。</p>':''}`;
+      <div><span>地块</span><span>${S.parcels.length} / ${PARCELS.length}</span></div><div><span>法宝</span><span>${Object.keys(S.tre||{}).length}（供奉 ${treFx().shown}）</span></div><div><span>道场基金</span><span>${fmt$(S.endow||0)}</span></div><div><span>合影</span><span>${(S.album||[]).length} 张</span></div></div>${S.f.debugRun?'<p class="label">这是一局调试局。</p>':''}`;
   if(cur==='p') body=pager('endp',act().sort((a,b)=>b.c-a.c),Math.max(8,Math.floor((avH()-240)/76)*7),m=>`<figure>${pimg(traitsFor(m))}<figcaption>${esc(m.n.split(' ')[0])}</figcaption></figure>`,'<p class="hint">没有人了。</p>','cast');
   if(cur==='a') body=pager('enda',Object.entries(ACH),Math.max(2,Math.floor((avH()-240)/66))*2,([k2,a])=>`<div class="${S.ach[k2]!=null?'got':''}"><b>${a[0]}</b>${a[1]}</div>`,'','ach');
   ovEl.innerHTML=`<div class="ov"><div class="box ending">${subtabs('end',tabs)}<div class="endb">${body}</div>
@@ -3959,7 +3995,7 @@ function openMenu(){
   ovEl.innerHTML=`<div class="ov"><div class="box"><h2>菜单</h2>
   <p class="hint">${esc(S.name)} · ${esc(ORIGINS[S.origin].n)} · ${SM[S.school]?SM[S.school].n:SCHOOLS[S.school]} · ${esc(S.center)}${S.f.debugRun?' · 调试局':''}</p>
   <div class="go"><button class="btn" data-x="1">回到游戏</button><button class="iconbtn" data-help="1">怎么玩</button><button class="iconbtn" data-set="1">游戏参数</button>${langBtns('data-lang')}<button class="btn ghost" data-r="1">放弃本局，重新开始</button></div>
-  <p class="hint" style="margin-top:14px">玩法提示：低稀释度带来人流与供养，但会掉纯度并吸引“游客佛教徒”；成员承诺度会向他们偏好的深度靠拢。超过18个月没有仁波切来访，纯度会持续下滑。倦怠≥70或体力<30时各少一个行动格。和合低时成员更容易疏远。</p></div></div>`;
+  <p class="hint" style="margin-top:14px">玩法提示：周日共修越浅（深度越低），人流与供养越多，但会掉纯度并吸引“游客佛教徒”；成员承诺度会向他们偏好的深度靠拢。超过18个月没有仁波切来访，纯度会持续下滑。倦怠≥70或体力<30时各少一个行动格。和合低时成员更容易疏远。</p></div></div>`;
   ovEl.onclick=e=>{const t=e.target.closest('button');if(!t){if(e.target.classList.contains('ov')){ovEl.innerHTML='';ovEl.onclick=null;}return;}
     if(t.dataset.r){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
     else if(t.dataset.help){ovEl.onclick=null;openHelp();}
@@ -4062,10 +4098,10 @@ app.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.cont
 
 /* 无尽模式发愿：目标递增 */
 GOALS.push(
-  {id:'g_e_mem',t:4,rep:1,n:'更多的人',d:'成员达到更多',cond:()=>!!S.endless,prog:()=>`${act().length}/${S.gx.mem}`,done:()=>act().length>=S.gx.mem,rw:{T:1,D:300},bump:()=>{S.gx.mem+=8;}},
-  {id:'g_e_inc',t:4,rep:1,n:'收支',d:'产业月收入达到目标',cond:()=>!!S.endless,prog:()=>`$${entOpen().reduce((a,id)=>a+entIncome(id),0).toLocaleString()}/$${S.gx.inc.toLocaleString()}`,done:()=>entOpen().reduce((a,id)=>a+entIncome(id),0)>=S.gx.inc,rw:{TP:2},bump:()=>{S.gx.inc=Math.round(S.gx.inc*1.5);}},
+  {id:'g_e_mem',t:4,rep:1,n:'更多的人',d:'成员达到更多',cond:()=>!!S.endless,prog:()=>`${act().length}/${S.gx.mem}`,done:()=>act().length>=S.gx.mem,rw:{T:1,D:300},bump:()=>{S.gx.mem=Math.min(180,S.gx.mem+8);}},
+  {id:'g_e_inc',t:4,rep:1,n:'收支',d:'产业月收入达到目标',cond:()=>!!S.endless,prog:()=>`$${entOpen().reduce((a,id)=>a+entIncome(id),0).toLocaleString()}/$${S.gx.inc.toLocaleString()}`,done:()=>entOpen().reduce((a,id)=>a+entIncome(id),0)>=S.gx.inc,rw:{TP:2},bump:()=>{S.gx.inc=Math.min(10000,Math.round(S.gx.inc*1.5));}},
   {id:'g_e_ent',t:4,rep:1,n:'产业',d:'开张的产业达到目标',cond:()=>!!S.endless,prog:()=>`${entOpen().length}/${S.gx.ent}`,done:()=>entOpen().length>=S.gx.ent,rw:{HA:3},bump:()=>{S.gx.ent=Math.min(10,S.gx.ent+1);}},
-  {id:'g_e_ren',t:4,rep:1,n:'名望',d:'名望达到目标',cond:()=>!!S.endless,prog:()=>`${Math.round(S.renown)}/${S.gx.ren}`,done:()=>S.renown>=S.gx.ren,rw:{L:1,M:5},bump:()=>{S.gx.ren=Math.round(S.gx.ren*1.6);}}
+  {id:'g_e_ren',t:4,rep:1,n:'名望',d:'名望达到目标',cond:()=>!!S.endless,prog:()=>`${Math.round(S.renown)}/${S.gx.ren}`,done:()=>S.renown>=S.gx.ren,rw:{L:1,M:5},bump:()=>{S.gx.ren=Math.min(8000,Math.round(S.gx.ren*1.6));}}
 );
 function goalsCheck(notes){
   v8Init();entInit();const hit=[];
@@ -4155,7 +4191,8 @@ const WIKI_CONCEPTS=[
   ['功德','看不见的东西。放生、临终关怀、社区服务、节日法会会积累，上限 100，每周流失 2.2%。影响修学速度、结局与密勒日巴式闭关。'],
   ['捐款人疲劳','义卖、有偿静修营、直播随喜，连续做回报递减（每做一次 −35% 叠加，每周恢复四分之一）。隔几周做一次最划算。'],
   ['富足效应','账上超过 12 个月开支时，周日随喜和筹款按 √(12/月数) 递减，最低 45%。钱是拿来用的。'],
-  ['规模成本','超过 20 位成员后，每多一人，所有人的承诺度漂移 −0.015。大道场需要角色、集体修法与和合来维持。'],
+  ['道场基金','第三章起在“建造 · 特殊”里。存进去的钱取不出来，每年 3% 按月入账，不受富足效应影响；结局评分里桑耶和桥两项会加分（最多 +10）。'],
+  ['规模成本','超过 20 位成员后，每多一人，所有人的承诺度漂移 −0.015；超过 60 人后，每个人的随喜也会少一点（×√(60/人数)，最低 60%）。大道场需要角色、集体修法与和合来维持。'],
   ['舆论热度','媒体关注度。放大事件对信任的影响，带来访客与新人，也带来风险。会自然冷却。'],
   ['仁波切信任','上师对你的信任。自修、闭关、如法会升；自修太少会降。影响灌顶与认证。'],
   ['承诺度','每位成员对道场的投入。向他偏好的深度靠拢；低于 25 持续太久会想离开。'],
@@ -4164,7 +4201,7 @@ const WIKI_CONCEPTS=[
   ['容量与出席','佛堂房间面积 × 0.8 = 座位。出席受容量、承诺度、访客（车位）限制。'],
   ['通路','建筑和需要路的场地必须经由碎石路或小径连到最右侧的柏油公路，否则不起作用。'],
   ['税与开支','地产税按建筑面积和地块数算，501(c)(3) 后减半。成员多了有杂费，超过 30 人要请管理员。'],
-  ['发愿','本周页上的三个当前目标。完成有奖励，自动补充。无尽模式里目标会不断抬高。'],
+  ['发愿','本周页上的三个当前目标。完成有奖励，自动补充。无尽模式里目标会不断抬高，直到上限（180 位成员、每月 $10,000、名望 8,000）。'],
   ['职事','司库、知客、维那、典座。承诺度 ≥50 的成员可担任，各有加成，并让他更稳定。'],
   ['产业','经营页里的生意：先投钱筹备，开张后每月有收入、维护费和数值影响。可定价、指派经理、整修、暂停。'],
   ['名望','按成员、产业、纯度与信任逐月累积的分数。每到里程碑有一笔供养和资粮。无尽模式的主要计分。'],
@@ -4864,6 +4901,12 @@ function wealthMul(){const r=runway();return r>12?Math.max(.45,Math.sqrt(12/r)):
 function scaleDrag(){return Math.max(0,act().length-20)*.015;}
 /* v26：被动加成边际递减——超出 k 的部分只算 35%（布局与宝物的传承/信任） */
 function dimR(x,k){return x>k?k+(x-k)*.35:x;}
+/* v27：大道场里每个人给得少一点（责任分散）：60 人以上随喜 ×√(60/人数)，最低 0.6 */
+function sizeGive(){const n=act().length;return n>60?Math.max(.6,Math.sqrt(60/n)):1;}
+/* v27：自然流动——德州人搬家很勤，普通成员每月有小概率搬走 */
+const MOVES=['搬去奥斯汀上班了','跟着家人搬去了达拉斯','回加州了','去外州读研究生了','换了夜班，周日来不了了','孩子上了高中，周末都在打球'];
+function churnTick(notes){const mgr=new Set(Object.values(S.ent||{}).map(e=>e.mgr));act().forEach(m=>{if(!(m.gen||m.ros)||hasRole(m)||mgr.has(m.id)||(m.away&&m.away>S.turn))return;const p=.003+Math.max(0,60-m.c)/60*.012-(m.done?.002:0);if(chance(p)){const why=pick(MOVES);leave(m,why);notes.push(`${m.n}${why}。`);}});}
+
 /* 4. 新行动：对外布施——把多余的钱变成信任与功德 */
 ACTS.push({id:'dana',c:'社区',n:'对外布施',d:'把存款的一成（$500–5,000）捐给食物银行、灾区或西藏的学校。信任+、功德++、纯度略+',ok:()=>S.D>=2500,
   run(){const g=clamp(Math.round(S.D*.1/50)*50,500,5000);S.D-=g/ACT_SCALE;S.T+=1.5+g/1500;S.M+=3+g/800;S.L+=.5;S.B+=2;S.stats.dana=(S.stats.dana||0)+g;
@@ -6591,8 +6634,9 @@ const FAC=[
   {id:'protector',n:"Protector Shrine · Mahakala Hall",cost:()=>4000,d:"Lineage slowly +; a risk to public image",ok:()=>ch()>=3},
   {id:'guest',n:"Guest Room",cost:()=>3500,d:"Rinpoche visit costs −30%",ok:()=>ch()>=3},
 ];
+function facLv(id){const n=IT[id]&&id!=='stupa'&&S.layout?(S.layout.items.concat(S.layout.tray).some(i=>i.t===id)?1:0):0;return Math.max(S.fac[id]||0,n);} // v27：放进仓库的也算建过
 function build(id){
-  const f=FAC.find(x=>x.id===id); const lv=S.fac[id]; const c=f.cost(lv);
+  const f=FAC.find(x=>x.id===id); const lv=facLv(id); if(lv>=(f.max||1)) return; const c=f.cost(lv);
   if(S.D<cost_(c)) return;
   S.D-=cost_(c); S.fac[id]=lv+1;
   if(IT[id]&&(id!=='stupa'||lv===0)){const ok=placeOrTray(id);if(!ok)log(`No free space for ${IT[id].n} yet, so it went into storage.`);}
@@ -7187,10 +7231,10 @@ const CV=27; // 内容版本。新增的定时事件写进 CV_EV，旧存档读�
 const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[],27:['ethan_wedding','nyungne','tx_250']};
 function backfill(){
   if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
-  const from=S.cv||24;S.cv=CV;const ids=[];
+  const from=S.cv||(CV_EV[25].some(id=>S.seen[id]!=null)||S.f.rinpocheGone?25:24);S.cv=CV;const ids=[];
   for(const v in CV_EV)if(Number(v)>from)CV_EV[v].forEach(id=>{const ev=EV[id];if(!ev||!ev.at||S.seen[id]!=null)return;const t=ds2t(ev.at);if(t>S.turn||(t===S.turn&&S.wk===0&&S.phase==='plan'))return;if(S.endless&&['final','designate'].includes(id))return;if(S.queue.some(q=>q.id===id))return;ids.push(id);});
   ids.sort((a,b)=>ds2t(EV[a].at)-ds2t(EV[b].at));
-  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?3:2; // 临近十年结局：每月三件，仁波切的线放最前
+  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?Math.min(4,Math.max(3,Math.ceil(ids.length/Math.max(1,120-S.turn)))):2; // 临近十年结局：每月三件，仁波切的线放最前
   if(late)['parinirvana','tsurphu_call'].forEach(id=>{const i=ids.indexOf(id);if(i>0){ids.splice(i,1);ids.unshift(id);}});
   ids.forEach((id,i)=>S.queue.push({id,at:S.turn+Math.floor(i/per),ctx:{bf:1}}));
   if(S.endless&&S.seen.el_after==null&&!S.queue.some(q=>q.id==='el_after'))S.queue.push({id:'el_after',at:S.turn+Math.ceil(ids.length/per),ctx:null});
@@ -7280,6 +7324,35 @@ Dale has already pressed his old uniform. Some members feel there are too many f
   opts:[{t:`Walk with the US flag, the Texas flag and prayer flags together`,e:{T:4,H:4,c:{dale:6,tenzin:-2}},r:`The group walks down Austin Avenue. Some people along the curb applaud, some frown, and a small child keeps running after the prayer flags. Dale marches at the front without missing a step.`},
     {t:`Have Dale read the Declaration at Sunday practice, then dedicate the merit`,req:()=>has('dale'),rq:`Requires Dale`,e:{T:2,L:1,M:2,c:{dale:8}},r:`Dale pauses at "Life, Liberty and the pursuit of Happiness." At the dedication you say "all sentient beings" more slowly than usual.`},
     {t:`The center stays out of it`,e:{L:1,T:-1,c:{dale:-4}},r:`You say the center doesn't take sides. Dale goes on his own and comes back with a little flag for everyone. Nobody throws theirs away.`}]});
+
+/* ===== v27 · 无尽模式的可重复事件（变体在 prep 里选定，存进 ctx，渲染时不会变） ===== */
+E({id:'el_refuge',tag:`Endless · Lineage`,title:`Refuge Day`,rep:1,cd:12,w:6,cond:()=>EL()&&act().filter(m=>S.turn-m.join<=12).length>=3,
+  prep(){S.ctx={n:act().filter(m=>S.turn-m.join<=12).length};return true;},
+  text:()=>`This year ${C().n} people have asked to take refuge. Traditionally a small lock of hair is snipped and a refuge name given. ${S.f.designated==='lobsang'?'Lobsang says he will preside.':'They have asked you to preside.'}
+Someone asks whether the name will be written in Tibetan on a certificate. Someone asks whether the haircut hurts.`,
+  opts:[{t:`Hold the refuge ceremony in the shrine room`,e:{L:2,HA:3,M:2},fx(){act().filter(m=>S.turn-m.join<=12).forEach(m=>{m.c+=6;});return '';},r:`Lock by lock the hair goes into a little dish, and burns with a faint singed smell. The people with new names keep looking at their slips of paper.`},
+    {t:`Run a six-week refuge class first, then the ceremony`,e:{L:3,KN:2,B:4},fx(){act().filter(m=>S.turn-m.join<=12).forEach(m=>{m.c+=9;});return '';},r:`After six weeks one person says they aren't ready yet. You tell them next year, then. The rest take refuge, more quietly than you expected.`},
+    {t:`Keep it simple: recite the three refuges after Sunday practice`,e:{M:1,HA:1},r:`No certificates, no haircuts. Afterward Hank hands everyone a cookie.`}]});
+const EL_QS=[`A newly arrived engineer asks: "If there's no self, who gets reborn?"`,`A young woman from Austin asks: "Do I have to be vegetarian? My dad runs a barbecue joint."`,`An old woman points at the protector shrine: "The blue one wearing skulls. Is that a devil?"`,`A Catholic asks: "If I take refuge, can I still go to Mass?"`,`A college student asks: "Why bow down to a person?"`,`A man who just lost his job asks: "You say everything is empty. What about my rent?"`];
+E({id:'el_question',tag:`Endless · Newcomers`,title:`A Question`,rep:1,cd:6,w:5,cond:()=>EL(),
+  prep(){S.ctx={q:Math.floor(Math.random()*EL_QS.length)};return true;},
+  text:()=>`${EL_QS[C().q||0]}
+After Sunday practice, everyone waits to hear how you answer.`,
+  opts:[{t:`Answer from the texts`,e:{KN:1,L:1},r:`You talk for a while and cite two sources. They nod, spend half the night looking them up, and come back the next week with three new questions.`},{t:`Answer from your own practice`,e:{HA:2,S:1},r:`You tell them about the first time you ran into the same question. It is shorter than quoting scripture, and it stays with them.`},{t:`Be honest: I'm still working that out`,e:{M:1,T:1},r:`They laugh and say it's the most honest religious answer they have heard in Texas.`}]});
+const EL_WX=[`The tornado sirens go on and off all afternoon. In the end the storm skirts the north shore of the lake, taking a run of fence by the parking lot and three prayer flags with it.`,`Hail the size of eggs. Every car roof is dented, half the greenhouse glass is broken and the shrine room skylight is cracked.`,`Freezing rain. The power is out for two days and the pipes burst. Some neighbors who live in trailers have nowhere to go.`,`A night of downpour. The lake rises up to the edge of the lawn. The road is cut and nobody can get in on Sunday.`];
+E({id:'el_weather',tag:`Endless · Weather`,title:`Texas Weather`,rep:1,cd:14,w:4,cond:()=>EL(),
+  prep(){S.ctx={v:Math.floor(Math.random()*EL_WX.length)};return true;},
+  text:()=>`${EL_WX[C().v||0]}
+Fixing it costs money; not fixing it costs time.`,
+  opts:[{t:`Hire someone to fix it`,req:()=>S.D>=900,rq:`Requires $900`,e:{D:-900},r:`The contractor is Chuy's cousin. He gives you ten percent off "because you helped my aunt."`},
+    {t:`The whole sangha pitches in over the weekend`,e:{HA:4,B:8,D:-150},r:`It isn't pretty, but everyone points out "the bit I fixed."`},
+    {t:`Help the neighbors first`,e:{T:3,M:3,B:5,D:-300},r:`You help the neighbors first. Your own repairs take an extra month, and nobody complains.`}]});
+E({id:'el_passing',tag:`Endless · Sangha`,title:`An Old Member`,rep:1,cd:18,w:3,cond:()=>EL()&&act().some(m=>(m.gen||m.ros)&&S.turn-m.join>=96),
+  prep(){const c=act().filter(m=>(m.gen||m.ros)&&S.turn-m.join>=96);if(!c.length)return false;const m=pick(c);S.ctx={m:m.id,n:m.n,y:2020+Math.floor(m.join/12)};return true;},
+  text:()=>`${C().n} has died. Since ${C().y}, ${C().n} sat in the same place almost every Sunday. The family calls to ask whether the center can do something. They aren't Buddhist, but they say, "This is what they would have wanted."`,
+  opts:[{t:`The whole sangha practices for forty-nine days`,e:{L:3,M:6,HA:4,B:6,D:-300},fx(){leave(mem(C().m),`passed away peacefully`);return '';},r:`A puja every seventh day. On the forty-ninth, the family walk into the shrine room for the first time and sit beside that place.`},
+    {t:`A funeral in the family's tradition; you go and recite phowa`,e:{T:2,M:4},fx(){leave(mem(C().m),`passed away peacefully`);return '';},r:`You recite phowa in a corner of the funeral home and nobody thinks it odd. Afterward one of the family says, "Thank you for coming."`},
+    {t:`Dedicate the merit to him at Sunday practice`,e:{M:2,HA:2},fx(){leave(mem(C().m),`passed away peacefully`);return '';},r:`When you say the name, the shrine room goes quiet for a moment. Nobody sits on that cushion after that.`}]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Members' Lives",title:"Wants to Leave",qonly:1,
@@ -7466,7 +7539,7 @@ function settle0(){
   if(S.f.priyaCFO) inc*=1.05;
   if(roleOK('treasurer')) inc*=1.06;
   if(m===2||m===5) inc*=1.3;
-  inc*=DIFF().inc;
+  inc*=DIFF().inc;inc*=sizeGive();
   {const wm=wealthMul();inc*=wm;if(wm<1&&monthEnd)notes.push(`You have ${Math.round(runway())} months of expenses in the bank, and people feel the center doesn't need their money: offerings ×${wm.toFixed(2)}. Spend it — on building, ventures, treasures, or giving it away.`);}
   inc=Math.round(inc/WK); S.lastInc=inc*WK;
   lines.push(["This Sunday's offerings",inc]);
@@ -7478,6 +7551,7 @@ function settle0(){
   if(S.f.market){const g=200+60*(LB.stalls||0);other+=g;lines.push(["Saturday market stall fees",g]);}
   if(S.f.cattleGraze){other+=120;lines.push(["East pasture grazing fee",120]);}
   LB.inc.forEach(([n,g])=>{other+=g;lines.push([n,g]);});
+  if(S.endow){const g=Math.round(S.endow*.03/12);other+=g;lines.push(["Endowment income",g]);}
   if(S.f.huntLease&&(Mo()>=11||Mo()<=1)){other+=400;lines.push(["Hunting season lease",400]);}
   other+=entSettle(lines,notes);if(EL_INC()){other+=EL_INC();lines.push(["Austin branch offerings",EL_INC()]);}
   if(S.merch){const g=S.merch*300;other+=g;lines.push([`Merch ×${S.merch}`,g]);S.L-=S.merch*(tk('D5')?.2:.4);}
@@ -7486,7 +7560,7 @@ function settle0(){
   }
   // v6：和合 / 体力 / 学识 / 资粮 / 科技树
   S.HA+=(55-S.HA)*.05-Math.min(1.2,Math.max(0,act().length-14)*.04)-(S.B>=70?.4:0);
-  S.HP+=.4-(S.origin==='hispanic'?.05:0)-.22*(S.actsDone||[]).length-(S.B>=70?1.2:0)-(m>=6&&m<=9?.3:0)-(S.self<20?.2:0)-(Y()-2020)*.05;
+  S.HP+=.4-(S.origin==='hispanic'?.05:0)-.22*(S.actsDone||[]).length-(S.B>=70?1.2:0)-(m>=6&&m<=9?.3:0)-(S.self<20?.2:0)-(Y()-2020)*.07-Math.max(0,S.HP-80)*.04;
   S.KN-=S.KN*.004+.05-(LB.KNw||0); S.L+=(S.KN-40)/500;
   if(tk('A3'))S.B-=.8; if(tk('A5'))S.KN+=.3; if(tk('B2'))S.HP+=.4; if(tk('B5')){S.self+=.5;S.RT+=.1;} if(tk('B6'))S.M+=.1;
   if(tk('C1'))S.L+=.08; if(tk('C2'))S.T+=.15; if(tk('C3')){S.HP+=.3;S.HA+=.3;} if(tk('C6')){S.M+=.2;S.HA+=.2;} if(tk('D4'))S.RT+=.1; if(tk('D6'))S.HA+=.1;
@@ -7506,6 +7580,7 @@ function settle0(){
   S.L+=((tk('A4')?44:38)-S.L)*.06;if(tk('A6'))S.L+=.3;if(tk('C5'))S.L+=Math.min(1,act().filter(x=>x.done).length*.2); S.T+=(35-S.T)*.055; S.L-=Math.max(0,act().length-15)*.03;
   if(S.fac.garden) S.T+=.4;
   if(S.camera>0) S.camera--;
+  if(!(S.cheat&&S.cheat.noleave))churnTick(notes);
   if(S.D<0) S.stats.negD++; else S.stats.negD=0;
   // Chad 正统度
   if(S.f.chadCenter){S.auth.chad+=rnd(-.5,1.5);S.auth.you=S.auth.you*.9+(S.L*.6+S.RT*.2+S.stats.visits*2)*.1;}
@@ -7838,6 +7913,7 @@ function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(f.koraDone)o.push(`The kora group photo hangs at the end of the corridor. One person is missing from it: the one holding the camera.`);
   if(f.rinpocheGone&&!f.yangsi)o.push(`Lobsang says the search party for the reincarnation has already set out.`);
   if(f.democracy)o.push(`The board still meets. This year's topic is, once again, the parking lot.`);
+  if((S.endow||0)>=20000)o.push(`The endowment pays for the lamps, the roof and one retreat place a year.`);
   return o;}
 function epilogueHTML(){const o=epilogue();return o.length?`<div class="label" style="margin-top:12px">Afterwards</div>${o.map(x=>`<p style="margin:4px 0">${esc(x)}</p>`).join('')}`:'';}
 
@@ -9391,7 +9467,8 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  const ew=Math.min(10,(S.endow||0)/5000);
+  return {samye:ew+S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:ew+S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f',"Fates"],['e',"Events"],['p',"Hearts"],['b',"Ledger"]];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">Intel: numbers the game usually keeps out of sight. For the Abbot's eyes only.</p>`;
@@ -9555,9 +9632,10 @@ function openBuild(){
   const cols=Math.min(window.innerWidth,560)>=470?2:1;const n=Math.max(1,Math.floor((avH()-230)/112))*cols;
   const can=c=>S.D>=cost_(c);let cards=[];
   if(cur==='f'){
-    cards=FAC.filter(f=>['stupa','wheels','garden'].includes(f.id)).map(f=>{const lv=S.fac[f.id];const max=f.max||1;const done=lv>=max;const ok=okc(f);const c=done?0:f.cost(lv);
+    cards=FAC.filter(f=>['stupa','wheels','garden'].includes(f.id)).map(f=>{const lv=facLv(f.id);const max=f.max||1;const done=lv>=max;const ok=okc(f);const c=done?0:f.cost(lv);
       return `<div class="f ${lv>0?'built':''}"><b>${f.n}${f.lv?` · ${f.lv[lv]}`:''}</b><span>${f.d}</span><div class="row"><span class="num">${done?"Done":'$'+c.toLocaleString()}</span>${done?'':`<button class="btn ${ok&&can(c)?'':'ghost'}" data-b="${f.id}" ${ok&&can(c)?'':'disabled'}>${ok?(lv>0?"Upgrade":"Build"):"Locked"}</button>`}</div></div>`;});
     if(S.f.merchOK||S.f.brookeAlly) cards.push(`<div class="f"><b>Merchandise</b><span>T-shirts, mugs, "farmhouse-style" malas. Each +$300/month, Lineage −0.4/month.</span><div class="row"><span class="num">On sale ${S.merch} / 3</span><span style="display:flex;gap:6px"><button class="btn ghost" data-m="-1" ${S.merch?'':'disabled'}>Pull one</button><button class="btn" data-m="1" ${S.merch<3?'':'disabled'}>Add one</button></span></div></div>`);
+    if(ch()>=3) cards.push(`<div class="f"><b>Center Endowment</b><span>Put surplus money into a fund you can't withdraw from: 3% a year comes back monthly, and the ten-year ending (and the years after) remember it.</span><div class="row"><span class="num">Endowed $${(S.endow||0).toLocaleString()}</span><span style="display:flex;gap:6px"><button class="btn ghost" data-endow="5000" ${S.D>=5000?'':'disabled'}>+$5,000</button><button class="btn" data-endow="20000" ${S.D>=20000?'':'disabled'}>+$20,000</button></span></div></div>`);
     if(S.f.armedEver) cards.push(`<div class="f"><b>Volunteer Security</b><span>${S.f.armed?"Dale sits by the door every Sunday.":"The security team has disbanded. The event text will remember."}</span><div class="row"><span></span><button class="btn ghost" data-sec="1">${S.f.armed?"Disband":"Re-form"}</button></div></div>`);
   }
   if(cur==='r') cards=Object.entries(RT).map(([k,r])=>{const ok=okc(r);const m=r.min;return `<div class="f"><b>${r.n} · at least ${m[0]}×${m[1]} tiles</b><span>${r.d}</span><div class="row"><span class="num">$${r.cost}/tile</span><span style="display:flex;gap:6px"><button class="btn ghost" data-room="${k}" ${ok?'':'disabled'}>Draw it</button><button class="btn" data-autoroom="${k}" ${ok?'':'disabled'}>Auto-build</button></span></div></div>`;});
@@ -9571,6 +9649,7 @@ function openBuild(){
     else if(t.dataset.autoroom){if(autoRoom(t.dataset.autoroom)){log(`The contractor finished the ${RT[t.dataset.autoroom].n}.`);save();render();openBuild();}else{t.textContent="Not enough money or space";}}
     else if(t.dataset.b) build(t.dataset.b);
     else if(t.dataset.m){S.merch=clamp(S.merch+Number(t.dataset.m),0,3);if(S.merch===1&&Number(t.dataset.m)>0)log("The first T-shirt is on sale.");save();render();openBuild();}
+    else if(t.dataset.endow){const a=Number(t.dataset.endow);if(S.D>=a){S.D-=a;S.endow=(S.endow||0)+a;log(`Added to the center endowment: $${a.toLocaleString()}`);}save();render();openBuild();}
     else if(t.dataset.sec){S.f.armed=!S.f.armed;log(S.f.armed?"The volunteer security team is back together.":"The volunteer security team has disbanded.");save();render();openBuild();}
     else if(t.dataset.x) close();};
   function close(){ovEl.innerHTML='';ovEl.onclick=null;UI.ovRe=null;}
@@ -9580,7 +9659,7 @@ function openMenu(){
   ovEl.innerHTML=`<div class="ov"><div class="box"><h2>Menu</h2>
   <p class="hint">${esc(S.name)} · ${esc(ORIGINS[S.origin].n)} · ${SM[S.school]?SM[S.school].n:SCHOOLS[S.school]} · ${esc(S.center)}${S.f.debugRun?" · debug run":''}</p>
   <div class="go"><button class="btn" data-x="1">Back to game</button><button class="iconbtn" data-set="1">Settings</button>${langBtns('data-lang')}<button class="btn ghost" data-r="1">Abandon this game and restart</button></div>
-  <p class="hint" style="margin-top:14px">Tips: low dilution brings crowds and donations, but erodes Lineage and attracts "tourist Buddhists"; members drift toward the depth they prefer. Go more than 18 months without a Rinpoche visit and Lineage keeps sliding. Burnout ≥70 or Vitality <30 each cost you one action slot. Low Harmony makes members drift away.</p></div></div>`;
+  <p class="hint" style="margin-top:14px">Tips: shallow Sundays (low depth) bring crowds and donations, but erode Lineage and attract "tourist Buddhists"; members drift toward the depth they prefer. Go more than 18 months without a Rinpoche visit and Lineage keeps sliding. Burnout ≥70 or Vitality <30 each cost you one action slot. Low Harmony makes members drift away.</p></div></div>`;
   ovEl.onclick=e=>{const t=e.target.closest('button');if(!t){if(e.target.classList.contains('ov')){ovEl.innerHTML='';ovEl.onclick=null;}return;}
     if(t.dataset.r){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
     else if(t.dataset.lang){swLang(t.dataset.lang);}
@@ -9600,7 +9679,7 @@ function renderEnd(){
       <div><span>Ngöndro completed</span><span>${done.length}</span></div><div><span>Total attendance</span><span>${S.stats.totalAttend.toLocaleString()}</span></div>
       <div><span>Rinpoche visits</span><span>${S.stats.visits}</span></div><div><span>Merit</span><span>${S.M>=60?"Deep":S.M>=30?"Some":"Invisible"}</span></div>
       <div><span>Harmony</span><span>${Math.round(S.HA)}</span></div><div><span>Learning</span><span>${Math.round(S.KN)}</span></div>
-      <div><span>Parcels</span><span>${S.parcels.length} / ${PARCELS.length}</span></div><div><span>Treasures</span><span>${Object.keys(S.tre||{}).length} (${treFx().shown} displayed)</span></div><div><span>Group photos</span><span>${(S.album||[]).length}</span></div></div>${S.f.debugRun?"<p class=\"label\">This was a debug run.</p>":''}`;
+      <div><span>Parcels</span><span>${S.parcels.length} / ${PARCELS.length}</span></div><div><span>Treasures</span><span>${Object.keys(S.tre||{}).length} (${treFx().shown} displayed)</span></div><div><span>Endowment</span><span>${fmt$(S.endow||0)}</span></div><div><span>Group photos</span><span>${(S.album||[]).length}</span></div></div>${S.f.debugRun?"<p class=\"label\">This was a debug run.</p>":''}`;
   if(cur==='p') body=pager('endp',act().sort((a,b)=>b.c-a.c),Math.max(8,Math.floor((avH()-240)/76)*7),m=>`<figure>${pimg(traitsFor(m))}<figcaption>${esc(m.n.split(' ')[0])}</figcaption></figure>`,"<p class=\"hint\">No one is left.</p>",'cast');
   if(cur==='a') body=pager('enda',Object.entries(ACH),Math.max(2,Math.floor((avH()-240)/66))*2,([k2,a])=>`<div class="${S.ach[k2]!=null?'got':''}"><b>${a[0]}</b>${a[1]}</div>`,'','ach');
   ovEl.innerHTML=`<div class="ov"><div class="box ending">${subtabs('end',tabs)}<div class="endb">${body}</div>
@@ -9897,7 +9976,7 @@ function openMenu(){
   ovEl.innerHTML=`<div class="ov"><div class="box"><h2>Menu</h2>
   <p class="hint">${esc(S.name)} · ${esc(ORIGINS[S.origin].n)} · ${SM[S.school]?SM[S.school].n:SCHOOLS[S.school]} · ${esc(S.center)}${S.f.debugRun?" · debug run":''}</p>
   <div class="go"><button class="btn" data-x="1">Back to game</button><button class="iconbtn" data-help="1">How to play</button><button class="iconbtn" data-set="1">Settings</button>${langBtns('data-lang')}<button class="btn ghost" data-r="1">Abandon this game and restart</button></div>
-  <p class="hint" style="margin-top:14px">Tips: low dilution brings crowds and donations, but erodes Lineage and attracts "tourist Buddhists"; members drift toward the depth they prefer. Go more than 18 months without a Rinpoche visit and Lineage keeps sliding. Burnout ≥70 or Vitality <30 each cost you one action slot. Low Harmony makes members drift away.</p></div></div>`;
+  <p class="hint" style="margin-top:14px">Tips: shallow Sundays (low depth) bring crowds and donations, but erode Lineage and attract "tourist Buddhists"; members drift toward the depth they prefer. Go more than 18 months without a Rinpoche visit and Lineage keeps sliding. Burnout ≥70 or Vitality <30 each cost you one action slot. Low Harmony makes members drift away.</p></div></div>`;
   ovEl.onclick=e=>{const t=e.target.closest('button');if(!t){if(e.target.classList.contains('ov')){ovEl.innerHTML='';ovEl.onclick=null;}return;}
     if(t.dataset.r){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
     else if(t.dataset.help){ovEl.onclick=null;openHelp();}
@@ -10000,10 +10079,10 @@ app.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.cont
 
 /* 无尽模式发愿：目标递增 */
 GOALS.push(
-  {id:'g_e_mem',t:4,rep:1,n:"More People",d:"Reach the member target",cond:()=>!!S.endless,prog:()=>`${act().length}/${S.gx.mem}`,done:()=>act().length>=S.gx.mem,rw:{T:1,D:300},bump:()=>{S.gx.mem+=8;}},
-  {id:'g_e_inc',t:4,rep:1,n:"Turnover",d:"Venture income reaches the target",cond:()=>!!S.endless,prog:()=>`$${entOpen().reduce((a,id)=>a+entIncome(id),0).toLocaleString()}/$${S.gx.inc.toLocaleString()}`,done:()=>entOpen().reduce((a,id)=>a+entIncome(id),0)>=S.gx.inc,rw:{TP:2},bump:()=>{S.gx.inc=Math.round(S.gx.inc*1.5);}},
+  {id:'g_e_mem',t:4,rep:1,n:"More People",d:"Reach the member target",cond:()=>!!S.endless,prog:()=>`${act().length}/${S.gx.mem}`,done:()=>act().length>=S.gx.mem,rw:{T:1,D:300},bump:()=>{S.gx.mem=Math.min(180,S.gx.mem+8);}},
+  {id:'g_e_inc',t:4,rep:1,n:"Turnover",d:"Venture income reaches the target",cond:()=>!!S.endless,prog:()=>`$${entOpen().reduce((a,id)=>a+entIncome(id),0).toLocaleString()}/$${S.gx.inc.toLocaleString()}`,done:()=>entOpen().reduce((a,id)=>a+entIncome(id),0)>=S.gx.inc,rw:{TP:2},bump:()=>{S.gx.inc=Math.min(10000,Math.round(S.gx.inc*1.5));}},
   {id:'g_e_ent',t:4,rep:1,n:"Ventures",d:"Open ventures reach the target",cond:()=>!!S.endless,prog:()=>`${entOpen().length}/${S.gx.ent}`,done:()=>entOpen().length>=S.gx.ent,rw:{HA:3},bump:()=>{S.gx.ent=Math.min(10,S.gx.ent+1);}},
-  {id:'g_e_ren',t:4,rep:1,n:"Renown",d:"Renown reaches the target",cond:()=>!!S.endless,prog:()=>`${Math.round(S.renown)}/${S.gx.ren}`,done:()=>S.renown>=S.gx.ren,rw:{L:1,M:5},bump:()=>{S.gx.ren=Math.round(S.gx.ren*1.6);}}
+  {id:'g_e_ren',t:4,rep:1,n:"Renown",d:"Renown reaches the target",cond:()=>!!S.endless,prog:()=>`${Math.round(S.renown)}/${S.gx.ren}`,done:()=>S.renown>=S.gx.ren,rw:{L:1,M:5},bump:()=>{S.gx.ren=Math.min(8000,Math.round(S.gx.ren*1.6));}}
 );
 function goalsCheck(notes){
   v8Init();entInit();const hit=[];
@@ -10093,7 +10172,8 @@ const WIKI_CONCEPTS=[
   ["Merit","The invisible thing. Built up by life release, hospice, community service and festival pujas; capped at 100 and loses 2.2% a week. Affects study speed, endings and the Milarepa retreat."],
   ["Donor Fatigue","Bake sales, paid retreats and livestream offerings pay less when repeated (each use stacks −35%; a quarter recovers each week). Spacing them a few weeks apart pays best."],
   ["Comfortable Center","With more than 12 months of expenses in the bank, Sunday offerings and fundraising scale by √(12/months), down to 45%. Money is for using."],
-  ["Cost of Size","Beyond 20 members, each additional person lowers everyone's commitment drift by 0.015. A large sangha needs roles, group practice and Harmony to hold together."],
+  ["Endowment","From Chapter 3, under Build · Special. Money put in cannot be taken out; 3% a year is paid monthly and is not affected by the comfortable-center penalty. Adds to the Samye and Bridge ending scores (up to +10)."],
+  ["Cost of Size","Beyond 20 members, each additional person lowers everyone's commitment drift by 0.015; beyond 60, each person also gives a little less (×√(60/members), down to 60%). A large sangha needs roles, group practice and Harmony to hold together."],
   ["Media Heat","Media attention. Amplifies how events hit Trust, brings visitors and newcomers, and brings risk. Cools on its own."],
   ["Rinpoche's Trust","Your teacher's trust in you. Rises with self-practice, retreats and doing things properly; falls when you practice too little. Gates empowerments and certification."],
   ["Commitment","Each member's investment in the center. Drifts toward how well Sunday matches their preferred depth; stuck below 25 for too long, they think about leaving."],
@@ -10102,7 +10182,7 @@ const WIKI_CONCEPTS=[
   ["Capacity and Attendance","Shrine room area × 0.8 = seats. Attendance is limited by capacity, commitment and visitors (parking)."],
   ["Connected","Buildings and road-side venues must link by gravel road or footpath to the highway on the far right, or they do nothing."],
   ["Tax and Expenses","Property tax follows building area and parcel count, halved after 501(c)(3). More members mean more costs, and past 30 you need a caretaker."],
-  ["Aspirations","The three current goals on the Week panel. Rewards on completion, refilled automatically. In endless mode the targets keep rising."],
+  ["Aspirations","The three current goals on the Week panel. Rewards on completion, refilled automatically. In endless mode the targets keep rising, up to a ceiling (180 members, $10,000 a month, Renown 8,000)."],
   ["Offices","Treasurer, greeter, chant master, cook. Members with commitment ≥50 can serve; each office gives a bonus and keeps the holder steadier."],
   ["Ventures","The businesses on the Business tab: invest and set up first, then monthly income, upkeep and stat effects. Set pricing, assign a manager, renovate, pause."],
   ["Renown","A score that accrues monthly from members, ventures, Lineage and Trust. Each milestone brings offerings and accumulations. The main score in endless mode."],
@@ -10802,6 +10882,12 @@ function wealthMul(){const r=runway();return r>12?Math.max(.45,Math.sqrt(12/r)):
 function scaleDrag(){return Math.max(0,act().length-20)*.015;}
 /* v26：被动加成边际递减——超出 k 的部分只算 35%（布局与宝物的传承/信任） */
 function dimR(x,k){return x>k?k+(x-k)*.35:x;}
+/* v27：大道场里每个人给得少一点（责任分散）：60 人以上随喜 ×√(60/人数)，最低 0.6 */
+function sizeGive(){const n=act().length;return n>60?Math.max(.6,Math.sqrt(60/n)):1;}
+/* v27：自然流动——德州人搬家很勤，普通成员每月有小概率搬走 */
+const MOVES=["moved to Austin for a job","moved to Dallas with family","went back to California","left for grad school out of state","switched to night shifts and can't make Sundays","has kids in high-school sports every weekend now"];
+function churnTick(notes){const mgr=new Set(Object.values(S.ent||{}).map(e=>e.mgr));act().forEach(m=>{if(!(m.gen||m.ros)||hasRole(m)||mgr.has(m.id)||(m.away&&m.away>S.turn))return;const p=.003+Math.max(0,60-m.c)/60*.012-(m.done?.002:0);if(chance(p)){const why=pick(MOVES);leave(m,why);notes.push(`${m.n} ${why}.`);}});}
+
 /* 4. 新行动：对外布施——把多余的钱变成信任与功德 */
 ACTS.push({id:'dana',c:"Community",n:"Give Outward",d:"Give a tenth of savings ($500–5,000) to a food bank, a disaster fund or a school in Tibet. Trust +, Merit ++, Purity slightly +",ok:()=>S.D>=2500,
   run(){const g=clamp(Math.round(S.D*.1/50)*50,500,5000);S.D-=g/ACT_SCALE;S.T+=1.5+g/1500;S.M+=3+g/800;S.L+=.5;S.B+=2;S.stats.dana=(S.stats.dana||0)+g;
@@ -12529,8 +12615,9 @@ const FAC=[
   {id:'protector',n:"Santuário dos protetores · Sala de Mahakala",cost:()=>4000,d:"Linhagem +, devagar; um risco para a imagem pública",ok:()=>ch()>=3},
   {id:'guest',n:"Quarto de hóspedes",cost:()=>3500,d:"Visitas do Rinpoche −30% de custo",ok:()=>ch()>=3},
 ];
+function facLv(id){const n=IT[id]&&id!=='stupa'&&S.layout?(S.layout.items.concat(S.layout.tray).some(i=>i.t===id)?1:0):0;return Math.max(S.fac[id]||0,n);} // v27：放进仓库的也算建过
 function build(id){
-  const f=FAC.find(x=>x.id===id); const lv=S.fac[id]; const c=f.cost(lv);
+  const f=FAC.find(x=>x.id===id); const lv=facLv(id); if(lv>=(f.max||1)) return; const c=f.cost(lv);
   if(S.D<cost_(c)) return;
   S.D-=cost_(c); S.fac[id]=lv+1;
   if(IT[id]&&(id!=='stupa'||lv===0)){const ok=placeOrTray(id);if(!ok)log(`Ainda não há espaço livre para ${IT[id].n}, por isso foi para o armazém.`);}
@@ -13125,10 +13212,10 @@ const CV=27; // 内容版本。新增的定时事件写进 CV_EV，旧存档读�
 const CV_EV={25:['kashgar_anniv','nowruz','wuhan_letter','kailash_kora','harvest_ledger','ablikim_garden','tsurphu_call','aynur_art','parinirvana'],26:[],27:['ethan_wedding','nyungne','tx_250']};
 function backfill(){
   if(!S||(S.cv||24)>=CV)return;if(S.phase==='end'&&!S.endless)return;
-  const from=S.cv||24;S.cv=CV;const ids=[];
+  const from=S.cv||(CV_EV[25].some(id=>S.seen[id]!=null)||S.f.rinpocheGone?25:24);S.cv=CV;const ids=[];
   for(const v in CV_EV)if(Number(v)>from)CV_EV[v].forEach(id=>{const ev=EV[id];if(!ev||!ev.at||S.seen[id]!=null)return;const t=ds2t(ev.at);if(t>S.turn||(t===S.turn&&S.wk===0&&S.phase==='plan'))return;if(S.endless&&['final','designate'].includes(id))return;if(S.queue.some(q=>q.id===id))return;ids.push(id);});
   ids.sort((a,b)=>ds2t(EV[a].at)-ds2t(EV[b].at));
-  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?3:2; // 临近十年结局：每月三件，仁波切的线放最前
+  const late=!S.endless&&S.turn>=ds2t('2029-06'),per=late?Math.min(4,Math.max(3,Math.ceil(ids.length/Math.max(1,120-S.turn)))):2; // 临近十年结局：每月三件，仁波切的线放最前
   if(late)['parinirvana','tsurphu_call'].forEach(id=>{const i=ids.indexOf(id);if(i>0){ids.splice(i,1);ids.unshift(id);}});
   ids.forEach((id,i)=>S.queue.push({id,at:S.turn+Math.floor(i/per),ctx:{bf:1}}));
   if(S.endless&&S.seen.el_after==null&&!S.queue.some(q=>q.id==='el_after'))S.queue.push({id:'el_after',at:S.turn+Math.ceil(ids.length/per),ctx:null});
@@ -13218,6 +13305,35 @@ O Dale já passou a ferro a velha farda. Alguns membros acham que este verão h�
   opts:[{t:`Desfilar com a bandeira dos EUA, a do Texas e bandeiras de oração juntas`,e:{T:4,H:4,c:{dale:6,tenzin:-2}},r:`O grupo desce a Austin Avenue. Há quem aplauda no passeio e quem franza o sobrolho, e uma criança pequena não para de correr atrás das bandeiras de oração. O Dale vai à frente sem perder o passo.`},
     {t:`Pedir ao Dale que leia a Declaração na prática de domingo e depois dedicar o mérito`,req:()=>has('dale'),rq:`Requer o Dale`,e:{T:2,L:1,M:2,c:{dale:8}},r:`O Dale para em «a Vida, a Liberdade e a busca da Felicidade». Na dedicação, dizes «todos os seres sencientes» mais devagar do que o costume.`},
     {t:`O centro não participa`,e:{L:1,T:-1,c:{dale:-4}},r:`Dizes que o centro não toma partido. O Dale vai sozinho e volta com uma bandeirinha para cada um. Ninguém deita a sua fora.`}]});
+
+/* ===== v27 · 无尽模式的可重复事件（变体在 prep 里选定，存进 ctx，渲染时不会变） ===== */
+E({id:'el_refuge',tag:`Infinito · Linhagem`,title:`Dia de refúgio`,rep:1,cd:12,w:6,cond:()=>EL()&&act().filter(m=>S.turn-m.join<=12).length>=3,
+  prep(){S.ctx={n:act().filter(m=>S.turn-m.join<=12).length};return true;},
+  text:()=>`Este ano ${C().n} pessoas pediram para tomar refúgio. Pela tradição, corta-se uma pequena madeixa de cabelo e dá-se um nome de refúgio. ${S.f.designated==='lobsang'?'O Lobsang diz que preside ele.':'Pediram-te que presidas.'}
+Alguém pergunta se o nome vai escrito em tibetano num certificado. Alguém pergunta se o corte dói.`,
+  opts:[{t:`Fazer a cerimónia de refúgio na sala do santuário`,e:{L:2,HA:3,M:2},fx(){act().filter(m=>S.turn-m.join<=12).forEach(m=>{m.c+=6;});return '';},r:`Madeixa a madeixa, o cabelo vai para um pratinho e arde com um leve cheiro a queimado. Quem recebeu nome novo não para de olhar para o seu papel.`},
+    {t:`Primeiro um curso de refúgio de seis semanas, depois a cerimónia`,e:{L:3,KN:2,B:4},fx(){act().filter(m=>S.turn-m.join<=12).forEach(m=>{m.c+=9;});return '';},r:`Ao fim de seis semanas, uma pessoa diz que ainda não está pronta. Dizes-lhe que fica para o ano. Os outros tomam refúgio, mais em silêncio do que esperavas.`},
+    {t:`Simples: recitar os três refúgios depois da prática de domingo`,e:{M:1,HA:1},r:`Sem certificados, sem cortes de cabelo. No fim, o Hank dá uma bolacha a cada um.`}]});
+const EL_QS=[`Um engenheiro recém-chegado pergunta: «Se não há eu, quem é que renasce?»`,`Uma rapariga de Austin pergunta: «Tenho de ser vegetariana? O meu pai tem uma churrascaria.»`,`Uma senhora idosa aponta para o santuário do protetor: «Aquele azul com caveiras. É um demónio?»`,`Um católico pergunta: «Se eu tomar refúgio, ainda posso ir à missa?»`,`Um estudante universitário pergunta: «Porquê prostrar-se diante de uma pessoa?»`,`Um homem que acabou de perder o emprego pergunta: «Dizes que tudo é vazio. E a minha renda?»`];
+E({id:'el_question',tag:`Infinito · Recém-chegados`,title:`Uma pergunta`,rep:1,cd:6,w:5,cond:()=>EL(),
+  prep(){S.ctx={q:Math.floor(Math.random()*EL_QS.length)};return true;},
+  text:()=>`${EL_QS[C().q||0]}
+Depois da prática de domingo, todos esperam para ouvir a tua resposta.`,
+  opts:[{t:`Responder a partir dos textos`,e:{KN:1,L:1},r:`Falas um bocado e citas duas fontes. A pessoa acena, passa metade da noite a procurá-las e volta na semana seguinte com três perguntas novas.`},{t:`Responder a partir da tua própria prática`,e:{HA:2,S:1},r:`Contas a primeira vez que te deparaste com a mesma pergunta. É mais curto do que citar escrituras, e a pessoa não se esquece.`},{t:`Ser honesto: ainda estou a perceber isso`,e:{M:1,T:1},r:`A pessoa ri-se e diz que é a resposta religiosa mais honesta que já ouviu no Texas.`}]});
+const EL_WX=[`As sirenes de tornado tocam a tarde inteira. No fim a tempestade passa rente à margem norte do lago e leva um troço de vedação junto ao parque de estacionamento e três bandeiras de oração.`,`Granizo do tamanho de ovos. Todos os tejadilhos ficam amolgados, metade dos vidros da estufa partem-se e a claraboia da sala do santuário racha.`,`Chuva gelada. A luz falta dois dias e os canos rebentam. Alguns vizinhos que vivem em caravanas não têm para onde ir.`,`Uma noite de chuva torrencial. O lago sobe até à beira do relvado. A estrada fica cortada e ninguém consegue chegar no domingo.`];
+E({id:'el_weather',tag:`Infinito · Tempo`,title:`O tempo no Texas`,rep:1,cd:14,w:4,cond:()=>EL(),
+  prep(){S.ctx={v:Math.floor(Math.random()*EL_WX.length)};return true;},
+  text:()=>`${EL_WX[C().v||0]}
+Arranjar custa dinheiro; não arranjar custa tempo.`,
+  opts:[{t:`Contratar alguém para arranjar`,req:()=>S.D>=900,rq:`Requer $900`,e:{D:-900},r:`O empreiteiro é primo do Chuy. Faz-te dez por cento de desconto «porque ajudaram a minha tia».`},
+    {t:`Toda a sangha mete mãos à obra no fim de semana`,e:{HA:4,B:8,D:-150},r:`Não fica bonito, mas cada um aponta «a parte que eu arranjei».`},
+    {t:`Ajudar primeiro os vizinhos`,e:{T:3,M:3,B:5,D:-300},r:`Ajudam primeiro os vizinhos. As vossas reparações demoram mais um mês, e ninguém se queixa.`}]});
+E({id:'el_passing',tag:`Infinito · Sangha`,title:`Um membro antigo`,rep:1,cd:18,w:3,cond:()=>EL()&&act().some(m=>(m.gen||m.ros)&&S.turn-m.join>=96),
+  prep(){const c=act().filter(m=>(m.gen||m.ros)&&S.turn-m.join>=96);if(!c.length)return false;const m=pick(c);S.ctx={m:m.id,n:m.n,y:2020+Math.floor(m.join/12)};return true;},
+  text:()=>`${C().n} morreu. Desde ${C().y}, ${C().n} sentava-se quase todos os domingos no mesmo lugar. A família telefona a perguntar se o centro pode fazer alguma coisa. Não são budistas, mas dizem: «Era o que ia querer.»`,
+  opts:[{t:`Toda a sangha pratica durante quarenta e nove dias`,e:{L:3,M:6,HA:4,B:6,D:-300},fx(){leave(mem(C().m),`faleceu em paz`);return '';},r:`Uma puja a cada sétimo dia. No quadragésimo nono, a família entra pela primeira vez na sala do santuário e senta-se ao lado desse lugar.`},
+    {t:`Um funeral segundo a tradição da família; vais recitar phowa`,e:{T:2,M:4},fx(){leave(mem(C().m),`faleceu em paz`);return '';},r:`Recitas phowa num canto da agência funerária e ninguém acha estranho. No fim, alguém da família diz: «Obrigada por ter vindo.»`},
+    {t:`Dedicar-lhe o mérito na prática de domingo`,e:{M:2,HA:2},fx(){leave(mem(C().m),`faleceu em paz`);return '';},r:`Quando dizes o nome, a sala do santuário fica em silêncio por um momento. Ninguém volta a sentar-se naquela almofada.`}]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Vidas dos membros",title:"Quer ir embora",qonly:1,
@@ -13404,7 +13520,7 @@ function settle0(){
   if(S.f.priyaCFO) inc*=1.05;
   if(roleOK('treasurer')) inc*=1.06;
   if(m===2||m===5) inc*=1.3;
-  inc*=DIFF().inc;
+  inc*=DIFF().inc;inc*=sizeGive();
   {const wm=wealthMul();inc*=wm;if(wm<1&&monthEnd)notes.push(`Tens ${Math.round(runway())} meses de despesas no banco, e as pessoas sentem que o centro não precisa do dinheiro delas: oferendas ×${wm.toFixed(2)}. Gasta-o — em construção, negócios, tesouros, ou dá-o.`);}
   inc=Math.round(inc/WK); S.lastInc=inc*WK;
   lines.push(["Oferendas deste domingo",inc]);
@@ -13416,6 +13532,7 @@ function settle0(){
   if(S.f.market){const g=200+60*(LB.stalls||0);other+=g;lines.push(["Taxas das bancas do mercado de sábado",g]);}
   if(S.f.cattleGraze){other+=120;lines.push(["Taxa de pastagem do pasto leste",120]);}
   LB.inc.forEach(([n,g])=>{other+=g;lines.push([n,g]);});
+  if(S.endow){const g=Math.round(S.endow*.03/12);other+=g;lines.push(["Rendimento do fundo",g]);}
   if(S.f.huntLease&&(Mo()>=11||Mo()<=1)){other+=400;lines.push(["Arrendamento da época de caça",400]);}
   other+=entSettle(lines,notes);if(EL_INC()){other+=EL_INC();lines.push(["Oferendas da filial de Austin",EL_INC()]);}
   if(S.merch){const g=S.merch*300;other+=g;lines.push([`Merch ×${S.merch}`,g]);S.L-=S.merch*(tk('D5')?.2:.4);}
@@ -13424,7 +13541,7 @@ function settle0(){
   }
   // v6：和合 / 体力 / 学识 / 资粮 / 科技树
   S.HA+=(55-S.HA)*.05-Math.min(1.2,Math.max(0,act().length-14)*.04)-(S.B>=70?.4:0);
-  S.HP+=.4-(S.origin==='hispanic'?.05:0)-.22*(S.actsDone||[]).length-(S.B>=70?1.2:0)-(m>=6&&m<=9?.3:0)-(S.self<20?.2:0)-(Y()-2020)*.05;
+  S.HP+=.4-(S.origin==='hispanic'?.05:0)-.22*(S.actsDone||[]).length-(S.B>=70?1.2:0)-(m>=6&&m<=9?.3:0)-(S.self<20?.2:0)-(Y()-2020)*.07-Math.max(0,S.HP-80)*.04;
   S.KN-=S.KN*.004+.05-(LB.KNw||0); S.L+=(S.KN-40)/500;
   if(tk('A3'))S.B-=.8; if(tk('A5'))S.KN+=.3; if(tk('B2'))S.HP+=.4; if(tk('B5')){S.self+=.5;S.RT+=.1;} if(tk('B6'))S.M+=.1;
   if(tk('C1'))S.L+=.08; if(tk('C2'))S.T+=.15; if(tk('C3')){S.HP+=.3;S.HA+=.3;} if(tk('C6')){S.M+=.2;S.HA+=.2;} if(tk('D4'))S.RT+=.1; if(tk('D6'))S.HA+=.1;
@@ -13444,6 +13561,7 @@ function settle0(){
   S.L+=((tk('A4')?44:38)-S.L)*.06;if(tk('A6'))S.L+=.3;if(tk('C5'))S.L+=Math.min(1,act().filter(x=>x.done).length*.2); S.T+=(35-S.T)*.055; S.L-=Math.max(0,act().length-15)*.03;
   if(S.fac.garden) S.T+=.4;
   if(S.camera>0) S.camera--;
+  if(!(S.cheat&&S.cheat.noleave))churnTick(notes);
   if(S.D<0) S.stats.negD++; else S.stats.negD=0;
   // Chad 正统度
   if(S.f.chadCenter){S.auth.chad+=rnd(-.5,1.5);S.auth.you=S.auth.you*.9+(S.L*.6+S.RT*.2+S.stats.visits*2)*.1;}
@@ -13776,6 +13894,7 @@ function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(f.koraDone)o.push(`A fotografia do grupo da kora está ao fundo do corredor. Falta uma pessoa: a que segurava a máquina.`);
   if(f.rinpocheGone&&!f.yangsi)o.push(`O Lobsang diz que a equipa de busca da reencarnação já partiu.`);
   if(f.democracy)o.push(`A direção continua a reunir-se. O tema deste ano continua a ser o parque de estacionamento.`);
+  if((S.endow||0)>=20000)o.push(`O fundo paga as lamparinas, o telhado e um lugar de retiro por ano.`);
   return o;}
 function epilogueHTML(){const o=epilogue();return o.length?`<div class="label" style="margin-top:12px">Depois</div>${o.map(x=>`<p style="margin:4px 0">${esc(x)}</p>`).join('')}`:'';}
 
@@ -15329,7 +15448,8 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  const ew=Math.min(10,(S.endow||0)/5000);
+  return {samye:ew+S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:ew+S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f',"Finais"],['e',"Eventos"],['p',"Ânimos"],['b',"Contas"]];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">Dossiê: números que o jogo normalmente esconde. Só para os olhos do Abade.</p>`;
@@ -15493,9 +15613,10 @@ function openBuild(){
   const cols=Math.min(window.innerWidth,560)>=470?2:1;const n=Math.max(1,Math.floor((avH()-230)/112))*cols;
   const can=c=>S.D>=cost_(c);let cards=[];
   if(cur==='f'){
-    cards=FAC.filter(f=>['stupa','wheels','garden'].includes(f.id)).map(f=>{const lv=S.fac[f.id];const max=f.max||1;const done=lv>=max;const ok=okc(f);const c=done?0:f.cost(lv);
+    cards=FAC.filter(f=>['stupa','wheels','garden'].includes(f.id)).map(f=>{const lv=facLv(f.id);const max=f.max||1;const done=lv>=max;const ok=okc(f);const c=done?0:f.cost(lv);
       return `<div class="f ${lv>0?'built':''}"><b>${f.n}${f.lv?` · ${f.lv[lv]}`:''}</b><span>${f.d}</span><div class="row"><span class="num">${done?"Feito":'$'+c.toLocaleString()}</span>${done?'':`<button class="btn ${ok&&can(c)?'':'ghost'}" data-b="${f.id}" ${ok&&can(c)?'':'disabled'}>${ok?(lv>0?"Melhorar":"Construir"):"Bloqueado"}</button>`}</div></div>`;});
     if(S.f.merchOK||S.f.brookeAlly) cards.push(`<div class="f"><b>Merchandising</b><span>T-shirts, canecas, japamalas «estilo casa de quinta». Cada um +$300/mês, Linhagem −0.4/mês.</span><div class="row"><span class="num">À venda ${S.merch} / 3</span><span style="display:flex;gap:6px"><button class="btn ghost" data-m="-1" ${S.merch?'':'disabled'}>Retirar um</button><button class="btn" data-m="1" ${S.merch<3?'':'disabled'}>Pôr mais um</button></span></div></div>`);
+    if(ch()>=3) cards.push(`<div class="f"><b>Fundo do centro</b><span>Põe o dinheiro a mais num fundo de onde não o podes tirar: 3% ao ano voltam todos os meses, e o final dos dez anos (e os anos seguintes) lembram-se dele.</span><div class="row"><span class="num">No fundo $${(S.endow||0).toLocaleString()}</span><span style="display:flex;gap:6px"><button class="btn ghost" data-endow="5000" ${S.D>=5000?'':'disabled'}>+$5,000</button><button class="btn" data-endow="20000" ${S.D>=20000?'':'disabled'}>+$20,000</button></span></div></div>`);
     if(S.f.armedEver) cards.push(`<div class="f"><b>Segurança voluntária</b><span>${S.f.armed?"O Dale senta-se à porta todos os domingos.":"A equipa de segurança foi dissolvida. O texto dos acontecimentos vai lembrar-se."}</span><div class="row"><span></span><button class="btn ghost" data-sec="1">${S.f.armed?"Dissolver":"Reformar"}</button></div></div>`);
   }
   if(cur==='r') cards=Object.entries(RT).map(([k,r])=>{const ok=okc(r);const m=r.min;return `<div class="f"><b>${r.n} · pelo menos ${m[0]}×${m[1]} quadrados</b><span>${r.d}</span><div class="row"><span class="num">$${r.cost}/quadrado</span><span style="display:flex;gap:6px"><button class="btn ghost" data-room="${k}" ${ok?'':'disabled'}>Desenhar</button><button class="btn" data-autoroom="${k}" ${ok?'':'disabled'}>Auto-construir</button></span></div></div>`;});
@@ -15509,6 +15630,7 @@ function openBuild(){
     else if(t.dataset.autoroom){if(autoRoom(t.dataset.autoroom)){log(`O empreiteiro acabou: ${RT[t.dataset.autoroom].n}.`);save();render();openBuild();}else{t.textContent="Falta dinheiro ou espaço";}}
     else if(t.dataset.b) build(t.dataset.b);
     else if(t.dataset.m){S.merch=clamp(S.merch+Number(t.dataset.m),0,3);if(S.merch===1&&Number(t.dataset.m)>0)log("A primeira T-shirt está à venda.");save();render();openBuild();}
+    else if(t.dataset.endow){const a=Number(t.dataset.endow);if(S.D>=a){S.D-=a;S.endow=(S.endow||0)+a;log(`Depositado no fundo do centro: $${a.toLocaleString()}`);}save();render();openBuild();}
     else if(t.dataset.sec){S.f.armed=!S.f.armed;log(S.f.armed?"A equipa de segurança voluntária voltou a juntar-se.":"A equipa de segurança voluntária foi dissolvida.");save();render();openBuild();}
     else if(t.dataset.x) close();};
   function close(){ovEl.innerHTML='';ovEl.onclick=null;UI.ovRe=null;}
@@ -15518,7 +15640,7 @@ function openMenu(){
   ovEl.innerHTML=`<div class="ov"><div class="box"><h2>Menu</h2>
   <p class="hint">${esc(S.name)} · ${esc(ORIGINS[S.origin].n)} · ${SM[S.school]?SM[S.school].n:SCHOOLS[S.school]} · ${esc(S.center)}${S.f.debugRun?" · partida de debug":''}</p>
   <div class="go"><button class="btn" data-x="1">Voltar ao jogo</button><button class="iconbtn" data-set="1">Definições</button>${langBtns('data-lang')}<button class="btn ghost" data-r="1">Abandonar este jogo e recomeçar</button></div>
-  <p class="hint" style="margin-top:14px">Dicas: pouca diluição traz multidões e donativos, mas desgasta a Linhagem e atrai «budistas turistas»; os membros tendem para a profundidade que preferem. Passar mais de 18 meses sem visita do Rinpoche faz a Linhagem continuar a descer. Exaustão ≥70 ou Vigor <30 custam-te, cada um, um espaço de ação. Pouca Harmonia faz os membros afastarem-se.</p></div></div>`;
+  <p class="hint" style="margin-top:14px">Dicas: domingos pouco profundos (pouca profundidade) trazem multidões e donativos, mas desgastam a Linhagem e atraem «budistas turistas»; os membros tendem para a profundidade que preferem. Passar mais de 18 meses sem visita do Rinpoche faz a Linhagem continuar a descer. Exaustão ≥70 ou Vigor <30 custam-te, cada um, um espaço de ação. Pouca Harmonia faz os membros afastarem-se.</p></div></div>`;
   ovEl.onclick=e=>{const t=e.target.closest('button');if(!t){if(e.target.classList.contains('ov')){ovEl.innerHTML='';ovEl.onclick=null;}return;}
     if(t.dataset.r){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
     else if(t.dataset.lang){swLang(t.dataset.lang);}
@@ -15538,7 +15660,7 @@ function renderEnd(){
       <div><span>Ngöndro concluídos</span><span>${done.length}</span></div><div><span>Presenças totais</span><span>${S.stats.totalAttend.toLocaleString()}</span></div>
       <div><span>Visitas do Rinpoche</span><span>${S.stats.visits}</span></div><div><span>Mérito</span><span>${S.M>=60?"Profundo":S.M>=30?"Algum":"Invisível"}</span></div>
       <div><span>Harmonia</span><span>${Math.round(S.HA)}</span></div><div><span>Saber</span><span>${Math.round(S.KN)}</span></div>
-      <div><span>Parcelas</span><span>${S.parcels.length} / ${PARCELS.length}</span></div><div><span>Tesouros</span><span>${Object.keys(S.tre||{}).length} (${treFx().shown} expostos)</span></div><div><span>Fotos de grupo</span><span>${(S.album||[]).length}</span></div></div>${S.f.debugRun?"<p class=\"label\">Esta foi uma partida de debug.</p>":''}`;
+      <div><span>Parcelas</span><span>${S.parcels.length} / ${PARCELS.length}</span></div><div><span>Tesouros</span><span>${Object.keys(S.tre||{}).length} (${treFx().shown} expostos)</span></div><div><span>Fundo do centro</span><span>${fmt$(S.endow||0)}</span></div><div><span>Fotos de grupo</span><span>${(S.album||[]).length}</span></div></div>${S.f.debugRun?"<p class=\"label\">Esta foi uma partida de debug.</p>":''}`;
   if(cur==='p') body=pager('endp',act().sort((a,b)=>b.c-a.c),Math.max(8,Math.floor((avH()-240)/76)*7),m=>`<figure>${pimg(traitsFor(m))}<figcaption>${esc(m.n.split(' ')[0])}</figcaption></figure>`,"<p class=\"hint\">Não resta ninguém.</p>",'cast');
   if(cur==='a') body=pager('enda',Object.entries(ACH),Math.max(2,Math.floor((avH()-240)/66))*2,([k2,a])=>`<div class="${S.ach[k2]!=null?'got':''}"><b>${a[0]}</b>${a[1]}</div>`,'','ach');
   ovEl.innerHTML=`<div class="ov"><div class="box ending">${subtabs('end',tabs)}<div class="endb">${body}</div>
@@ -15835,7 +15957,7 @@ function openMenu(){
   ovEl.innerHTML=`<div class="ov"><div class="box"><h2>Menu</h2>
   <p class="hint">${esc(S.name)} · ${esc(ORIGINS[S.origin].n)} · ${SM[S.school]?SM[S.school].n:SCHOOLS[S.school]} · ${esc(S.center)}${S.f.debugRun?" · partida de debug":''}</p>
   <div class="go"><button class="btn" data-x="1">Voltar ao jogo</button><button class="iconbtn" data-help="1">Como jogar</button><button class="iconbtn" data-set="1">Definições</button>${langBtns('data-lang')}<button class="btn ghost" data-r="1">Abandonar este jogo e recomeçar</button></div>
-  <p class="hint" style="margin-top:14px">Dicas: muita diluição traz multidões e donativos, mas desgasta a Linhagem e atrai «budistas turistas»; os membros tendem para a profundidade que preferem. Mais de 18 meses sem visita do Rinpoche e a Linhagem continua a descer. Exaustão ≥70 ou Vigor <30 custam-te, cada um, uma ação. Pouca Harmonia faz os membros afastarem-se.</p></div></div>`;
+  <p class="hint" style="margin-top:14px">Dicas: domingos pouco profundos (pouca profundidade) trazem multidões e donativos, mas desgastam a Linhagem e atraem «budistas turistas»; os membros tendem para a profundidade que preferem. Mais de 18 meses sem visita do Rinpoche e a Linhagem continua a descer. Exaustão ≥70 ou Vigor <30 custam-te, cada um, uma ação. Pouca Harmonia faz os membros afastarem-se.</p></div></div>`;
   ovEl.onclick=e=>{const t=e.target.closest('button');if(!t){if(e.target.classList.contains('ov')){ovEl.innerHTML='';ovEl.onclick=null;}return;}
     if(t.dataset.r){wipe();S=null;ovEl.onclick=null;UI.tab='week';render();}
     else if(t.dataset.help){ovEl.onclick=null;openHelp();}
@@ -15938,10 +16060,10 @@ app.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.cont
 
 /* 无尽模式发愿：目标递增 */
 GOALS.push(
-  {id:'g_e_mem',t:4,rep:1,n:"Mais gente",d:"Atingir a meta de membros",cond:()=>!!S.endless,prog:()=>`${act().length}/${S.gx.mem}`,done:()=>act().length>=S.gx.mem,rw:{T:1,D:300},bump:()=>{S.gx.mem+=8;}},
-  {id:'g_e_inc',t:4,rep:1,n:"Volume",d:"As receitas dos negócios atingem a meta",cond:()=>!!S.endless,prog:()=>`$${entOpen().reduce((a,id)=>a+entIncome(id),0).toLocaleString()}/$${S.gx.inc.toLocaleString()}`,done:()=>entOpen().reduce((a,id)=>a+entIncome(id),0)>=S.gx.inc,rw:{TP:2},bump:()=>{S.gx.inc=Math.round(S.gx.inc*1.5);}},
+  {id:'g_e_mem',t:4,rep:1,n:"Mais gente",d:"Atingir a meta de membros",cond:()=>!!S.endless,prog:()=>`${act().length}/${S.gx.mem}`,done:()=>act().length>=S.gx.mem,rw:{T:1,D:300},bump:()=>{S.gx.mem=Math.min(180,S.gx.mem+8);}},
+  {id:'g_e_inc',t:4,rep:1,n:"Volume",d:"As receitas dos negócios atingem a meta",cond:()=>!!S.endless,prog:()=>`$${entOpen().reduce((a,id)=>a+entIncome(id),0).toLocaleString()}/$${S.gx.inc.toLocaleString()}`,done:()=>entOpen().reduce((a,id)=>a+entIncome(id),0)>=S.gx.inc,rw:{TP:2},bump:()=>{S.gx.inc=Math.min(10000,Math.round(S.gx.inc*1.5));}},
   {id:'g_e_ent',t:4,rep:1,n:"Negócio",d:"Os negócios abertos atingem a meta",cond:()=>!!S.endless,prog:()=>`${entOpen().length}/${S.gx.ent}`,done:()=>entOpen().length>=S.gx.ent,rw:{HA:3},bump:()=>{S.gx.ent=Math.min(10,S.gx.ent+1);}},
-  {id:'g_e_ren',t:4,rep:1,n:"Renome",d:"O renome atinge a meta",cond:()=>!!S.endless,prog:()=>`${Math.round(S.renown)}/${S.gx.ren}`,done:()=>S.renown>=S.gx.ren,rw:{L:1,M:5},bump:()=>{S.gx.ren=Math.round(S.gx.ren*1.6);}}
+  {id:'g_e_ren',t:4,rep:1,n:"Renome",d:"O renome atinge a meta",cond:()=>!!S.endless,prog:()=>`${Math.round(S.renown)}/${S.gx.ren}`,done:()=>S.renown>=S.gx.ren,rw:{L:1,M:5},bump:()=>{S.gx.ren=Math.min(8000,Math.round(S.gx.ren*1.6));}}
 );
 function goalsCheck(notes){
   v8Init();entInit();const hit=[];
@@ -16031,7 +16153,8 @@ const WIKI_CONCEPTS=[
   ["Mérito","A coisa invisível. Constrói-se com libertação de vidas, cuidados paliativos, serviço comunitário e pujas festivas; máximo de 100 e perde 2.2% por semana. Afeta a velocidade de estudo, os finais e o retiro de Milarepa."],
   ["Fadiga dos doadores","Vendas de bolos, retiros pagos e oferendas por transmissão em direto rendem menos quando repetidos (cada uso acumula −35%; recupera-se um quarto por semana). Espaçá-los algumas semanas compensa mais."],
   ["Centro confortável","Com mais de 12 meses de despesas no banco, as oferendas de domingo e a angariação de fundos escalam por √(12/meses), até um mínimo de 45%. O dinheiro é para usar."],
-  ["Custo da dimensão","Acima de 20 membros, cada pessoa a mais reduz em 0.015 a evolução do empenho de todos. Uma sangha grande precisa de funções, prática em grupo e Harmonia para se manter unida."],
+  ["Fundo do centro","A partir do Capítulo 3, em Construir · Especial. O dinheiro depositado não pode ser levantado; 3% ao ano são pagos mensalmente e não são afetados pela penalização do centro confortável. Soma pontos aos finais Samye e A Ponte (até +10)."],
+  ["Custo da dimensão","Acima de 20 membros, cada pessoa a mais reduz em 0.015 a evolução do empenho de todos; acima de 60, cada pessoa também dá um pouco menos (×√(60/membros), até um mínimo de 60%). Uma sangha grande precisa de funções, prática em grupo e Harmonia para se manter unida."],
   ["Atenção mediática","Atenção mediática. Amplifica o efeito dos acontecimentos na Confiança, traz visitantes e recém-chegados, e traz riscos. Arrefece sozinha."],
   ["Confiança do Rinpoche","A confiança do teu mestre em ti. Sobe com prática pessoal, retiros e fazendo as coisas como deve ser; desce quando praticas pouco. Condiciona iniciações e certificação."],
   ["Empenho","O investimento de cada membro no centro. Evolui consoante o domingo corresponda à profundidade que prefere; abaixo de 25 durante demasiado tempo, pensa em sair."],
@@ -16040,7 +16163,7 @@ const WIKI_CONCEPTS=[
   ["Capacidade e presença","Área da sala do santuário × 0.8 = lugares. A presença é limitada pela capacidade, pelo empenho e pelos visitantes (estacionamento)."],
   ["Ligado","Os edifícios e os espaços à beira da estrada têm de estar ligados por estrada de gravilha ou carreiro à autoestrada, no extremo direito; caso contrário, não fazem nada."],
   ["Impostos e despesas","O imposto predial depende da área construída e do número de parcelas, e cai para metade depois do 501(c)(3). Mais membros significam mais custos e, acima de 30, precisas de um zelador."],
-  ["Aspirações","Os três objetivos atuais no painel da Semana. Dão recompensas quando cumpridos e são repostos automaticamente. No modo infinito, as metas vão subindo."],
+  ["Aspirações","Os três objetivos atuais no painel da Semana. Dão recompensas quando cumpridos e são repostos automaticamente. No modo infinito, as metas vão subindo até um teto (180 membros, $10,000 por mês, Renome 8,000)."],
   ["Funções","Tesoureiro, anfitrião, mestre de cânticos, cozinheiro. Membros com Empenho ≥50 podem servir; cada cargo dá um bónus e torna quem o ocupa mais estável."],
   ["Negócio","Os negócios do separador Negócio: primeiro investes e montas, depois vêm as receitas mensais, a manutenção e os efeitos nos indicadores. Define preços, nomeia um gerente, renova, suspende."],
   ["Renome","Uma pontuação que se acumula todos os meses com os membros, os negócios, a Linhagem e a Confiança. Cada marco traz oferendas e acumulações. É a pontuação principal no modo infinito."],
@@ -16740,6 +16863,12 @@ function wealthMul(){const r=runway();return r>12?Math.max(.45,Math.sqrt(12/r)):
 function scaleDrag(){return Math.max(0,act().length-20)*.015;}
 /* v26：被动加成边际递减——超出 k 的部分只算 35%（布局与宝物的传承/信任） */
 function dimR(x,k){return x>k?k+(x-k)*.35:x;}
+/* v27：大道场里每个人给得少一点（责任分散）：60 人以上随喜 ×√(60/人数)，最低 0.6 */
+function sizeGive(){const n=act().length;return n>60?Math.max(.6,Math.sqrt(60/n)):1;}
+/* v27：自然流动——德州人搬家很勤，普通成员每月有小概率搬走 */
+const MOVES=["mudou-se para Austin por causa do emprego","foi com a família para Dallas","voltou para a Califórnia","foi fazer um mestrado noutro estado","passou a trabalhar de noite e já não pode ao domingo","tem os filhos no desporto escolar todos os fins de semana"];
+function churnTick(notes){const mgr=new Set(Object.values(S.ent||{}).map(e=>e.mgr));act().forEach(m=>{if(!(m.gen||m.ros)||hasRole(m)||mgr.has(m.id)||(m.away&&m.away>S.turn))return;const p=.003+Math.max(0,60-m.c)/60*.012-(m.done?.002:0);if(chance(p)){const why=pick(MOVES);leave(m,why);notes.push(`${m.n} ${why}.`);}});}
+
 /* 4. 新行动：对外布施——把多余的钱变成信任与功德 */
 ACTS.push({id:'dana',c:"Comunidade",n:"Dar para fora",d:"Dar um décimo das poupanças ($500–5,000) a um banco alimentar, a um fundo de catástrofe ou a uma escola no Tibete. Confiança +, Mérito ++, Pureza ligeiramente +",ok:()=>S.D>=2500,
   run(){const g=clamp(Math.round(S.D*.1/50)*50,500,5000);S.D-=g/ACT_SCALE;S.T+=1.5+g/1500;S.M+=3+g/800;S.L+=.5;S.B+=2;S.stats.dana=(S.stats.dana||0)+g;

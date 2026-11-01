@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
 const A = process.argv.slice(2), arg = (k, d) => { const i = A.indexOf('--' + k); return i >= 0 ? A[i + 1] : d; };
 const file = path.resolve(arg('file', path.join(__dirname, '..', 'index.html')));
 const langs = arg('langs', 'zh,en,pt').split(','), shots = arg('shots', null);
-const EVENTS = arg('events', 'tre_flea,designate,final,el_after,el_mila_out,el_rosa,el_windmill,el_three_year,el_citizen,el_hunan_voice,el_heat,ethan_wedding,nyungne,tx_250').split(',');
+const EVENTS = arg('events', 'tre_flea,designate,final,el_after,el_mila_out,el_rosa,el_windmill,el_three_year,el_citizen,el_hunan_voice,el_heat,ethan_wedding,nyungne,tx_250,el_refuge,el_question,el_weather,el_passing').split(',');
 const VPS = [[1280, 800], [390, 844]];
 (async () => {
   const browser = await chromium.launch(); let fails = 0;
@@ -49,6 +49,10 @@ const VPS = [[1280, 800], [390, 844]];
     await page.evaluate(() => { UI.tab = 'map'; render(); }); await shot('3map');
     // overlays
     for (const fn of ['openBuild', 'openWiki', 'openHelp', 'openMenu', 'openPhoto']) { await page.evaluate(f => { if (typeof window[f] === 'function') window[f](); }, fn); await overflow(fn); await page.evaluate(() => { ovEl.innerHTML = ''; ovEl.onclick = null; UI.ovRe = null; }); }
+    // endowment card (chapter 3+): deposit through the real button
+    await page.evaluate(() => { S._t0 = S.turn; S.turn = 80; S.D = 12000; ovEl.innerHTML = ''; openBuild(); });
+    { const b = await page.$('#ov [data-endow="5000"]'); if (!b) errs.push('no endowment button'); else { await b.click(); const e = await page.evaluate(() => S.endow || 0); if (e !== 5000) errs.push('endowment deposit failed: ' + e); } }
+    await overflow('build/endowment'); await page.evaluate(() => { S.turn = S._t0; delete S._t0; ovEl.innerHTML = ''; ovEl.onclick = null; UI.ovRe = null; render(); });
     // event cards, including the newest; set up flags so each variant renders
     for (const id of EVENTS) {
       const variants = id === 'el_after' ? [{ final: 'mila' }, { final: 'succ', heir: 'rosa' }, { final: 'merge' }, { ended: 'exile' }, { ended: 'brand' }, { ended: 'diss' }, {}] : [{}];
@@ -56,6 +60,7 @@ const VPS = [[1280, 800], [390, 844]];
         await page.evaluate(([id, v]) => { S.phase = 'plan'; S.cur = null; S.res = null; S.pending = []; delete S.seen[id];
           if (id === 'designate') { S.RT = 20; } if (id === 'final') { S.f.designated = 'tenzin'; S.f.rinpocheGone = S.turn; }
           if (id === 'tre_flea') { S.D = Math.max(S.D, 2000); }
+          if (id === 'el_passing') { const m = act().find(x => x.gen || x.ros) || act()[0]; m.gen = true; m.join = S.turn - 100; }
           S.f.final = v.final || null; S.f.heir = v.heir || null; S.ended = v.ended || null; dbgTrigger(id, true); }, [id, v]);
         const ph = await page.evaluate(() => S.phase);
         if (ph !== 'event') { errs.push(`event ${id} did not open (${JSON.stringify(v)})`); continue; }

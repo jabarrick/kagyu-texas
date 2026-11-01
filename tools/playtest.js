@@ -5,7 +5,7 @@
 // flags "stuck" stretches (debt, nothing affordable, burnout spirals) so balance changes can be checked.
 //
 // Usage: node tools/playtest.js [--lang zh|en|pt] [--origin asian|convert|tibetan|monk|black|hispanic]
-//          [--school karma|drukpa|drikung] [--style balanced|lineage|builder|frugal|idle] [--seed N]
+//          [--school karma|drukpa|drikung] [--style balanced|lineage|builder|frugal|idle|casual] [--seed N]
 //          [--diff easy|normal|hard|zen] [--final remote|local|merge|succ|mila] [--endless 24] [--json out.json] [--quiet]
 // Needs Playwright (require('playwright')). Exit code 1 if the page logs an error.
 const path = require('path'), fs = require('fs');
@@ -25,9 +25,10 @@ function BOT_SRC() {
   BOT.seed = s => { seed = s || 1; Math.random = R; };
   // where do Lineage / Trust / Dana come from? (per year: events, actions, weekly settle)
   BOT.contrib = {};
-  const track = (name, key) => { const f = window[name]; window[name] = function () { const b = { L: S.L, T: S.T, D: S.D }; const r = f.apply(this, arguments); const y = Y(); const c = BOT.contrib[y] = BOT.contrib[y] || {}; const k = c[key] = c[key] || { L: 0, T: 0, D: 0 }; k.L += S.L - b.L; k.T += S.T - b.T; k.D += S.D - b.D; return r; }; };
-  { const f = window.soft; window.soft = function (fn) { const b = { L: S.L, T: S.T, D: S.D }; const r = f.apply(this, arguments); const key = fn === runActs ? 'act' : fn === settle0 ? 'week' : 'ev'; const y = Y(); const c = BOT.contrib[y] = BOT.contrib[y] || {}; const k = c[key] = c[key] || { L: 0, T: 0, D: 0 }; k.L += S.L - b.L; k.T += S.T - b.T; k.D += S.D - b.D; return r; }; }
+  const track = (name, key) => { const f = window[name]; window[name] = function () { const b = { L: S.L, T: S.T, D: S.D }; const r = f.apply(this, arguments); const y = Y(); const c = BOT.contrib[y] = BOT.contrib[y] || {}; const k = c[key] = c[key] || { L: 0, T: 0, D: 0 }; k.L += S.L - b.L; k.T += S.T - b.T; k.D += S.D - b.D; k.HP = (k.HP || 0) + S.HP - b.HP; return r; }; };
+  { const f = window.soft; window.soft = function (fn) { const b = { L: S.L, T: S.T, D: S.D, HP: S.HP }; const r = f.apply(this, arguments); const key = fn === runActs ? 'act' : fn === settle0 ? 'week' : 'ev'; const y = Y(); const c = BOT.contrib[y] = BOT.contrib[y] || {}; const k = c[key] = c[key] || { L: 0, T: 0, D: 0 }; k.L += S.L - b.L; k.T += S.T - b.T; k.D += S.D - b.D; k.HP = (k.HP || 0) + S.HP - b.HP; return r; }; }
   track('spend', 'spend');
+  const pickR = a => a.length ? a[Math.floor(R() * a.length)] : null;
   const reserve = () => Math.max(1200, expTotal() * (BOT.style === 'frugal' ? 5 : 3));
   const spendable = () => S.D - reserve();
   const buy = (what, c, fn) => { if (c > spendable()) return false; const d0 = S.D; const ok = fn(); if (ok !== false && S.D !== d0) { BOT.buys.push({ t: ds(), wk: S.wk, what, cost: Math.round(d0 - S.D) }); return true; } return false; };
@@ -61,7 +62,7 @@ function BOT_SRC() {
       if (buy('item ' + t, cost_(d.cost), () => buyDecor(t))) break;
     }
     // 5. special facilities: stupa, prayer wheels
-    for (const id of ['garden', 'wheels', 'stupa']) { const f = FAC.find(x => x.id === id); const lv = S.fac[id]; if (lv >= (f.max || 1) || !okc(f)) continue; const c = cost_(f.cost(lv)); if (c * 1.5 > spendable()) { notes.push(`want ${id} $${c}`); continue; } buy(id + ' L' + (lv + 1), c, () => build(id)); }
+    for (const id of ['garden', 'wheels', 'stupa']) { const f = FAC.find(x => x.id === id); const lv = typeof facLv === 'function' ? facLv(id) : S.fac[id]; if (lv >= (f.max || 1) || !okc(f)) continue; const c = cost_(f.cost(lv)); if (c * 1.5 > spendable()) { notes.push(`want ${id} $${c}`); continue; } buy(id + ' L' + (lv + 1), c, () => build(id)); }
     // 6. ventures + managers
     entInit();
     for (const id in ENT) { const d = ENT[id]; if (S.ent[id] || !d.req()) continue; if (buy('venture ' + id, cost_(d.cost), () => entStart(id))) break; else notes.push(`want venture ${id}`); }
@@ -73,6 +74,8 @@ function BOT_SRC() {
     const rich = runway() > 14;
     const parc = PARCELS.filter(p => buyable(p)).sort((a, b) => landPrice(a) - landPrice(b))[0];
     if (parc && (rich || notes.some(x => x.startsWith('want hall'))) && cost_(landPrice(parc)) * 1.3 < spendable()) buy('parcel ' + parc.id, cost_(landPrice(parc)), () => buyParcel(parc.id));
+    // 8b. endowment: park the surplus once there is more than 15 months of runway
+    if (ch() >= 3 && runway() > 9 && BOT.style !== 'frugal') { const a = S.D - expTotal() * 8 > 20000 ? 20000 : 5000; if (S.D - a > expTotal() * 8) { S.D -= a; S.endow = (S.endow || 0) + a; BOT.buys.push({ t: ds(), wk: S.wk, what: 'endowment', cost: a }); } }
     // 9. tech
     for (const t of TECH) if (techState(t) === 'ready') { techLearn(t.id); BOT.buys.push({ t: ds(), wk: S.wk, what: 'tech ' + t.id, cost: 0 }); }
     // 10. roles
@@ -121,6 +124,7 @@ function BOT_SRC() {
   function answer() {
     const ev = EV[S.cur.id]; S.ctx = S.cur.ctx; const os = getOpts(ev);
     { const y = BOT.evYear[Y()] = BOT.evYear[Y()] || { n: 0, story: 0 }; y.n++; if (ev.at || ev.qonly) y.story++; }
+    if (BOT.style === 'casual') { const ok = os.map((o, i) => i).filter(i => !os[i].req || os[i].req()); BOT.events[S.cur.id] = (BOT.events[S.cur.id] || 0) + 1; return choose(ok.length ? ok[Math.floor(R() * ok.length)] : 0); }
     if (BOT.style === 'idle') { const k = os.findIndex(o => !o.req || o.req()); BOT.events[S.cur.id] = (BOT.events[S.cur.id] || 0) + 1; return choose(Math.max(0, k)); }
     let best = -1, bs = -1e9;
     if (S.cur.id === 'final' && BOT.final) { const k = os.findIndex(o => o.e && o.e.f && o.e.f.final === BOT.final && (!o.req || o.req())); if (k >= 0) { BOT.events.final = 1; return choose(k); } }
@@ -137,6 +141,13 @@ function BOT_SRC() {
       if (S.phase === 'end') return false;
       if (S.phase === 'year') { const offer = S.yr.offer; const pref = BOT.style === 'lineage' ? ['retreat', 'study', 'sangha'] : ['sangha', 'outreach', 'thrift', 'build', 'health']; const id = pref.find(p => offer.includes(p)) || offer[0]; chooseBoon(id); continue; }
       if (S.phase === 'plan') {
+        if (BOT.style === 'casual') { // impulsive player: random actions, buys whatever catches the eye, never rests on purpose
+          if (S.wk === 0 && R() < .35 && S.D > 600) { const t = pickR(Object.keys(IT).filter(k => IT[k].cost != null && IT[k].cost < S.D - 300 && okc(IT[k]))); if (t) buyDecor(t); }
+          if (S.wk === 0 && R() < .15 && S.bld) { const t = pickR(Object.keys(RT).filter(k => okc(RT[k]))); if (t) autoRoom(t); }
+          if (S.wk === 0 && R() < .1) { entInit(); const id = pickR(Object.keys(ENT).filter(k => !S.ent[k] && ENT[k].req())); if (id) entStart(id); }
+          if (R() < .1) S.dil = clamp(S.dil + Math.round((R() - .5) * 30), 0, allowedMax());
+          const av = ACTS.filter(a => okc(a)).map(a => a.id); S.acts = []; while (S.acts.length < slotsMax() && av.length) S.acts.push(av.splice(Math.floor(R() * av.length), 1)[0]);
+          startMonth(); continue; }
         if (BOT.style === 'idle') { S.acts = ['group', 'intro', 'fund'].slice(0, slotsMax()); startMonth(); continue; }
         if (S.wk === 0) BOT.lastNotes = window.spend();
         setDepth(); S.acts = pickActs(); render(); startMonth(); continue;
