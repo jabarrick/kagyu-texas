@@ -1286,6 +1286,44 @@ E({id:'el_mila_out',tag:`无尽 · 出关`,title:`出关`,qonly:1,
     {t:`留在小屋，做下一期的闭关导师`,req:()=>on('cabin'),rq:`需要闭关小屋`,e:{L:8,S:10,f:{milaOut:1}},fx(){S.f.localGuide=S.f.localGuide||S.name;return '';},r:`等候名单上已经有三个名字。你把界石又放了回去。`},
     {t:`先绕湖走一圈，别的再说`,e:{HP:15,HA:5,M:5,f:{milaOut:1}},r:`你走了一整个下午。一只苍鹭陪你走了一段。`}]});
 
+/* ===== v26 · 无尽模式扩写：人物与农场（2031 年起） ===== */
+E({id:'el_rosa',tag:`无尽 · 人物`,title:`Rosa`,rep:1,cd:999,w:5,cond:()=>EL()&&has('rosa')&&Y()>=2032&&S.f.heir!=='rosa'&&!S.f.rosaGone,
+  text:()=>`Rosa住进了Providence医院的临终关怀病房。她让女儿打电话给你，也打给了她教区的神父。“两个都要，”她说，“我年纪大了，不挑。”
+你到的时候她醒着，床头摆着那张瓜达卢佩圣母的小卡片，旁边是你多年前送她的一串念珠——一百零八颗的那种。`,
+  opts:[{t:`让神父先来，然后为她念《二十一度母礼赞》`,e:{M:6,HA:4,L:1,c:{all:2}},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`安详离世`);return '';},r:`神父为她傅油。之后你念度母礼赞，她跟着动嘴唇。念完她说：“度母和圣母，眼睛是一样的。”三天后，她在睡梦中走了。`},
+    {t:`她走后，全体僧团修四十九天`,req:()=>S.D>=400,rq:`需要 $400`,e:{D:-400,L:3,M:8,HA:6,B:6},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`安详离世`);return '';},r:`每第七天一场法会，酥油灯从客厅一直点到湖边。第四十九天，她女儿第一次走进佛堂，坐在Rosa的老位置上。`},
+    {t:`问她还想要什么`,e:{HA:8,T:2},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`安详离世`);return '';},r:`她只要一件事：周日的茶点别改。两周后她走了。之后的每个周日，茶点都和她在的时候一模一样。`}]});
+E({id:'el_windmill',tag:`无尽 · 农场`,title:`风车停了`,rep:1,cd:999,w:4,cond:()=>EL()&&Y()>=2031&&!S.f.windmillDone,
+  text:()=>`一场北风过后，那架老风车不转了。叶片断了两片，轴承锈死。从2020年起它就在那里，谁也说不清它在给哪里抽水。
+Hank说他认识一个在韦科修过风车的老头，Chuy说他有焊机。Tenzin提了个别的主意。`,
+  opts:[{t:`请Hank和Chuy修好它`,req:()=>S.D>=1200,rq:`需要 $1,200`,e:{D:-1200,HA:4,T:1,f:{windmillDone:'fixed'}},r:`修了三个周末。重新转起来那天，好几个成员在停车场拍视频。`},
+    {t:`就让它停着`,e:{L:2,M:2,f:{windmillDone:'still'}},r:`你在它底下讲了一次无常。讲完有人问：那还修吗？你说：不急。`},
+    {t:`装上风力转经筒`,req:()=>S.D>=2000,rq:`需要 $2,000`,e:{D:-2000,L:3,H:3,M:3,f:{windmillDone:'wheel'}},fx(){S.renown=(S.renown||0)+20;return '';},r:`现在叶片每转一圈，就带着六字真言转一圈。Tenzin算过：一个有风的下午，大约十万遍。`}]});
+E({id:'el_three_year',tag:`无尽 · 传承`,title:`第一批三年闭关`,rep:1,cd:24,w:5,cond:()=>EL()&&on('cabin')&&act().filter(x=>x.done).length>=4&&!S.f.group3yr,
+  text:()=>`四位圆满了加行的成员来找你：他们想一起进三年三月三日的闭关。家里都谈过了，工作也安排好了。
+传统的闭关要有闭关导师、护持的人，还有三年的饭钱和电费。他们自己凑了一部分，剩下的，他们没开口。`,
+  opts:[{t:`道场护持他们三年（$9,000）`,req:()=>S.D>=9000,rq:`需要 $9,000`,e:{D:-9000,L:10,M:10,RT:5,f:{group3yr:'here'}},fx(){S.renown=(S.renown||0)+60;act().filter(x=>x.done).slice(0,4).forEach(m=>{m.away=S.turn+39;});return '';},r:`封关那天，你亲手放下界石。此后每天中午，有人把饭放在小屋门口的木架上，敲一下钟就走。`},
+    {t:`送他们去外州的三年闭关中心`,req:()=>S.D>=3000,rq:`需要 $3,000`,e:{D:-3000,L:5,M:6,f:{group3yr:'away'}},fx(){act().filter(x=>x.done).slice(0,4).forEach(m=>{m.away=S.turn+39;});return '';},r:`他们去了山里的一个闭关中心。每年春天寄来一张明信片，上面只写日期。`},
+    {t:`再等两年，先把基础打牢`,e:{L:1,c:{all:1}},r:`他们点头。其中一个人说：“那我先把大礼拜再做十万遍。”`}]});
+E({id:'el_citizen',tag:`无尽 · 人物`,title:`宣誓`,rep:1,cd:999,w:6,cond:()=>EL()&&!!S.f.uyghurFamily&&Y()>=2035&&!S.f.citizen,
+  text:()=>`Dilnur一家在韦科联邦法院宣誓入籍。仪式上有来自二十三个国家的人。法官请每个人说出自己出生的国家，轮到Dilnur时，她停了一下，说：“东突厥斯坦——喀什。”法官点点头，没有纠正。
+Aynur已经十六岁了，坐在旁听席第一排，替全家拿着那面小国旗。`,
+  opts:[{t:`带着几位成员去旁听`,e:{T:3,HA:3,M:2,f:{citizen:1}},r:`你们坐在最后一排。散场时Ablikim挨个和你们握手，握得很用力。`},
+    {t:`在湖边草坪办一场百家宴，请清真寺一起`,req:()=>S.D>=300,rq:`需要 $300`,e:{D:-300,T:4,HA:5,f:{citizen:1}},r:`馕、抓饭、墨西哥卷饼、烤肉——素的那种。伊玛目和你又一次在停车场聊到很晚。`},
+    {t:`Aynur请你给她的美术夏令营写推荐信`,e:{M:3,KN:1,f:{citizen:1}},r:`你写了一页半。最后一句是：“她画的东西，帮一个地方记住了它自己。”`}]});
+E({id:'el_hunan_voice',tag:`无尽 · 虚构历史`,title:`三秒钟`,rep:1,cd:999,w:5,cond:()=>EL()&&!!S.f.uyghurFamily&&Y()>=2031&&!S.f.hunanVoice,
+  text:()=>`四年来，Dilnur第一次收到湖南表姐的消息：一条语音，三秒钟。“我们都好。别打电话。”
+她在厨房里放了一遍又一遍。她什么都没求你。`,
+  opts:[{t:`在厨房陪她坐着`,e:{M:4,HA:2,f:{hunanVoice:1}},r:`你们谁也没说话。水开了两次，谁也没去倒茶。`},
+    {t:`晚课回向——不念名字`,e:{M:3,L:1,f:{hunanVoice:1}},r:`你回向给“所有在远方、不能被叫出名字的人”。Dilnur站在佛堂门外听完，才回家。`},
+    {t:`打电话请伊玛目过来`,e:{T:2,HA:2,r:{marcus:1},f:{hunanVoice:1}},r:`伊玛目来了，带着他太太做的点心。他和Dilnur用维吾尔语说了很久，你一个字也听不懂，也不需要懂。`}]});
+E({id:'el_heat',tag:`无尽 · 天气`,title:`热穹`,rep:1,cd:30,w:4,months:[7,8],cond:()=>EL(),
+  text:()=>`热穹压在德州中部，连续九天四十三度。电网又在告急。几位年长的成员家里没有空调。
+县里在找能当“纳凉中心”的地方。`,
+  opts:[{t:`把佛堂开放为纳凉中心`,req:()=>S.D>=700,rq:`需要 $700`,e:{D:-700,T:4,M:4,H:3,B:5},r:`白天佛堂里坐满了陌生人：带孩子的母亲、送外卖的、一位一直在念玫瑰经的老太太。没有人被要求打坐。`},
+    {t:`给草坪装遮阳棚和喷雾`,req:()=>S.D>=400,rq:`需要 $400`,e:{D:-400,HA:3,T:1},r:`孩子们在喷雾下面跑来跑去。大人们坐在棚下，第一次觉得湖边的风是凉的。`},
+    {t:`照常运作，提醒大家多喝水`,e:{c:{all:-1}},r:`周日有两位老成员没来。你打电话过去，他们说：太热了，在家念。`}]});
+
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:'成员人生',title:'想离开',qonly:1,
   text:()=>{const m=ctxMem();return m?`${m.n}已经连续几个月心不在焉了。今天他说：“我想我需要暂停一下。”${m.pref<35?'他说这里“越来越像一个宗教”。':m.pref>70?'他说这里“越来越不像一个道场”。':'他没说为什么。'}`:'有人想离开。';},
@@ -1443,6 +1481,7 @@ function settle0(){
     d+=LB.commit+(tk('A1')?.3:0)+((S.HA??50)-50)/45+(boon('sangha')?.2:0)+(hasRole(x)?.4:0);
     if(S.B>=70) d-=1;
     d-=scaleDrag();
+    d-=Math.max(0,x.c-65)*.1; // v26：承诺度高位回落，满意要靠维持
     if(S.f.armed&&x.pref>70) d-=.6;
     if(S.f.chadCenter&&S.auth.chad>S.auth.you+12&&x.pref>=65) d-=1.2;
     if(x.id==='tenzin'&&S.origin==='convert') d-=.3;
@@ -1498,7 +1537,7 @@ function settle0(){
   if(S.HP<10){other-=400;lines.push(['住持病倒 · 医药费',-400]);S.HP=40;S.B=Math.max(0,S.B-25);notes.push('你病倒了，在医院住了三天。');log('住持病倒住院了三天。');}
   if(monthEnd&&(S.stats.grant||0)>=6){S.stats.grant=0;if(chance(.55+S.T/300)){const g=Math.round((1800+ri(0,1800))*(S.f.c3?1.4:1));other+=g;lines.push(['基金会资助',g]);notes.push('基金申请通过了。');log(`基金申请通过：$${g}。`);}else notes.push('这一轮基金申请没有通过。');}
   if(monthEnd&&S.D<0){const it=Math.round(-S.D*.015);other-=it;lines.push(['透支利息',-it]);if(S.D<-8000){S.T-=1;S.B+=3;notes.push('欠账的消息传开了：信任−，倦怠+');}}
-  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.985;
+  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.978;
   S.D+=inc+other-et;
   // 漂移（月末）
   if(monthEnd){
@@ -1830,7 +1869,7 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`林悦 Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur'});
 ENDINGS.refuge={n:`庇护所`,en:'SANCTUARY',img:`诺鲁孜节的草地上，伊玛目、Marcus和你坐在同一块野餐布上。Dilnur的女儿在给每个人的盘子里分抓饭。`,t:()=>`后来，韦科的人说起这个地方，不再说“那个佛教组织”，而是说“湖边那家，出事的时候门是开着的”。${S.f.uyGarden?`Ablikim的葡萄架上，今年挂了几串还很酸的葡萄。`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin在日喀则开了一间小茶馆，墙上挂着韦科佛堂的合影。`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin还在H-E-B上班，周日在佛堂领诵。`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin按仁波切信里说的，周日讲法。他还在H-E-B上早班。`);
@@ -4093,7 +4132,7 @@ const WIKI_CONCEPTS=[
   ['和合','僧团的融洽。茶话会、荟供、谈话会升，人太多、住持倦怠会降。它直接影响成员承诺度的漂移。'],
   ['学识','住持的经论功底。研读经论、翻译、讲经堂会升，会自然遗忘。提高术语深度上限，并加快资粮积累。'],
   ['资粮','修学科技树用的点数。每周按学识、自修与功德积累。'],
-  ['功德','看不见的东西。放生、临终关怀、社区服务、节日法会会积累，上限 100，每周流失 1.5%。影响修学速度、结局与密勒日巴式闭关。'],
+  ['功德','看不见的东西。放生、临终关怀、社区服务、节日法会会积累，上限 100，每周流失 2.2%。影响修学速度、结局与密勒日巴式闭关。'],
   ['捐款人疲劳','义卖、有偿静修营、直播随喜，连续做回报递减（每做一次 −35% 叠加，每周恢复四分之一）。隔几周做一次最划算。'],
   ['富足效应','账上超过 12 个月开支时，周日随喜和筹款按 √(12/月数) 递减，最低 45%。钱是拿来用的。'],
   ['规模成本','超过 20 位成员后，每多一人，所有人的承诺度漂移 −0.015。大道场需要角色、集体修法与和合来维持。'],
@@ -4391,7 +4430,7 @@ function treFx(){const o={L:0,T:0,H:0,HA:0,M:0,KN:0,RT:0,HP:0,self:0,disc:{},ng:
   treList().forEach(id=>{const d=TRE[id];if(!d)return;o.value+=d.v;if(!treShown(id))return;o.shown++;for(const k in d.fx)o[k]+=d.fx[k];if(d.disc)for(const k in d.disc)o.disc[k]=Math.min(o.disc[k]||1,d.disc[k]);const s=d.sp||{};
     if(s.ng)o.ng*=s.ng;if(s.intro)o.intro*=s.intro;if(s.hospice)o.hospice*=s.hospice;if(s.tsok)o.tsok*=s.tsok;if(s.fest)o.fest*=s.fest;if(s.vis)o.vis+=s.vis;if(s.newP)o.newP+=s.newP;if(s.commit)o.commit+=s.commit;if(s.renown)o.renown+=s.renown;if(s.cap)o.cap+=s.cap;if(s.theft)o.theft++;});
   return o;}
-function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n}从博物馆回来了。`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
+function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n}从博物馆回来了。`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=dimR(f.HA,.15);S.M+=dimR(f.M,.15);S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
   if(treShown('kangling')&&!roomsOn('protector').length){/* 不可能：pl=protector */}
   if(treShown('milarepa_songs')&&has('tenzin')){const m=mem('tenzin');if(m&&!m.left)m.c+=.1;}
   if(f.commit)act().forEach(m=>m.c+=f.commit/WK);}
@@ -7164,6 +7203,44 @@ Three years, three months and three days: the preliminaries once more, the yidam
     {t:`Stay in the cabin as retreat master for the next group`,req:()=>on('cabin'),rq:`Requires a retreat cabin`,e:{L:8,S:10,f:{milaOut:1}},fx(){S.f.localGuide=S.f.localGuide||S.name;return '';},r:`There are already three names on the waiting list. You put the boundary stones back.`},
     {t:`Walk once around the lake before anything else`,e:{HP:15,HA:5,M:5,f:{milaOut:1}},r:`It takes the whole afternoon. A heron keeps you company for part of the way.`}]});
 
+/* ===== v26 · 无尽模式扩写：人物与农场（2031 年起） ===== */
+E({id:'el_rosa',tag:`Endless · People`,title:`Rosa`,rep:1,cd:999,w:5,cond:()=>EL()&&has('rosa')&&Y()>=2032&&S.f.heir!=='rosa'&&!S.f.rosaGone,
+  text:()=>`Rosa has moved into the hospice ward at Providence. She had her daughter call you, and the priest from her parish too. "Both," she said. "I'm old. I'm not picky."
+When you arrive she is awake. On the bedside table is the little card of Our Lady of Guadalupe, and beside it the mala you gave her years ago, the hundred-and-eight-bead kind.`,
+  opts:[{t:`Let the priest come first, then recite the Praise to the Twenty-One Taras for her`,e:{M:6,HA:4,L:1,c:{all:2}},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`passed away peacefully`);return '';},r:`The priest anoints her. Then you recite the praise to Tara, and her lips move along with it. When you finish she says, "Tara and Our Lady have the same eyes." Three days later she dies in her sleep.`},
+    {t:`After she dies, the whole sangha practices for forty-nine days`,req:()=>S.D>=400,rq:`Requires $400`,e:{D:-400,L:3,M:8,HA:6,B:6},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`passed away peacefully`);return '';},r:`A puja every seventh day, butter lamps from the living room all the way down to the lake. On the forty-ninth day her daughter walks into the shrine room for the first time and sits in Rosa's old place.`},
+    {t:`Ask her what she still wants`,e:{HA:8,T:2},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`passed away peacefully`);return '';},r:`Only one thing: don't change the Sunday tea. Two weeks later she is gone. Every Sunday after that, the tea is exactly as it was when she was there.`}]});
+E({id:'el_windmill',tag:`Endless · The Farm`,title:`The Windmill Stops`,rep:1,cd:999,w:4,cond:()=>EL()&&Y()>=2031&&!S.f.windmillDone,
+  text:()=>`After a norther blows through, the old windmill stops turning. Two blades are snapped and the bearing has rusted solid. It has stood there since 2020, and nobody ever worked out where it was pumping water to.
+Hank says he knows an old man who used to fix windmills around Waco; Chuy says he has a welder. Tenzin has another idea.`,
+  opts:[{t:`Have Hank and Chuy fix it`,req:()=>S.D>=1200,rq:`Requires $1,200`,e:{D:-1200,HA:4,T:1,f:{windmillDone:'fixed'}},r:`It takes three weekends. The day it turns again, half a dozen members film it from the parking lot.`},
+    {t:`Let it stand still`,e:{L:2,M:2,f:{windmillDone:'still'}},r:`You give a talk on impermanence underneath it. Afterward someone asks: so are we fixing it? You say: no hurry.`},
+    {t:`Fit it with a wind-turned prayer wheel`,req:()=>S.D>=2000,rq:`Requires $2,000`,e:{D:-2000,L:3,H:3,M:3,f:{windmillDone:'wheel'}},fx(){S.renown=(S.renown||0)+20;return '';},r:`Now every turn of the blades turns the six-syllable mantra too. Tenzin has done the math: about a hundred thousand on a windy afternoon.`}]});
+E({id:'el_three_year',tag:`Endless · Lineage`,title:`The First Three-Year Retreat`,rep:1,cd:24,w:5,cond:()=>EL()&&on('cabin')&&act().filter(x=>x.done).length>=4&&!S.f.group3yr,
+  text:()=>`Four members who have finished ngöndro come to see you. They want to enter three-year, three-month, three-day retreat together. They have talked it over with their families and arranged things at work.
+A traditional retreat needs a retreat master, people to support it, and three years of food and electricity. They have raised part of it themselves. About the rest, they haven't said a word.`,
+  opts:[{t:`The center supports them for three years ($9,000)`,req:()=>S.D>=9000,rq:`Requires $9,000`,e:{D:-9000,L:10,M:10,RT:5,f:{group3yr:'here'}},fx(){S.renown=(S.renown||0)+60;act().filter(x=>x.done).slice(0,4).forEach(m=>{m.away=S.turn+39;});return '';},r:`On the day the retreat is sealed, you set down the boundary stones yourself. From then on, every day at noon someone leaves food on the wooden shelf by the cabin door, rings the bell once and walks away.`},
+    {t:`Send them to a three-year retreat center out of state`,req:()=>S.D>=3000,rq:`Requires $3,000`,e:{D:-3000,L:5,M:6,f:{group3yr:'away'}},fx(){act().filter(x=>x.done).slice(0,4).forEach(m=>{m.away=S.turn+39;});return '';},r:`They go to a retreat center in the mountains. Every spring a postcard arrives with nothing on it but the date.`},
+    {t:`Wait two more years and build the foundation first`,e:{L:1,c:{all:1}},r:`They nod. One of them says, "Then I'll do another hundred thousand prostrations first."`}]});
+E({id:'el_citizen',tag:`Endless · People`,title:`The Oath`,rep:1,cd:999,w:6,cond:()=>EL()&&!!S.f.uyghurFamily&&Y()>=2035&&!S.f.citizen,
+  text:()=>`Dilnur's family take the oath of citizenship at the federal courthouse in Waco, alongside people from twenty-three countries. The judge asks each of them to name the country where they were born. When it is Dilnur's turn she pauses, then says: "East Turkestan. Kashgar." The judge nods and does not correct her.
+Aynur is sixteen now. She sits in the front row of the gallery, holding the little flag for the whole family.`,
+  opts:[{t:`Go and watch with a few members`,e:{T:3,HA:3,M:2,f:{citizen:1}},r:`You sit in the back row. Afterward Ablikim shakes each of your hands, hard.`},
+    {t:`Hold a potluck on the lake lawn, with the mosque`,req:()=>S.D>=300,rq:`Requires $300`,e:{D:-300,T:4,HA:5,f:{citizen:1}},r:`Naan, polo, tamales, barbecue (the vegetarian kind). You and the imam end up talking in the parking lot until late, again.`},
+    {t:`Aynur asks you for a recommendation letter for a summer art program`,e:{M:3,KN:1,f:{citizen:1}},r:`You write a page and a half. The last line reads: "What she draws has helped a place remember itself."`}]});
+E({id:'el_hunan_voice',tag:`Endless · Fictional History`,title:`Three Seconds`,rep:1,cd:999,w:5,cond:()=>EL()&&!!S.f.uyghurFamily&&Y()>=2031&&!S.f.hunanVoice,
+  text:()=>`For the first time in four years, Dilnur hears from her cousin in Hunan: a voice message, three seconds long. "We are all well. Don't call."
+She plays it in the kitchen again and again. She doesn't ask you for anything.`,
+  opts:[{t:`Sit with her in the kitchen`,e:{M:4,HA:2,f:{hunanVoice:1}},r:`Neither of you speaks. The kettle boils twice and nobody pours the tea.`},
+    {t:`Dedicate the evening practice, without names`,e:{M:3,L:1,f:{hunanVoice:1}},r:`You dedicate the merit to "all those far away who cannot be called by name." Dilnur stands outside the shrine room door until it is over, and only then goes home.`},
+    {t:`Call the imam and ask him to come`,e:{T:2,HA:2,r:{marcus:1},f:{hunanVoice:1}},r:`The imam comes, bringing pastries his wife made. He and Dilnur talk in Uyghur for a long time. You don't understand a word, and you don't need to.`}]});
+E({id:'el_heat',tag:`Endless · Weather`,title:`Heat Dome`,rep:1,cd:30,w:4,months:[7,8],cond:()=>EL(),
+  text:()=>`A heat dome settles over Central Texas: nine straight days above 110°F. The grid is on emergency footing again. Several of the older members have no air conditioning at home.
+The county is looking for places to serve as cooling centers.`,
+  opts:[{t:`Open the shrine room as a cooling center`,req:()=>S.D>=700,rq:`Requires $700`,e:{D:-700,T:4,M:4,H:3,B:5},r:`All day the shrine room fills with strangers: mothers with children, delivery drivers, an old woman saying the rosary the whole time. Nobody is asked to meditate.`},
+    {t:`Put up shade canopies and misters on the lawn`,req:()=>S.D>=400,rq:`Requires $400`,e:{D:-400,HA:3,T:1},r:`The children run back and forth under the mist. The adults sit under the canopy and, for the first time, find the lake breeze cool.`},
+    {t:`Carry on as usual; remind everyone to drink water`,e:{c:{all:-1}},r:`Two older members miss Sunday. You call them. Too hot, they say; they're practicing at home.`}]});
+
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Members' Lives",title:"Wants to Leave",qonly:1,
   text:()=>{const m=ctxMem();return m?`${m.n} has been somewhere else for months. Today he says, "I think I need to take a break."${m.pref<35?" He says this place is \"turning into a religion.\"":m.pref>70?" He says this place is \"turning into less of a dharma center.\"":" He doesn't say why."}`:"Someone wants to leave.";},
@@ -7321,6 +7398,7 @@ function settle0(){
     d+=LB.commit+(tk('A1')?.3:0)+((S.HA??50)-50)/45+(boon('sangha')?.2:0)+(hasRole(x)?.4:0);
     if(S.B>=70) d-=1;
     d-=scaleDrag();
+    d-=Math.max(0,x.c-65)*.1; // v26：承诺度高位回落，满意要靠维持
     if(S.f.armed&&x.pref>70) d-=.6;
     if(S.f.chadCenter&&S.auth.chad>S.auth.you+12&&x.pref>=65) d-=1.2;
     if(x.id==='tenzin'&&S.origin==='convert') d-=.3;
@@ -7376,7 +7454,7 @@ function settle0(){
   if(S.HP<10){other-=400;lines.push(["Abbot ill · medical bills",-400]);S.HP=40;S.B=Math.max(0,S.B-25);notes.push("You fell ill and spent three days in the hospital.");log("The Abbot fell ill and spent three days in the hospital.");}
   if(monthEnd&&(S.stats.grant||0)>=6){S.stats.grant=0;if(chance(.55+S.T/300)){const g=Math.round((1800+ri(0,1800))*(S.f.c3?1.4:1));other+=g;lines.push(["Foundation grant",g]);notes.push("The grant application was approved.");log(`Grant approved: $${g}.`);}else notes.push("This round's grant application was turned down.");}
   if(monthEnd&&S.D<0){const it=Math.round(-S.D*.015);other-=it;lines.push(["Overdraft interest",-it]);if(S.D<-8000){S.T-=1;S.B+=3;notes.push("Word of the debts gets around: Trust −, Burnout +");}}
-  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.985;
+  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.978;
   S.D+=inc+other-et;
   // 漂移（月末）
   if(monthEnd){
@@ -7708,7 +7786,7 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur'});
 ENDINGS.refuge={n:`Sanctuary`,en:'SANCTUARY',img:`On the lawn at Nowruz, the imam, Marcus and you share one picnic blanket. Dilnur's daughter is spooning polo onto everyone's plate.`,t:()=>`Later, when people in Waco talk about this place, they no longer say "that Buddhist group." They say "the place by the lake that kept its door open when it all happened."${S.f.uyGarden?` This year, a few very sour bunches hang from Ablikim's trellis.`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin opened a small teahouse in Shigatse. A photo of the Waco sangha hangs on the wall.`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin still works at H-E-B and leads the chanting on Sundays.`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`Tenzin gives the Sunday teachings, as Rinpoche's letter asked. He still works the early shift at H-E-B.`);
@@ -9972,7 +10050,7 @@ const WIKI_CONCEPTS=[
   ["Harmony","How well the sangha gets along. Tea gatherings, tsok and talks raise it; crowding and the Abbot's burnout lower it. It directly shapes how members' commitment drifts."],
   ["Learning","The Abbot's grounding in the texts. Study, translation and a lecture hall raise it; it fades naturally. Raises the depth ceiling and speeds up accumulations."],
   ["Accum.","Points for studying the tech tree. Accrue weekly from Learning, self-practice and Merit."],
-  ["Merit","The invisible thing. Built up by life release, hospice, community service and festival pujas; capped at 100 and loses 1.5% a week. Affects study speed, endings and the Milarepa retreat."],
+  ["Merit","The invisible thing. Built up by life release, hospice, community service and festival pujas; capped at 100 and loses 2.2% a week. Affects study speed, endings and the Milarepa retreat."],
   ["Donor Fatigue","Bake sales, paid retreats and livestream offerings pay less when repeated (each use stacks −35%; a quarter recovers each week). Spacing them a few weeks apart pays best."],
   ["Comfortable Center","With more than 12 months of expenses in the bank, Sunday offerings and fundraising scale by √(12/months), down to 45%. Money is for using."],
   ["Cost of Size","Beyond 20 members, each additional person lowers everyone's commitment drift by 0.015. A large sangha needs roles, group practice and Harmony to hold together."],
@@ -10270,7 +10348,7 @@ function treFx(){const o={L:0,T:0,H:0,HA:0,M:0,KN:0,RT:0,HP:0,self:0,disc:{},ng:
   treList().forEach(id=>{const d=TRE[id];if(!d)return;o.value+=d.v;if(!treShown(id))return;o.shown++;for(const k in d.fx)o[k]+=d.fx[k];if(d.disc)for(const k in d.disc)o.disc[k]=Math.min(o.disc[k]||1,d.disc[k]);const s=d.sp||{};
     if(s.ng)o.ng*=s.ng;if(s.intro)o.intro*=s.intro;if(s.hospice)o.hospice*=s.hospice;if(s.tsok)o.tsok*=s.tsok;if(s.fest)o.fest*=s.fest;if(s.vis)o.vis+=s.vis;if(s.newP)o.newP+=s.newP;if(s.commit)o.commit+=s.commit;if(s.renown)o.renown+=s.renown;if(s.cap)o.cap+=s.cap;if(s.theft)o.theft++;});
   return o;}
-function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} has come back from the museum.`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
+function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} has come back from the museum.`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=dimR(f.HA,.15);S.M+=dimR(f.M,.15);S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
   if(treShown('kangling')&&!roomsOn('protector').length){/* 不可能：pl=protector */}
   if(treShown('milarepa_songs')&&has('tenzin')){const m=mem('tenzin');if(m&&!m.left)m.c+=.1;}
   if(f.commit)act().forEach(m=>m.c+=f.commit/WK);}
@@ -13043,6 +13121,44 @@ Três anos, três meses e três dias: as práticas preliminares outra vez, a pr�
     {t:`Ficar na cabana como mestre de retiro do próximo grupo`,req:()=>on('cabin'),rq:`Requer uma cabana de retiro`,e:{L:8,S:10,f:{milaOut:1}},fx(){S.f.localGuide=S.f.localGuide||S.name;return '';},r:`Já há três nomes na lista de espera. Voltas a pôr as pedras de fronteira no lugar.`},
     {t:`Dar primeiro uma volta ao lago, o resto depois`,e:{HP:15,HA:5,M:5,f:{milaOut:1}},r:`Leva a tarde inteira. Uma garça faz-te companhia durante parte do caminho.`}]});
 
+/* ===== v26 · 无尽模式扩写：人物与农场（2031 年起） ===== */
+E({id:'el_rosa',tag:`Infinito · Pessoas`,title:`Rosa`,rep:1,cd:999,w:5,cond:()=>EL()&&has('rosa')&&Y()>=2032&&S.f.heir!=='rosa'&&!S.f.rosaGone,
+  text:()=>`A Rosa foi para a unidade de cuidados paliativos do Providence. Pediu à filha que te telefonasse, e também ao padre da paróquia. «Os dois», disse ela. «Estou velha. Não sou esquisita.»
+Quando chegas, está acordada. Na mesa de cabeceira está o pequeno cartão de Nossa Senhora de Guadalupe e, ao lado, o mala que lhe deste há anos, daqueles de cento e oito contas.`,
+  opts:[{t:`Deixar o padre vir primeiro e depois recitar para ela o Louvor às Vinte e Uma Taras`,e:{M:6,HA:4,L:1,c:{all:2}},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`faleceu em paz`);return '';},r:`O padre unge-a. Depois recitas o louvor a Tara, e os lábios dela acompanham. Quando acabas, ela diz: «A Tara e Nossa Senhora têm os mesmos olhos.» Três dias depois, morre a dormir.`},
+    {t:`Depois da morte dela, toda a sangha pratica durante quarenta e nove dias`,req:()=>S.D>=400,rq:`Requer $400`,e:{D:-400,L:3,M:8,HA:6,B:6},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`faleceu em paz`);return '';},r:`Uma puja a cada sétimo dia, lamparinas de manteiga desde a sala até ao lago. No quadragésimo nono dia, a filha entra pela primeira vez na sala do santuário e senta-se no antigo lugar da Rosa.`},
+    {t:`Perguntar-lhe o que ainda quer`,e:{HA:8,T:2},fx(){S.f.rosaGone=S.turn;leave(mem('rosa'),`faleceu em paz`);return '';},r:`Só uma coisa: que não mudem o chá de domingo. Duas semanas depois, partiu. Em todos os domingos seguintes, o chá é exatamente como quando ela lá estava.`}]});
+E({id:'el_windmill',tag:`Infinito · A quinta`,title:`O moinho para`,rep:1,cd:999,w:4,cond:()=>EL()&&Y()>=2031&&!S.f.windmillDone,
+  text:()=>`Depois de passar uma frente fria do norte, o velho moinho deixa de girar. Duas pás partiram-se e o rolamento ficou preso de ferrugem. Está ali desde 2020 e ninguém nunca percebeu para onde bombeava a água.
+O Hank diz que conhece um velhote que arranjava moinhos em Waco; o Chuy diz que tem uma máquina de soldar. O Tenzin tem outra ideia.`,
+  opts:[{t:`Pedir ao Hank e ao Chuy que o arranjem`,req:()=>S.D>=1200,rq:`Requer $1,200`,e:{D:-1200,HA:4,T:1,f:{windmillDone:'fixed'}},r:`Leva três fins de semana. No dia em que volta a girar, meia dúzia de membros filma-o do parque de estacionamento.`},
+    {t:`Deixá-lo parado`,e:{L:2,M:2,f:{windmillDone:'still'}},r:`Dás um ensinamento sobre a impermanência debaixo dele. No fim alguém pergunta: então, arranjamos ou não? Dizes: não há pressa.`},
+    {t:`Montar-lhe uma roda de oração movida pelo vento`,req:()=>S.D>=2000,rq:`Requer $2,000`,e:{D:-2000,L:3,H:3,M:3,f:{windmillDone:'wheel'}},fx(){S.renown=(S.renown||0)+20;return '';},r:`Agora cada volta das pás faz girar também o mantra das seis sílabas. O Tenzin fez as contas: cerca de cem mil numa tarde de vento.`}]});
+E({id:'el_three_year',tag:`Infinito · Linhagem`,title:`O primeiro retiro de três anos`,rep:1,cd:24,w:5,cond:()=>EL()&&on('cabin')&&act().filter(x=>x.done).length>=4&&!S.f.group3yr,
+  text:()=>`Quatro membros que completaram o ngöndro vêm falar contigo. Querem entrar juntos no retiro de três anos, três meses e três dias. Já falaram com as famílias e trataram das coisas no trabalho.
+Um retiro tradicional precisa de um mestre de retiro, de quem o apoie e de três anos de comida e eletricidade. Juntaram parte do dinheiro sozinhos. Sobre o resto, não disseram uma palavra.`,
+  opts:[{t:`O centro apoia-os durante três anos ($9,000)`,req:()=>S.D>=9000,rq:`Requer $9,000`,e:{D:-9000,L:10,M:10,RT:5,f:{group3yr:'here'}},fx(){S.renown=(S.renown||0)+60;act().filter(x=>x.done).slice(0,4).forEach(m=>{m.away=S.turn+39;});return '';},r:`No dia em que o retiro é selado, és tu que pousas as pedras de fronteira. A partir daí, todos os dias ao meio-dia alguém deixa a comida na prateleira de madeira junto à porta da cabana, toca o sino uma vez e vai-se embora.`},
+    {t:`Enviá-los para um centro de retiro de três anos noutro estado`,req:()=>S.D>=3000,rq:`Requer $3,000`,e:{D:-3000,L:5,M:6,f:{group3yr:'away'}},fx(){act().filter(x=>x.done).slice(0,4).forEach(m=>{m.away=S.turn+39;});return '';},r:`Vão para um centro de retiro nas montanhas. Todas as primaveras chega um postal sem nada escrito além da data.`},
+    {t:`Esperar mais dois anos e consolidar primeiro as bases`,e:{L:1,c:{all:1}},r:`Eles acenam com a cabeça. Um deles diz: «Então primeiro faço mais cem mil prostrações.»`}]});
+E({id:'el_citizen',tag:`Infinito · Pessoas`,title:`O juramento`,rep:1,cd:999,w:6,cond:()=>EL()&&!!S.f.uyghurFamily&&Y()>=2035&&!S.f.citizen,
+  text:()=>`A família da Dilnur presta juramento de cidadania no tribunal federal de Waco, ao lado de pessoas de vinte e três países. O juiz pede a cada um que diga o país onde nasceu. Quando chega a vez da Dilnur, ela hesita e depois diz: «Turquestão Oriental. Kashgar.» O juiz acena e não a corrige.
+A Aynur tem agora dezasseis anos. Está sentada na primeira fila da galeria, a segurar a pequena bandeira pela família toda.`,
+  opts:[{t:`Ir assistir com alguns membros`,e:{T:3,HA:3,M:2,f:{citizen:1}},r:`Sentam-se na última fila. No fim, o Ablikim aperta a mão a cada um de vocês, com força.`},
+    {t:`Fazer um almoço partilhado no relvado junto ao lago, com a mesquita`,req:()=>S.D>=300,rq:`Requer $300`,e:{D:-300,T:4,HA:5,f:{citizen:1}},r:`Naan, polo, tamales, churrasco (do vegetariano). Tu e o imã acabam outra vez a conversar no parque de estacionamento até tarde.`},
+    {t:`A Aynur pede-te uma carta de recomendação para um curso de verão de artes`,e:{M:3,KN:1,f:{citizen:1}},r:`Escreves página e meia. A última frase diz: «O que ela desenha ajudou um lugar a lembrar-se de si próprio.»`}]});
+E({id:'el_hunan_voice',tag:`Infinito · História fictícia`,title:`Três segundos`,rep:1,cd:999,w:5,cond:()=>EL()&&!!S.f.uyghurFamily&&Y()>=2031&&!S.f.hunanVoice,
+  text:()=>`Pela primeira vez em quatro anos, a Dilnur tem notícias da prima em Hunan: uma mensagem de voz com três segundos. «Estamos todos bem. Não liguem.»
+Ela ouve-a na cozinha, uma e outra vez. Não te pede nada.`,
+  opts:[{t:`Ficar sentado com ela na cozinha`,e:{M:4,HA:2,f:{hunanVoice:1}},r:`Nenhum dos dois fala. A chaleira ferve duas vezes e ninguém serve o chá.`},
+    {t:`Dedicar a prática da noite, sem nomes`,e:{M:3,L:1,f:{hunanVoice:1}},r:`Dedicas o mérito a «todos os que estão longe e não podem ser chamados pelo nome». A Dilnur fica à porta da sala do santuário até ao fim, e só depois vai para casa.`},
+    {t:`Telefonar ao imã e pedir-lhe que venha`,e:{T:2,HA:2,r:{marcus:1},f:{hunanVoice:1}},r:`O imã vem, com uns bolos que a mulher fez. Ele e a Dilnur falam em uigur durante muito tempo. Não percebes uma palavra, nem precisas.`}]});
+E({id:'el_heat',tag:`Infinito · Tempo`,title:`Cúpula de calor`,rep:1,cd:30,w:4,months:[7,8],cond:()=>EL(),
+  text:()=>`Uma cúpula de calor instala-se sobre o centro do Texas: nove dias seguidos acima dos 43 °C. A rede elétrica está outra vez em estado de emergência. Vários dos membros mais velhos não têm ar condicionado em casa.
+O condado procura locais que sirvam de centros de arrefecimento.`,
+  opts:[{t:`Abrir a sala do santuário como centro de arrefecimento`,req:()=>S.D>=700,rq:`Requer $700`,e:{D:-700,T:4,M:4,H:3,B:5},r:`O dia inteiro, a sala enche-se de desconhecidos: mães com crianças, estafetas, uma senhora idosa a rezar o terço o tempo todo. Ninguém é convidado a meditar.`},
+    {t:`Montar toldos e nebulizadores no relvado`,req:()=>S.D>=400,rq:`Requer $400`,e:{D:-400,HA:3,T:1},r:`As crianças correm de um lado para o outro debaixo da névoa. Os adultos sentam-se à sombra e, pela primeira vez, acham fresca a brisa do lago.`},
+    {t:`Continuar como sempre e lembrar todos de beber água`,e:{c:{all:-1}},r:`Dois membros mais velhos faltam no domingo. Telefonas-lhes. Está calor demais, dizem; estão a praticar em casa.`}]});
+
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Vidas dos membros",title:"Quer ir embora",qonly:1,
   text:()=>{const m=ctxMem();return m?`Há meses que ${m.n} anda com a cabeça noutro lado. Hoje diz: «Acho que preciso de fazer uma pausa.»${m.pref<35?" Diz que isto está «a transformar-se numa religião».":m.pref>70?" Diz que isto está «a deixar de ser um centro de Dharma».":" Não diz porquê."}`:"Alguém quer ir embora.";},
@@ -13200,6 +13316,7 @@ function settle0(){
     d+=LB.commit+(tk('A1')?.3:0)+((S.HA??50)-50)/45+(boon('sangha')?.2:0)+(hasRole(x)?.4:0);
     if(S.B>=70) d-=1;
     d-=scaleDrag();
+    d-=Math.max(0,x.c-65)*.1; // v26：承诺度高位回落，满意要靠维持
     if(S.f.armed&&x.pref>70) d-=.6;
     if(S.f.chadCenter&&S.auth.chad>S.auth.you+12&&x.pref>=65) d-=1.2;
     if(x.id==='tenzin'&&S.origin==='convert') d-=.3;
@@ -13255,7 +13372,7 @@ function settle0(){
   if(S.HP<10){other-=400;lines.push(["Abade doente · despesas médicas",-400]);S.HP=40;S.B=Math.max(0,S.B-25);notes.push("Adoeceste e passaste três dias no hospital.");log("O Abade adoeceu e passou três dias no hospital.");}
   if(monthEnd&&(S.stats.grant||0)>=6){S.stats.grant=0;if(chance(.55+S.T/300)){const g=Math.round((1800+ri(0,1800))*(S.f.c3?1.4:1));other+=g;lines.push(["Subsídio de fundação",g]);notes.push("A candidatura ao subsídio foi aprovada.");log(`Subsídio aprovado: $${g}.`);}else notes.push("A candidatura ao subsídio desta ronda foi recusada.");}
   if(monthEnd&&S.D<0){const it=Math.round(-S.D*.015);other-=it;lines.push(["Juros de descoberto",-it]);if(S.D<-8000){S.T-=1;S.B+=3;notes.push("Corre a notícia das dívidas: Confiança −, Exaustão +");}}
-  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.985;
+  S.L-=Math.max(0,S.T-55)*.03;S.T-=Math.max(0,S.L-55)*.03;S.M*=.978;
   S.D+=inc+other-et;
   // 漂移（月末）
   if(monthEnd){
@@ -13587,7 +13704,7 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
 
 /* v25：新人物头像、事件头像、结局与后记 */
 Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
-Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa'});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang',el_mila_out:'rosa',el_rosa:'rosa',el_windmill:'hank',el_citizen:'dilnur',el_hunan_voice:'dilnur'});
 ENDINGS.refuge={n:`Refúgio`,en:'SANCTUARY',img:`No relvado, no Nowruz, o imã, o Marcus e tu partilham a mesma toalha de piquenique. A filha da Dilnur serve polo no prato de cada um.`,t:()=>`Mais tarde, quando em Waco se fala deste sítio, já não se diz «aquele grupo budista». Diz-se «a casa junto ao lago que manteve a porta aberta quando tudo aconteceu».${S.f.uyGarden?` Este ano, a latada do Ablikim já tem uns cachos ainda muito azedos.`:''}`};
 function epilogue(){const o=[],f=S.f,t=mem('tenzin');
   if(t&&t.left&&S.seen.tibet_india!=null)o.push(`O Tenzin abriu uma pequena casa de chá em Shigatse. Na parede está uma fotografia da sangha de Waco.`);else if(t&&!t.left&&f.designated!=='tenzin'&&f.heir!=='tenzin')o.push(`O Tenzin continua a trabalhar no H-E-B e dirige os cânticos aos domingos.`);else if(t&&!t.left&&f.designated==='tenzin'&&f.heir!=='tenzin')o.push(`O Tenzin dá os ensinamentos de domingo, como a carta do Rinpoche pedia. Continua a fazer o turno da manhã no H-E-B.`);
@@ -15851,7 +15968,7 @@ const WIKI_CONCEPTS=[
   ["Harmonia","Como a sangha se dá. Encontros de chá, tsok e conversas aumentam-na; a sobrelotação e a exaustão do Abade baixam-na. Influencia diretamente a evolução do empenho dos membros."],
   ["Saber","O domínio dos textos por parte do Abade. Estudo, tradução e uma sala de ensinamentos aumentam-no; desvanece-se naturalmente. Eleva o teto de profundidade e acelera as acumulações."],
   ["Acum.","Pontos para estudar na árvore de estudos. Acumulam-se todas as semanas com o Saber, a prática pessoal e o Mérito."],
-  ["Mérito","A coisa invisível. Constrói-se com libertação de vidas, cuidados paliativos, serviço comunitário e pujas festivas; máximo de 100 e perde 1.5% por semana. Afeta a velocidade de estudo, os finais e o retiro de Milarepa."],
+  ["Mérito","A coisa invisível. Constrói-se com libertação de vidas, cuidados paliativos, serviço comunitário e pujas festivas; máximo de 100 e perde 2.2% por semana. Afeta a velocidade de estudo, os finais e o retiro de Milarepa."],
   ["Fadiga dos doadores","Vendas de bolos, retiros pagos e oferendas por transmissão em direto rendem menos quando repetidos (cada uso acumula −35%; recupera-se um quarto por semana). Espaçá-los algumas semanas compensa mais."],
   ["Centro confortável","Com mais de 12 meses de despesas no banco, as oferendas de domingo e a angariação de fundos escalam por √(12/meses), até um mínimo de 45%. O dinheiro é para usar."],
   ["Custo da dimensão","Acima de 20 membros, cada pessoa a mais reduz em 0.015 a evolução do empenho de todos. Uma sangha grande precisa de funções, prática em grupo e Harmonia para se manter unida."],
@@ -16149,7 +16266,7 @@ function treFx(){const o={L:0,T:0,H:0,HA:0,M:0,KN:0,RT:0,HP:0,self:0,disc:{},ng:
   treList().forEach(id=>{const d=TRE[id];if(!d)return;o.value+=d.v;if(!treShown(id))return;o.shown++;for(const k in d.fx)o[k]+=d.fx[k];if(d.disc)for(const k in d.disc)o.disc[k]=Math.min(o.disc[k]||1,d.disc[k]);const s=d.sp||{};
     if(s.ng)o.ng*=s.ng;if(s.intro)o.intro*=s.intro;if(s.hospice)o.hospice*=s.hospice;if(s.tsok)o.tsok*=s.tsok;if(s.fest)o.fest*=s.fest;if(s.vis)o.vis+=s.vis;if(s.newP)o.newP+=s.newP;if(s.commit)o.commit+=s.commit;if(s.renown)o.renown+=s.renown;if(s.cap)o.cap+=s.cap;if(s.theft)o.theft++;});
   return o;}
-function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} voltou do museu.`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=f.HA;S.M+=f.M;S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
+function treTick(){treInit();treList().forEach(id=>{const e=S.tre[id];if(e.loan&&S.turn>=e.loan){delete e.loan;if(treCanShow(id))e.on=true;log(`${TRE[id].n} voltou do museu.`);}});const f=treFx();S.L+=dimR(f.L,.2);S.T+=dimR(f.T,.15);S.H+=f.H;S.HA+=dimR(f.HA,.15);S.M+=dimR(f.M,.15);S.KN+=f.KN;S.RT+=f.RT;S.HP+=f.HP;S.self+=f.self;
   if(treShown('kangling')&&!roomsOn('protector').length){/* 不可能：pl=protector */}
   if(treShown('milarepa_songs')&&has('tenzin')){const m=mem('tenzin');if(m&&!m.left)m.c+=.1;}
   if(f.commit)act().forEach(m=>m.c+=f.commit/WK);}
