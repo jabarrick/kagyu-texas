@@ -1097,8 +1097,8 @@ E({id:'dam',tag:'世界 · 虚构历史',title:'宜昌以下',at:'2027-04',
   pre(){world('三峡大坝溃坝。洪水沿长江而下，宜昌、荆州、岳阳、武汉相继被淹。');},
   text:()=>{const asian=S.origin==='asian';const m=chineseMember();
     return `三峡大坝溃坝了。洪水沿长江而下，宜昌、荆州、洞庭湖区、武汉，一座城接一座城。死亡人数每小时更新一次，没有人相信那个数字。\n${asian?'你母亲在湖北的老家，你已经连续三天打不通电话。':m?`${m.n}的姑姑住在荆州。她这周日来了，坐在最后一排，手机一直亮着。`:'韦科的华人超市门口摆了一张募捐桌，排队的人一直排到停车场。'}${has('hanh')?'Nguyen家的祖母说，这么多人走了，要有人给他们念经。':''}`;},
-  opts:[{t:'把本月随喜全部转给赈灾机构',e:{D:-1500,T:4,M:6},r:'你在佛堂门口贴了一张收据。没有人问钱去了哪里。'},
-    {t:'与Nguyen家合办超度大法会',req:()=>has('hanh'),rq:'需要Nguyen一家在',e:{L:2,T:3,M:4,c:{hanh:8}},r:'藏文、越南文和普通话的念诵交替进行。来了很多从没来过的华人家庭。'},
+  opts:[{t:'把本月随喜全部转给赈灾机构',e:{D:-1500,T:4,M:6,f:{damRelief:1}},r:'你在佛堂门口贴了一张收据。没有人问钱去了哪里。'},
+    {t:'与Nguyen家合办超度大法会',req:()=>has('hanh'),rq:'需要Nguyen一家在',e:{L:2,T:3,M:4,c:{hanh:8},f:{damRelief:1}},r:'藏文、越南文和普通话的念诵交替进行。来了很多从没来过的华人家庭。'},
     {t:'只在佛堂内回向',e:{L:1,M:2},r:'一百零八盏酥油灯点了一整夜。'},
     {t:'飞回中国找家人',req:()=>S.origin==='asian'&&S.D>=2500,rq:'仅亚裔住持 · 需要 $2,500',e:{D:-2500,B:15,S:-3,f:{wentChina:1}},r:'你在武汉的临时安置点找了九天。回到韦科时，你在佛堂里坐了很久才开口。'}]});
 E({id:'hunan',tag:'世界 · 虚构历史',title:'迁往湖南',at:'2027-07',
@@ -1146,7 +1146,7 @@ E({id:'pham',tag:'人物',title:'Mrs. Pham',at:'2028-11',cond:()=>has('hanh'),
     {t:'以净土仪轨为主',e:{L:-1,T:2,c:{hanh:16}},r:'你念阿弥陀佛的发音已经比第一次好多了。Hạnh说祖母会笑的。'},
     {t:'两者合办',req:()=>S.D>=1200,rq:'需要 $1,200',e:{D:-1200,L:2,T:3,c:{hanh:12}},r:'藏文与越南文的念诵交替进行。没有人觉得奇怪。'}]});
 E({id:'dawson_fall',tag:'弧线二 · 镜像教会',title:'一杯酥油茶',at:'2029-02',
-  text:()=>`丰盛生命教会因财务丑闻崩塌：私人飞机、离岸账户、三年未审计的“奉献挑战”基金。Pastor Dawson出现在你的佛堂门口，没穿西装。他在后排坐了一个下午。`,
+  text:()=>`丰盛生命教会因财务丑闻崩塌：私人飞机、离岸账户、三年未审计的“奉献挑战”基金。Pastor Dawson出现在你的佛堂门口，没穿西装。他在后排坐了一个下午。${S.f.harvestLeak?`最先拉开线头的，是Kayleigh那条没什么人看的视频。`:''}${S.f.harvestWarn?`他坐下前说了一句：“你提醒过我。”`:''}`,
   opts:[{t:'请他留下来',e:{T:3,r:{dawson:10},H:6},r:'他问能不能帮忙做点什么。你给了他一把扫帚。'},
     {t:'礼貌地请他离开',e:{T:-1},r:'他点点头，说：“我理解。我也会这么做。”'},
     {t:'只给他一杯酥油茶',e:{M:4},r:'他喝了一口，皱眉，又喝了一口。“这比我们咖啡厅的拿铁好。”'}],
@@ -1170,7 +1170,7 @@ E({id:'designate',tag:'上师与传承',title:'指定',at:'2029-06',
     if(d==='player') return [{t:'接受',e:{L:4,S:4},r:'你把信放在佛龛上，然后去扫地了。'}];
     return [{t:'接受仁波切的安排',e:{L:3,M:3},r:'你把住持的钥匙交出去时，手很稳。'},{t:'心里不服',e:{L:-3,B:10},r:'你没说出来。但你知道自己没修好。'}];}});
 E({id:'final',tag:'传承 · 终章',title:'这个道场的以后',at:'2029-11',
-  text:()=>`十年了。你要为这个法会点定下长期的制度。${act().length}位成员在等你开口。`,
+  text:()=>`${S.f.rinpocheGone?`仁波切走了三个月了。`:''}十年了。你要为这个法会点定下长期的制度。${act().length}位成员在等你开口。`,
   opts:()=>{const o=[
     {t:'依赖远程上师，维持现状',e:{f:{final:'remote'}},r:'你说：“就像以前一样。”'},
     {t:'由本地导师接手教学',req:()=>S.f.guide||S.f.localGuide,rq:'需要合格的本地导师',e:{L:3,f:{final:'local'}},r:'本地导师第一次独自主持周日共修。你坐在最后一排。'},
@@ -1178,6 +1178,72 @@ E({id:'final',tag:'传承 · 终章',title:'这个道场的以后',at:'2029-11',
     ['tenzin','dale','rosa'].forEach(id=>{const m=mem(id);if(m&&!m.left&&m.c>=55)o.push({t:`退位，交给 ${m.n}`,e:{f:{final:'succ',heir:id}},r:'你把钥匙放在他手心里。'});});
     o.push({t:'进入三年三月三日闭关，放下一切经营',req:()=>S.self>=85&&S.L>=60&&S.M>=35,rq:'需要住持自修≥85、纯度≥60，以及足够的功德',e:{f:{final:'mila'}},r:'你走进闭关小屋，关上了门。'});
     return o;}});
+
+/* ===== v25 · 虚构历史线 2028–2029 及之后 ===== */
+function refugeDeeds(){const f=S.f;return ['vigil','damRelief','uyghurFamily','anniv1','nowruz','uyGarden','aynurSafe'].filter(k=>f[k]).length;}
+function refugeOK(){return !!S.f.uyghurFamily&&S.T>=55&&S.M>=40&&refugeDeeds()>=3;}
+function refugeScore(){return S.f.uyghurFamily?S.T*.45+S.M*.55+refugeDeeds()*5-12:-60;}
+E({id:'kashgar_anniv',tag:`世界 · 虚构历史`,title:`一周年`,at:'2028-02',cond:()=>!!(S.f.vigil||S.f.uyghurFamily),
+  text:()=>`一年前的这个月，喀什以南的那片绿洲从卫星图上消失了。伊玛目又打来电话：去年来守夜的人在问，今年还办不办。${S.f.uyghurFamily?`\nDilnur把一张对折的纸放在你手里，上面是她母亲和两个哥哥的名字。“我知道你们会为亡者回向，”她说，“但我们不这样做。我们为他们做杜阿。”`:''}`,
+  opts:()=>{const o=[{t:`同一个晚上，两场祈祷：清真寺先，佛堂后`,e:{T:4,M:4,H:3,r:{marcus:2},f:{anniv1:1}},r:`各按各的方式。伊玛目在停车场里对你说：“我们不用假装是一样的，才能站在一起。”`}];
+    if(S.f.uyghurFamily)o.push({t:`把名字交给伊玛目；佛堂另为一切亡者回向`,e:{T:3,M:5,f:{anniv1:1}},r:`Dilnur点点头。她说她母亲会喜欢这样：各自的门，各自的路，同一个晚上。`});
+    o.push({t:`这次只在佛堂内为亡者回向`,e:{L:2,M:2},r:`一百零八盏灯。第二天早上，有人在灯旁放了一小块馕。`});return o;}});
+E({id:'nowruz',tag:`人物 · 虚构历史`,title:`诺鲁孜`,at:'2028-03',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`三月二十一日是诺鲁孜节，维吾尔人的新年。Dilnur说，在喀什这一天要熬诺鲁孜粥，七种粮食一起煮；在韦科她凑不齐，H-E-B里没有那几样豆子。\nAblikim问：能不能借你们的厨房，还有湖边那块草地？“我们想请清真寺的人，也想请你们。”`,
+  opts:[{t:`借出厨房和草地，全员来帮忙`,e:{T:4,HA:5,M:3,D:-150,f:{nowruz:1},ach:'nowruz'},r:`七种粮食最后凑齐了：有人从达拉斯的印度超市买来了两种豆子。Ablikim弹了一首都塔尔，孩子们跟着拍手，伊玛目跟着哼。`},
+    {t:`借出场地，请他们自己主持`,e:{T:2,M:2,f:{nowruz:1}},r:`你在草地边上站了一下午，吃了三碗抓饭。`},
+    {t:`这周佛堂有法会，改天吧`,e:{L:1},r:`他们最后在清真寺的停车场过了节。Dilnur的女儿给你送来一碗粥，用保鲜膜包着。`}]});
+E({id:'harvest_ledger',tag:`弧线二 · 镜像教会`,title:`计数器`,at:'2028-06',
+  text:()=>`丰盛生命教会大屏幕上的“中国丰收”计数器已经跳过了四百万。去年在Brazos河里受洗的那位贝勒留学生又来了，她叫林悦（Lin Yue）。她说她武汉老家的家庭教会一分钱也没收到过，“牧师说钱还在‘渠道’里”。\n她把一张奉献收据放在你的茶几上：$2,000，收款方是一家开曼群岛的公司。`,
+  opts:[{t:`建议她去找记者，或者找Kayleigh`,e:{H:6,T:-1,r:{kayleigh:3},f:{harvestLeak:1}},r:`三个星期后，Kayleigh发了一条四十秒的视频：《中国丰收：钱去哪儿了？》。播放量很一般，但评论区里有一位律师留了言。`},
+    {t:`私下去找Dawson谈`,e:{r:{dawson:4},f:{harvestWarn:1}},r:`Dawson听完，看了你很久。“你以为我不知道吗？”他说，“我只是不知道怎么停下来。”`},
+    {t:`这不是佛堂该管的事`,e:{L:1,M:-2},r:`林悦收回了收据。“我以为你会不一样。”她走后，你在佛龛前坐了一会儿。`}]});
+E({id:'kailash_kora',tag:`传承 · 朝圣`,title:`转山`,at:'2028-05',cond:()=>!!S.f.kailash,
+  text:()=>`冈仁波齐朝圣团出发了。萨嘎达瓦的满月，塔尔波切的大经幡旗杆重新竖起来的时候，旁边站着的印度朝圣者比藏人还多。他们叫这座山Kailash，是湿婆的居所；对你们来说，它是胜乐金刚的坛城。\n转山一圈五十二公里，第二天要翻过海拔五千六百多米的卓玛拉山口。第二天凌晨，团里一位六十七岁的成员开始头痛、呕吐，嘴唇发紫。`,
+  opts:[{t:`你亲自陪他下撤，放弃这次转山`,e:{M:6,HA:4,S:2,f:{koraDone:1},ach:'kora'},r:`你们在塔尔钦的小旅馆里等了两天。他缓过来以后说：“你没转成。”你说：“山不会走。”`},
+    {t:`请藏族向导送他下山，其余人继续`,e:{L:3,RT:3,B:8,f:{koraDone:1}},r:`翻过卓玛拉时，你把一张全体成员的合影压在了经幡堆下面。下山的路上，一位印度老人递给你半块饼，什么也没说。`},
+    {t:`全团一起下撤，明年再来`,e:{L:-1,HA:6,D:-800,f:{koraDone:1},ach:'kora'},r:`有人失望，也有人松了口气。回程的大巴上，五个印度裔团员教大家唱了一首献给湿婆的拜赞歌，藏族司机跟着哼。`}]});
+E({id:'wuhan_letter',tag:`人物 · 虚构历史`,title:`武汉来信`,at:'2028-04',cond:()=>!!S.f.wentChina,
+  text:()=>`一封从武汉寄来的信，在路上走了七个星期。写信的是你在临时安置点遇见的一位老太太，信是她孙子替她写的。她说他们分到了一套板房；她说你那天帮她找的不是她女儿，“但那个女孩也需要有人找”。\n信封里夹着一张照片：板房门口贴着一个手写的“福”字。`,
+  opts:[{t:`把照片供在佛龛旁边`,e:{M:4,L:1},r:`每次点灯，你都会看它一眼。`},
+    {t:`回信，附上一点钱`,e:{D:-300,M:5},r:`你写了三页，最后只寄出一页。钱她收到了，回信里说给孙子买了一双球鞋。`},
+    {t:`在周日共修上把信读给大家听`,e:{HA:4,T:1,c:{all:2}},r:`读到“那个女孩也需要有人找”时，你停了一下。没有人催你。`}]});
+E({id:'ablikim_garden',tag:`人物 · 虚构历史`,title:`葡萄架`,at:'2028-07',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`Ablikim在喀什是农学院的讲师，在韦科是H-E-B熟食柜台的夜班。他来问能不能在农场边上租一小块地，种甜瓜，再“像吐鲁番那样”搭一个葡萄架。德州的夏天比南疆还热，他说，这正好。`,
+  opts:[{t:`划一块地给他，不收钱`,e:{T:3,M:4,f:{uyGarden:1}},r:`第二个周末他就搭起了架子。葡萄要三年才结果。他说：“我等得起。”`},
+    {t:`请他来管整个菜园，每月给一点钱`,e:{D:-200,T:2,M:2,f:{uyGarden:1,uyGardener:1}},r:`菜园的产量翻了一倍。他在工具棚里贴了一张手写的浇水表，维吾尔文一行，英文一行。`},
+    {t:`地都规划好了，帮他问问邻居`,e:{T:1},fx(){if((S.npc.chuy||0)>=4){S.npc.chuy+=2;return `Chuy在牧场边上给了他一块地，条件是每年夏天送一个甜瓜过去。`;}return `他后来在社区花园租了一块，离你们二十分钟车程。`;}}]});
+E({id:'tsurphu_call',tag:`上师与传承`,title:`楚布寺的视频`,at:'2028-10',cond:()=>!!S.f.indiaTibet,
+  text:()=>`Lobsang发来一个视频链接。画面晃得很厉害：楚布寺的大殿，身后是修复了一半的壁画，仁波切坐在轮椅上。他问韦科的天气，问Rosa的膝盖，问农场的风车还转不转。\n然后他说，想给大家讲几分钟。`,
+  opts:[{t:`在佛堂投屏，全员一起听`,e:{L:4,RT:5,HA:3,c:{all:4}},r:`他讲的是转心四思维的第二条：死亡无常。讲了十一分钟，网络断了。没有一个人起身。`},
+    {t:`只请几位老成员一起听`,e:{L:2,RT:4,S:2},r:`他看了看屏幕这头的几张脸，说：“人少，好。人少的时候说的话，比较真。”`},
+    {t:`录下来，译成英文和西班牙文`,e:{KN:3,L:2,T:1},r:`那段十一分钟的录像，后来成了入门课的第一讲。`}]});
+E({id:'aynur_art',tag:`人物 · 虚构历史`,title:`一张画`,at:'2029-03',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`Dilnur的女儿Aynur在佛堂门口画的那座清真寺，被学校选进了全县的少儿画展。Tribune-Herald的记者想来拍一张她和画的合影，“就在她画画的地方”。\nDilnur把你拉到厨房里，声音很低：她在湖南的表妹上个月被叫去“喝茶”了，问的就是他们在美国的事。照片一旦上网，那边就会有人看见。`,
+  opts:[{t:`谢绝拍照：报道只写画，不写人`,e:{T:2,M:3,f:{aynurSafe:1}},r:`报道的标题是《一座已经不存在的清真寺》。没有名字，没有照片。Dilnur把报纸剪下来，夹进了家里唯一一本相册。`},
+    {t:`让她们自己决定，佛堂不出面`,e:{T:1,M:1},r:`Dilnur谢绝了记者。那张画后来挂在了佛堂的走廊上，因为它是在那儿画的。`},
+    {t:`办一场“消失的地方”画展，所有作品都不署名`,e:{H:6,T:3,M:2,D:-300,f:{aynurSafe:1}},r:`贝勒那位维吾尔族研究生拿来了她外婆家院子的照片，一位越战老兵画了顺化的一条街，一位藏族老人交了一张日喀则老房子的素描。墙上没有一个名字。来看的人比你预想的多。`}]});
+E({id:'parinirvana',tag:`上师与传承`,title:`圆寂`,at:'2029-08',
+  pre(){S.f.rinpocheGone=S.turn;log(`仁波切圆寂。`);},
+  text:()=>`凌晨四点，Lobsang打来电话。仁波切在${S.f.indiaTibet?`楚布寺`:`印度的寺院`}圆寂了。\n他说，仁波切走之前让人把他扶起来坐正，之后就没有再躺下。他现在在图当之中，已经第三天了：身体还是温的，脸色像睡着一样。寺院请各地的弟子不要赶来，就在原地修法。${S.f.designated==='lobsang'?`\nLobsang最后说：荼毗之后，他会回韦科。“仁波切交代过的。”`:''}`,
+  opts:[{t:`全员在佛堂修上师瑜伽，七天不断`,e:{L:5,M:6,HA:5,B:10,c:{all:5}},r:`七天里佛堂的灯没有灭过。第七天，Lobsang发来消息：图当结束了。Rosa把最后一盏灯端到了湖边。`},
+    {t:`飞去参加荼毗大典`,req:()=>S.D>=3000,rq:`需要 $3,000`,e:{D:-3000,RT:8,S:4,B:12},r:`荼毗那天，你站在人群的最后面，看见很多从没见过的面孔，都是他的弟子。有一位是从巴西来的，她也在找一个可以哭的地方。`},
+    {t:`照常主持周日共修，什么都不改`,e:{L:3,S:3},r:`开示只有一句：“他说过，不要等他。”然后你带大家念了一遍上师祈请文。`}]});
+E({id:'kailash_hindu',tag:`邻里 · 虚构历史`,title:`同一座山`,ch:[4],w:5,cond:()=>!!S.f.indiaTibet&&!S.f.hinduDone,
+  text:()=>`一家人从Irving开车来，是达拉斯一座印度教神庙的信众，刚从“现在可以直接去了”的冈仁波齐回来。${S.f.kailash?`他们听说韦科有人组织过朝圣团。`:`他们听说韦科有一座藏传佛堂。`}父亲Vikram说：对我们来说，那是湿婆和帕尔瓦蒂的家。他问你：对你们来说，那是什么？`,
+  opts:[{t:`讲胜乐金刚，还有密勒日巴和那若本琼斗法的故事`,e:{KN:2,T:2,H:2,f:{hinduDone:1}},r:`讲到那若本琼骑着鼓往上飞、密勒日巴乘着第一缕阳光先到了山顶，那家的小儿子笑出了声。Vikram说，在他们的故事里，湿婆一直在山顶打坐，谁也没去跟他比。`},
+    {t:`请他们一起绕佛塔`,req:()=>S.fac.stupa>0,rq:`需要佛塔`,e:{T:3,M:3,f:{hinduDone:1}},r:`他们按顺时针方向绕，和你们一样。走完三圈，Vikram的母亲在塔基上放了一朵金盏花。`},
+    {t:`“同一座山，不同的门。”`,e:{T:2,L:1,f:{hinduDone:1}},r:`Vikram想了想，说：“也可能是同一扇门，不同的山。”你们都没有再往下说。`}]});
+E({id:'el_yangsi',tag:`无尽 · 传承`,title:`转世`,rep:1,cd:999,w:6,cond:()=>EL()&&!!S.f.rinpocheGone&&Y()>=2032&&!S.f.yangsi,
+  text:()=>`Lobsang的信。经过几年的寻访，一个四岁的男孩被认定为仁波切的转世。他住在${S.f.indiaTibet?`日喀则附近的一个村子`:`尼泊尔木斯塘的一个村子`}，第一次见到Lobsang时，伸手就去拿仁波切用过的那串念珠。\n寺院要为他的教育筹款。Lobsang问韦科能不能帮一点。`,
+  opts:[{t:`承担他十年的学费（$6,000）`,req:()=>S.D>=6000,rq:`需要 $6,000`,e:{D:-6000,L:5,RT:8,M:8,ach:'yawn'},fx(){S.f.yangsi=S.turn;S.renown=(S.renown||0)+60;return '';},r:`Lobsang寄来一张照片：小男孩坐在高高的法座上，正在打哈欠。`},
+    {t:`发起全体成员随喜`,e:{L:3,RT:5,HA:4,c:{all:3},ach:'yawn'},fx(){S.f.yangsi=S.turn;S.renown=(S.renown||0)+30;return '';},r:`捐款箱旁边放着那张照片。一个星期后，箱子满了两次。`},
+    {t:`心里随喜，暂时不出钱`,e:{L:1,ach:'yawn'},fx(){S.f.yangsi=S.turn;return '';},r:`你把照片贴在佛龛边上，每天早上看一眼。`}]});
+E({id:'el_yangsi_visit',tag:`无尽 · 传承`,title:`小仁波切来了`,rep:1,cd:999,w:8,cond:()=>EL()&&!!S.f.yangsi&&S.turn-S.f.yangsi>=72&&!S.f.yangsiCame,
+  text:()=>`小仁波切十岁了。他的老师带着他来北美，Lobsang也来了，头发白了一半。在韦科机场的到达口，男孩抬头看了看你举着的牌子，用藏语问Lobsang：“这里就是那个有风车的地方吗？”`,
+  opts:[{t:`请他在佛堂里给大家一次长寿灌顶`,e:{D:-1500,L:8,RT:8,M:6,H:8},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.stats.visits++;S.renown=(S.renown||0)+80;return '';},r:`他的老师在一旁小声提词。灌顶结束时，男孩从法座上下来，径直走到窗边去看风车。`},
+    {t:`什么仪式都不办，带他去湖边玩一天`,e:{HA:8,M:8,L:3,S:3},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.renown=(S.renown||0)+40;return '';},r:`他抓到一只小龙虾，看了很久，又放回了水里。Lobsang在旁边念了一句什么，眼眶红了。`}]});
+Object.assign(ACH,{nowruz:[`七种粮食`,`在佛堂的厨房里熬过诺鲁孜粥`],kora:[`山不会走`,`在卓玛拉山口前转身下山`],yawn:[`哈欠`,`收到仁波切转世的第一张照片`]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:'成员人生',title:'想离开',qonly:1,
@@ -1393,7 +1459,7 @@ function settle0(){
   // 漂移（月末）
   if(monthEnd){
   const sinceVisit=S.turn-S.lastVisit;
-  if(sinceVisit>(tk('D4')?24:18)) S.L-=.8;
+  if(sinceVisit>(tk('D4')?24:18)&&!(S.f.rinpocheGone&&(S.f.designated||S.f.localGuide||S.f.guide))) S.L-=.8;
   if(on('protector')) S.L+=.5;
   if(on('cabin')&&(S.f.guide||S.f.localGuide)) S.L+=.3;
   if(S.self<30) S.RT-=.5;
@@ -1449,6 +1515,7 @@ function ending(){
   if(S.L<=40&&S.f.brookeAlly&&S.D>=12000) hard.push('brand');
   if(S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&done>=1) hard.push('samye');
   if(S.T>=70&&S.f.councilSeat&&S.L>=30) hard.push('bridge');
+  if(refugeOK()) hard.push('refuge');
   return (hard.length?hard:Object.keys(sc)).sort((x,y)=>sc[y]-sc[x])[0];
 }
 const ENDINGS={
@@ -1457,7 +1524,7 @@ const ENDINGS={
   bridge:{n:'桥',en:'THE BRIDGE',img:'感恩节晚餐上，一位浸信会牧师和一位喇嘛同坐一桌，为谁先祷告客气了五分钟。',
     t:()=>`法脉变薄了一些，但韦科因你而不同。跨信仰理事会的名牌上写着“${S.center}”。`},
   brand:{n:'品牌',en:'THE BRAND',img:'道场成了“Lake Waco Wellness Retreat”。你是这里的雇员，工牌上写着Head of Authenticity。',
-    t:()=>`账上有 $${Math.round(S.D).toLocaleString()}。周末静修营排到了明年四月。佛堂里的唐卡被换成了高清复制品，原件在Brooke的办公室。`},
+    t:()=>`账上有 $${Math.round(S.D).toLocaleString()}。周末静修营排到了明年四月。${S.f.brookeAlly?`佛堂里的唐卡被换成了高清复制品，原件在Brooke的办公室。`:`佛堂里的唐卡被换成了高清复制品，原件在管理公司的仓库里。`}`},
   diss:{n:'消散',en:'DISSOLUTION',img:'客厅里又只剩下几个人。他们在做大礼拜。',
     t:()=>{const d=act().filter(x=>x.done);return d.length?`只剩 ${act().length} 个人，但其中 ${d.map(x=>x.n).join('、')} 圆满了全部五个十万。这是失败还是胜利，由你判断。`:`只剩 ${act().length} 个人，也没有人完成加行。你们还是每周日聚在一起。也许这就是全部。`;}},
   exile:{n:'流亡',en:'EXILE',img:'你们被迫迁往奥斯汀。韦科的论坛上，有人发帖怀念那座白色的佛塔。',
@@ -1716,6 +1783,22 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
   land_P3:'paleo',land_P4:'warden',warbler_fine:'warden',land_P5:'wade',land_P6:'@player',pond_flood:'@player',land_P7:'corps',land_P8:'corps',fangsheng:'warden',
   ortiz:'ortiz',guadalupe:'ortiz',bishop:'ortiz',ortiz_end:'ortiz',icu:'okonkwo',chaplain:'okonkwo',hospice:'okonkwo',sonam:'sonam',sonam_lobsang:'sonam',sonam_retreat:'sonam',
   tex:'tex',tex_rodeo:'tex',tex_end:'tex',shirley:'shirley',juneteenth:'shirley',kyle:'kyle',kyle_nil:'kyle',garza:'garza',seder:'feld',vandal:'joykim',joykim:'joykim',drought:'@player'});
+
+/* v25：新人物头像、事件头像、结局与后记 */
+Object.assign(CH,{linyue:{n:`林悦 Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang'});
+ENDINGS.refuge={n:`庇护所`,en:'SANCTUARY',img:`诺鲁孜节的草地上，伊玛目、Marcus和你坐在同一块野餐布上。Dilnur的女儿在给每个人的盘子里分抓饭。`,t:()=>`后来，韦科的人说起这个地方，不再说“那个佛教组织”，而是说“湖边那家，出事的时候门是开着的”。${S.f.uyGarden?`Ablikim的葡萄架上，今年挂了几串还很酸的葡萄。`:''}`};
+function epilogue(){const o=[],f=S.f,t=mem('tenzin');
+  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin在日喀则开了一间小茶馆，墙上挂着韦科佛堂的合影。`);else if(t&&!t.left&&f.designated!=='tenzin')o.push(`Tenzin还在H-E-B上班，周日在佛堂领诵。`);
+  if(f.uyghurFamily)o.push(`Dilnur一家的庇护申请批下来了。Aynur的画还挂在佛堂走廊上。`);
+  if(S.seen.dawson_fall!=null)o.push((S.npc.dawson||0)>=8?`Dawson在县食物银行开货车，每月有一个周六来扫佛堂的停车场。`:`Dawson搬去了俄克拉何马，没有留下地址。`);
+  if(f.merged)o.push(`Chad还在负责周日的茶水。他的藏语进步了。`);
+  if(f.harvestLeak||f.harvestWarn)o.push(`林悦毕业后回了武汉，在一家家庭教会教主日学。`);
+  if(f.koraDone)o.push(`转山团的合影挂在走廊尽头，照片上少了一个人，因为他在拍照。`);
+  if(f.rinpocheGone&&!f.yangsi)o.push(`Lobsang说，寻访转世的人已经出发了。`);
+  if(f.democracy)o.push(`理事会还在开会。今年讨论的依然是停车场。`);
+  return o;}
+function epilogueHTML(){const o=epilogue();return o.length?`<div class="label" style="margin-top:12px">后来</div>${o.map(x=>`<p style="margin:4px 0">${esc(x)}</p>`).join('')}`:'';}
 
 /* --- 买地触发 --- */
 E({id:'land_P1',tag:'土地 · 东牧场',title:'越界的牛',qonly:1,
@@ -3266,13 +3349,13 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)+(100-S.L)*.6+(S.f.brookeAlly?15:0),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f','结局预测'],['e','事件'],['p','人心'],['b','底账']];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">内参：游戏里通常看不到的数字。仅供住持本人阅读。</p>`;
   if(cur==='f'){
     const sc=endingScores(),mx=Math.max(...Object.values(sc),1),now=ending();
-    const conds=[[act().length<5,'成员少于 5 人 → 消散'],[S.L>=60&&S.T<=32,'纯度≥60、信任≤32 → 流亡'],[S.L<=40&&S.f.brookeAlly&&S.D>=12000,'纯度≤40、与Brooke结盟、账上≥$12,000 → 品牌'],[S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&act().some(x=>x.done),'纯度≥70、信任≥40、有闭关指导、有认证、有人圆满加行 → 桑耶'],[S.T>=70&&S.f.councilSeat&&S.L>=30,'信任≥70、理事会席位、纯度≥30 → 桥']];
+    const conds=[[act().length<5,'成员少于 5 人 → 消散'],[S.L>=60&&S.T<=32,'纯度≥60、信任≤32 → 流亡'],[S.L<=40&&S.f.brookeAlly&&S.D>=12000,'纯度≤40、与Brooke结盟、账上≥$12,000 → 品牌'],[S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&act().some(x=>x.done),'纯度≥70、信任≥40、有闭关指导、有认证、有人圆满加行 → 桑耶'],[S.T>=70&&S.f.councilSeat&&S.L>=30,'信任≥70、理事会席位、纯度≥30 → 桥'],[refugeOK(),`收留Ablikim一家、信任≥55、功德≥40、善举≥3 → 庇护所`]];
     const exp=expenses(),et=exp.reduce((a,b)=>a+b[1],0);
     h+=`<section class="panel"><h3>如果现在结束 <small>${ENDINGS[now].n} · ${ENDINGS[now].en}</small></h3>
       ${Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="ebar ${k===now?'on':''}"><span>${ENDINGS[k].n}</span><div class="bar"><i style="width:${clamp(v/mx*100,2,100)}%;color:${k===now?'var(--gold)':'var(--line2)'}"></i></div><span class="num">${Math.round(v)}</span></div>`).join('')}
@@ -3468,7 +3551,7 @@ function renderEnd(){
   app.innerHTML='';
   const tabs=[['e','结局'],['d','数据'],['p','留下的人'],['a','成就']];const cur=sub('end',tabs);
   let body='';
-  if(cur==='e') body=`<div class="label">${Y()}年12月 · 十年</div><h1>${e.n}</h1><div class="en" style="letter-spacing:.3em;color:var(--mute);font-size:12px">${e.en}</div><p class="img">${esc(e.img)}</p><p>${esc(e.t())}</p>`;
+  if(cur==='e') body=`<div class="label">${Y()}年12月 · 十年</div><h1>${e.n}</h1><div class="en" style="letter-spacing:.3em;color:var(--mute);font-size:12px">${e.en}</div><p class="img">${esc(e.img)}</p><p>${esc(e.t())}</p>${epilogueHTML()}`;
   if(cur==='d') body=`<div class="rep" style="margin:10px 0">
       <div><span>法脉纯度</span><span>${Math.round(S.L)}</span></div><div><span>社区信任</span><span>${Math.round(S.T)}</span></div>
       <div><span>供养</span><span>${fmt$(S.D)}</span></div><div><span>成员</span><span>${act().length}</span></div>
@@ -3919,7 +4002,7 @@ E({id:'el_branch',tag:'无尽 · 分院',title:'奥斯汀的邀请',rep:1,cd:36,
     {t:'祝福他们自己办',e:{L:1,T:1},fx(){S.f.branch=1;const n=Math.min(6,act().length-10);act().filter(m=>m.gen||m.ros).slice(0,n).forEach(m=>leave(m,'去奥斯汀办分院了'));return `${n}位成员去了奥斯汀。你们是母院了。`;}},
     {t:'再等两年',e:{},r:'他们继续每周开车来。'}]});
 E({id:'el_karmapa',tag:'无尽 · 传承',title:'法王来访',rep:1,cd:60,w:3,cond:()=>EL()&&S.L>=60&&S.RT>=55&&!S.f.karmapaCame,
-  text:()=>`仁波切的信：噶玛巴北美巡回，想在你们这里停留一天。安保、接待、三千人的停车。`,
+  text:()=>`${S.f.rinpocheGone?'Lobsang':'仁波切'}的信：噶玛巴北美巡回，想在你们这里停留一天。安保、接待、三千人的停车。`,
   opts:[{t:'全力承办',e:{D:-3000,L:8,H:20,T:3,B:20,M:10},fx(){S.f.karmapaCame=1;S.renown+=150;treGain('karmapa_signed','法王亲笔');return '那天湖边停了两千辆车。浸信会借出了他们的停车场。Dawson牧师在门口帮忙指挥。';}},
     {t:'只办小型会面',e:{D:-800,L:4,RT:5,M:5},fx(){S.f.karmapaCame=1;S.renown+=60;return '法王在农舍客厅坐了一个小时，问了风车的事。';}}]});
 E({id:'el_docu',tag:'无尽 · 媒体',title:'纪录片',rep:1,cd:48,w:4,cond:()=>EL()&&S.H>=20,
@@ -4027,7 +4110,7 @@ function openWiki(){
   if(cur==='t')body=pager('wk_t',TECH,n,x=>row(`${x.n} · ${TBR.find(b=>b[0]===x.br)[1]}${tk(x.id)?' ✓':''}`,`${x.k}　效果：${x.fx}`));
   if(cur==='p'){const ids=Object.keys(TRAITS).map(k=>'tr:'+k).concat(Object.keys(MT)).concat(Object.keys(CH).filter(k=>!MT[k]&&!ORIGINS[k]));const met=S.members.map(m=>m.id);body=pager('wk_p',ids,n,id=>{if(id.startsWith('tr:')){const t=TRAITS[id.slice(3)];const k=here().filter(m=>m.tag===id.slice(3)).length;return row(`专长 · ${t.n}${k?` ×${k}`:''}`,`${t.d}。承诺度 ≥40 的在册成员生效，最多叠加三位。`);}const m=MT[id],c=CH[id];const seen=met.includes(id)||(S.seen&&Object.keys(S.seen).some(e=>EVENT_WHO[e]===id));return `<div class="wk who2">${c?pimg(c):''}<div><b>${esc(seen?(m?m.n:c.n):'？？？')}</b><span>${esc(seen?(m?m.r:''):'还没遇到')}</span></div></div>`;});}
   if(cur==='v'){const evs=Object.values(EV).filter(e=>e.title&&e.tag);const seen=evs.filter(e=>S.seen[e.id]!=null);body=`<p class="label" style="margin:0">已遇到 ${seen.length} / ${evs.length} 张事件卡</p>`+pager('wk_v',evs.sort((a,b)=>(S.seen[b.id]!=null)-(S.seen[a.id]!=null)||(a.tag||'').localeCompare(b.tag||'')),n,e=>row(S.seen[e.id]!=null?e.title:'？？？',S.seen[e.id]!=null?`${e.tag} · 首次 ${ds(S.seen[e.id])}`:e.tag));}
-  if(cur==='n')body=pager('wk_n',Object.entries(ENDINGS),n,([k,e])=>row(`${e.n} · ${e.en}`,({samye:'纯度≥70、信任≥40、本地闭关指导、仁波切认证、有人圆满加行',bridge:'信任≥70、跨信仰理事会席位、纯度≥30',brand:'纯度≤40、与Brooke结盟、账上≥$12,000',exile:'纯度≥60、信任≤32',diss:'成员少于 5 人，或行动太少、欠债太多',succ:'终章选择退位，交给一位成员',mila:'终章选择三年闭关：自修≥85、纯度≥60、功德≥35'})[k]||''));
+  if(cur==='n')body=pager('wk_n',Object.entries(ENDINGS),n,([k,e])=>row(`${e.n} · ${e.en}`,({samye:'纯度≥70、信任≥40、本地闭关指导、仁波切认证、有人圆满加行',bridge:'信任≥70、跨信仰理事会席位、纯度≥30',brand:'纯度≤40、与Brooke结盟、账上≥$12,000',exile:'纯度≥60、信任≤32',diss:'成员少于 5 人，或行动太少、欠债太多',succ:'终章选择退位，交给一位成员',mila:'终章选择三年闭关：自修≥85、纯度≥60、功德≥35',refuge:`收留了Ablikim一家、信任≥55、功德≥40、为灾难中的人做过三件以上的事`})[k]||''));
   if(cur==='g')body=pager('wk_g',WIKI_TERMS,n,([a,b])=>row(a,b));
   ovEl.innerHTML=`<div class="ov"><div class="box wiki"><div class="ph"><h2>百科</h2><button class="iconbtn" data-x="1">关闭</button></div>${subtabs('wiki',tabs)}<div class="wkl">${body}</div></div></div>`;
   UI.ovRe=openWiki;
@@ -6841,8 +6924,8 @@ E({id:'dam',tag:"World · Fictional History",title:"Below Yichang",at:'2027-04',
   text:()=>{const asian=S.origin==='asian';const m=chineseMember();
     return `The Three Gorges Dam has failed. The flood runs down the Yangtze: Yichang, Jingzhou, the Dongting Lake country, Wuhan, one city after the next. The death toll is updated every hour, and nobody believes the number.
 ${asian?"For three days you haven't been able to get through to your mother's hometown in Hubei. ":m?`${m.n}'s aunt lives in Jingzhou. She came this Sunday and sat in the back row, her phone lit the whole time. `:"Outside Waco's Chinese grocery someone has set up a donation table, and the line runs out into the parking lot. "}${has('hanh')?"The Nguyen grandmother says that with so many gone, somebody has to chant for them.":''}`;},
-  opts:[{t:"Send this month's offerings to disaster relief",e:{D:-1500,T:4,M:6},r:"You tape the receipt to the shrine room door. Nobody asks where the money went."},
-    {t:"Hold a great memorial puja with the Nguyens",req:()=>has('hanh'),rq:"Requires the Nguyens",e:{L:2,T:3,M:4,c:{hanh:8}},r:"Tibetan, Vietnamese and Mandarin chanting take turns. Many Chinese families come who have never come before."},
+  opts:[{t:"Send this month's offerings to disaster relief",e:{D:-1500,T:4,M:6,f:{damRelief:1}},r:"You tape the receipt to the shrine room door. Nobody asks where the money went."},
+    {t:"Hold a great memorial puja with the Nguyens",req:()=>has('hanh'),rq:"Requires the Nguyens",e:{L:2,T:3,M:4,c:{hanh:8},f:{damRelief:1}},r:"Tibetan, Vietnamese and Mandarin chanting take turns. Many Chinese families come who have never come before."},
     {t:"Dedicate merit in the shrine room only",e:{L:1,M:2},r:"One hundred and eight butter lamps burn through the night."},
     {t:"Fly to China to find your family",req:()=>S.origin==='asian'&&S.D>=2500,rq:"Asian Abbot only · Requires $2,500",e:{D:-2500,B:15,S:-3,f:{wentChina:1}},r:"You search the temporary shelters in Wuhan for nine days. Back in Waco, you sit in the shrine room a long while before you can speak."}]});
 E({id:'hunan',tag:"World · Fictional History",title:"Removal to Hunan",at:'2027-07',
@@ -6893,7 +6976,7 @@ E({id:'pham',tag:"People",title:'Mrs. Pham',at:'2028-11',cond:()=>has('hanh'),
     {t:"Mainly Pure Land rites",e:{L:-1,T:2,c:{hanh:16}},r:"Your pronunciation of Amitabha has come a long way since the first time. Hạnh says Grandmother would have laughed."},
     {t:"Combine both",req:()=>S.D>=1200,rq:"Requires $1,200",e:{D:-1200,L:2,T:3,c:{hanh:12}},r:"Tibetan and Vietnamese chanting take turns. Nobody finds it strange."}]});
 E({id:'dawson_fall',tag:"Arc 2 · Mirror Church",title:"A Cup of Butter Tea",at:'2029-02',
-  text:()=>`Abundant Life Church collapses in a financial scandal: a private jet, offshore accounts, a "Giving Challenge" fund unaudited for three years. Pastor Dawson appears at your shrine room door without a suit. He sits in the back row all afternoon.`,
+  text:()=>`Abundant Life Church collapses in a financial scandal: a private jet, offshore accounts, a "Giving Challenge" fund unaudited for three years. Pastor Dawson appears at your shrine room door without a suit. He sits in the back row all afternoon.${S.f.harvestLeak?` The first loose thread was pulled by that little-watched video of Kayleigh's.`:''}${S.f.harvestWarn?` Before he sits down he says only: "You warned me."`:''}`,
   opts:[{t:"Invite him to stay",e:{T:3,r:{dawson:10},H:6},r:"He asks if there's anything he can do to help. You hand him a broom."},
     {t:"Politely ask him to leave",e:{T:-1},r:"He nods. \"I understand. I'd do the same.\""},
     {t:"Just give him a cup of butter tea",e:{M:4},r:"He takes a sip, frowns, takes another. \"This beats the lattes at our café.\""}],
@@ -6917,7 +7000,7 @@ E({id:'designate',tag:"Teacher & Lineage",title:"The Appointment",at:'2029-06',
     if(d==='player') return [{t:"Accept",e:{L:4,S:4},r:"You place the letter on the altar, then go sweep the floor."}];
     return [{t:"Accept Rinpoche's decision",e:{L:3,M:3},r:"When you hand over the Abbot's keys, your hand is steady."},{t:"Resent it inwardly",e:{L:-3,B:10},r:"You don't say it. But you know your own practice wasn't good enough."}];}});
 E({id:'final',tag:"Lineage · Finale",title:"The Center's Future",at:'2029-11',
-  text:()=>`Ten years. You must set lasting arrangements for this dharma group. ${act().length} members are waiting for you to speak.`,
+  text:()=>`${S.f.rinpocheGone?`Rinpoche has been gone three months. `:''}Ten years. You must set lasting arrangements for this dharma group. ${act().length} members are waiting for you to speak.`,
   opts:()=>{const o=[
     {t:"Rely on a remote teacher; keep things as they are",e:{f:{final:'remote'}},r:"You say, \"Same as always.\""},
     {t:"Hand the teaching to the local teacher",req:()=>S.f.guide||S.f.localGuide,rq:"Requires a qualified local teacher",e:{L:3,f:{final:'local'}},r:"The local teacher leads Sunday practice alone for the first time. You sit in the back row."},
@@ -6925,6 +7008,72 @@ E({id:'final',tag:"Lineage · Finale",title:"The Center's Future",at:'2029-11',
     ['tenzin','dale','rosa'].forEach(id=>{const m=mem(id);if(m&&!m.left&&m.c>=55)o.push({t:`Step down; hand over to ${m.n}`,e:{f:{final:'succ',heir:id}},r:"You set the keys in their palm."});});
     o.push({t:"Enter three-year, three-month, three-day retreat; let go of all management",req:()=>S.self>=85&&S.L>=60&&S.M>=35,rq:"Requires Abbot Self-practice ≥85, Lineage ≥60, and enough Merit",e:{f:{final:'mila'}},r:"You walk into the retreat cabin and close the door."});
     return o;}});
+
+/* ===== v25 · 虚构历史线 2028–2029 及之后 ===== */
+function refugeDeeds(){const f=S.f;return ['vigil','damRelief','uyghurFamily','anniv1','nowruz','uyGarden','aynurSafe'].filter(k=>f[k]).length;}
+function refugeOK(){return !!S.f.uyghurFamily&&S.T>=55&&S.M>=40&&refugeDeeds()>=3;}
+function refugeScore(){return S.f.uyghurFamily?S.T*.45+S.M*.55+refugeDeeds()*5-12:-60;}
+E({id:'kashgar_anniv',tag:`World · Fictional History`,title:`One Year`,at:'2028-02',cond:()=>!!(S.f.vigil||S.f.uyghurFamily),
+  text:()=>`A year ago this month, the oasis south of Kashgar vanished from the satellite images. The imam calls again: the people who came to last year's vigil are asking whether there will be one this year.${S.f.uyghurFamily?`\nDilnur puts a folded sheet of paper in your hand: the names of her mother and her two brothers. "I know you dedicate merit for the dead," she says. "We don't do it that way. We make du'a for them."`:''}`,
+  opts:()=>{const o=[{t:`One evening, two prayers: the mosque first, then the shrine room`,e:{T:4,M:4,H:3,r:{marcus:2},f:{anniv1:1}},r:`Each in its own way. In the parking lot the imam says to you: "We don't have to pretend to be the same to stand together."`}];
+    if(S.f.uyghurFamily)o.push({t:`Give the names to the imam; the shrine room dedicates merit for all the dead`,e:{T:3,M:5,f:{anniv1:1}},r:`Dilnur nods. Her mother would have liked it this way, she says: separate doors, separate paths, the same night.`});
+    o.push({t:`This time, only dedicate merit inside the shrine room`,e:{L:2,M:2},r:`A hundred and eight lamps. The next morning someone has left a small round of naan beside them.`});return o;}});
+E({id:'nowruz',tag:`People · Fictional History`,title:`Nowruz`,at:'2028-03',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`March 21 is Nowruz, the Uyghur new year. Dilnur says that in Kashgar you cook Nowruz porridge on this day, seven grains in one pot; in Waco she can't find them all, H-E-B doesn't carry those beans.\nAblikim asks: could they borrow your kitchen, and the lawn by the lake? "We want to invite the mosque. And we want to invite you."`,
+  opts:[{t:`Lend the kitchen and the lawn; everyone pitches in`,e:{T:4,HA:5,M:3,D:-150,f:{nowruz:1},ach:'nowruz'},r:`In the end all seven grains turn up: someone drives to an Indian grocery in Dallas for the last two kinds of beans. Ablikim plays a tune on the dutar; the children clap along and the imam hums.`},
+    {t:`Lend the space and let them host`,e:{T:2,M:2,f:{nowruz:1}},r:`You spend the afternoon at the edge of the lawn and eat three bowls of polo.`},
+    {t:`There's a puja that week; another time`,e:{L:1},r:`They end up celebrating in the mosque parking lot. Dilnur's daughter brings you a bowl of the porridge, wrapped in cling film.`}]});
+E({id:'harvest_ledger',tag:`Arc 2 · Mirror Church`,title:`The Counter`,at:'2028-06',
+  text:()=>`The "China Harvest" counter on Abundant Life's big screen has passed four million. The Baylor student who was baptized in the Brazos last year comes back; her name is Lin Yue. The house church back home in Wuhan has never received a cent, she says. "The pastor says the money is still in the channel."\nShe puts a giving receipt on your coffee table: $2,000, payable to a company in the Cayman Islands.`,
+  opts:[{t:`Suggest she take it to a reporter, or to Kayleigh`,e:{H:6,T:-1,r:{kayleigh:3},f:{harvestLeak:1}},r:`Three weeks later Kayleigh posts a forty-second video: "China Harvest: Where Did the Money Go?" The view count is modest, but a lawyer leaves a comment.`},
+    {t:`Talk to Dawson privately`,e:{r:{dawson:4},f:{harvestWarn:1}},r:`Dawson hears you out and looks at you for a long time. "You think I don't know?" he says. "I just don't know how to stop it."`},
+    {t:`This is not the center's business`,e:{L:1,M:-2},r:`Lin Yue takes the receipt back. "I thought you'd be different." After she leaves, you sit in front of the altar for a while.`}]});
+E({id:'kailash_kora',tag:`Lineage · Pilgrimage`,title:`The Kora`,at:'2028-05',cond:()=>!!S.f.kailash,
+  text:()=>`The Kailash pilgrimage sets out. On the full moon of Saga Dawa, when the great prayer-flag pole at Tarboche is raised again, there are more Indian pilgrims standing around it than Tibetans. To them the mountain is Kailash, the home of Shiva; to you it is the mandala of Chakrasamvara.\nThe kora is fifty-two kilometers, and on the second day it crosses the Drölma La pass, above 5,600 meters. Before dawn on the second day, a sixty-seven-year-old member of the group starts vomiting with a pounding headache. His lips are turning blue.`,
+  opts:[{t:`Take him down yourself and give up the kora`,e:{M:6,HA:4,S:2,f:{koraDone:1},ach:'kora'},r:`You wait two days in a guesthouse in Darchen. When he has recovered he says, "You never finished." You say, "The mountain isn't going anywhere."`},
+    {t:`Have a Tibetan guide take him down; the rest go on`,e:{L:3,RT:3,B:8,f:{koraDone:1}},r:`At the top of the Drölma La you tuck a photo of the whole sangha under the heap of prayer flags. On the way down, an old Indian man hands you half a flatbread without a word.`},
+    {t:`The whole group turns back; next year, perhaps`,e:{L:-1,HA:6,D:-800,f:{koraDone:1},ach:'kora'},r:`Some are disappointed; some are relieved. On the bus back, the five Indian-American members teach everyone a bhajan to Shiva, and the Tibetan driver hums along.`}]});
+E({id:'wuhan_letter',tag:`People · Fictional History`,title:`A Letter from Wuhan`,at:'2028-04',cond:()=>!!S.f.wentChina,
+  text:()=>`A letter from Wuhan, seven weeks in the post. It is from an old woman you met at the temporary shelter; her grandson wrote it down for her. They have been given a prefab unit, she says. The girl you helped her look for that day was not her daughter, "but that girl needed someone looking for her too."\nInside the envelope is a photo: the character fu, "blessing," written by hand and taped to the prefab door.`,
+  opts:[{t:`Place the photo beside the altar`,e:{M:4,L:1},r:`Every time you light the lamps, you glance at it.`},
+    {t:`Write back, with a little money`,e:{D:-300,M:5},r:`You write three pages and send one. She gets the money; her reply says it bought her grandson a pair of sneakers.`},
+    {t:`Read the letter aloud at Sunday practice`,e:{HA:4,T:1,c:{all:2}},r:`When you reach "that girl needed someone looking for her too," you have to stop for a moment. Nobody hurries you.`}]});
+E({id:'ablikim_garden',tag:`People · Fictional History`,title:`The Grape Trellis`,at:'2028-07',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`In Kashgar Ablikim lectured at an agricultural college; in Waco he works nights at the H-E-B deli counter. He asks whether he could rent a strip of land at the edge of the farm, to grow melons and put up a grape trellis "the way they do in Turpan." Texas summers are hotter than southern Xinjiang, he says. All the better.`,
+  opts:[{t:`Give him a strip of land, free`,e:{T:3,M:4,f:{uyGarden:1}},r:`By the second weekend the trellis is up. Grapes take three years to bear fruit. "I can wait," he says.`},
+    {t:`Ask him to run the whole garden, for a small stipend`,e:{D:-200,T:2,M:2,f:{uyGarden:1,uyGardener:1}},r:`The garden's yield doubles. In the tool shed he pins up a handwritten watering chart, one line in Uyghur, one in English.`},
+    {t:`The land is all planned out; ask the neighbors for him`,e:{T:1},fx(){if((S.npc.chuy||0)>=4){S.npc.chuy+=2;return `Chuy gives him a corner by the pasture, on condition that a melon comes over every summer.`;}return `He ends up renting a plot in a community garden, twenty minutes' drive away.`;}}]});
+E({id:'tsurphu_call',tag:`Teacher and Lineage`,title:`A Video from Tsurphu`,at:'2028-10',cond:()=>!!S.f.indiaTibet,
+  text:()=>`Lobsang sends a video link. The picture shakes badly: the main hall at Tsurphu, half-restored murals behind, Rinpoche in a wheelchair. He asks about the weather in Waco, about Rosa's knee, whether the farm windmill still turns.\nThen he says he would like to teach for a few minutes.`,
+  opts:[{t:`Put it on the shrine room screen for everyone`,e:{L:4,RT:5,HA:3,c:{all:4}},r:`He teaches on the second of the four thoughts that turn the mind: death and impermanence. Eleven minutes in, the connection drops. Nobody gets up.`},
+    {t:`Watch it with a few of the senior students`,e:{L:2,RT:4,S:2},r:`He looks at the few faces on your side of the screen. "Few people, good," he says. "What gets said when there are few people tends to be true."`},
+    {t:`Record it and translate it into English and Spanish`,e:{KN:3,L:2,T:1},r:`Those eleven minutes of video later become the first session of the introductory course.`}]});
+E({id:'aynur_art',tag:`People · Fictional History`,title:`A Drawing`,at:'2029-03',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`The mosque Dilnur's daughter Aynur drew at the shrine room door has been picked for the county children's art show. A Tribune-Herald reporter wants a photo of her with the drawing, "right where she drew it."\nDilnur pulls you into the kitchen and speaks very quietly: last month her cousin in Hunan was called in "for tea," and the questions were all about the family in America. Once a photo is online, someone over there will see it.`,
+  opts:[{t:`Decline the photo: the article can be about the drawing, not the girl`,e:{T:2,M:3,f:{aynurSafe:1}},r:`The headline reads "A Mosque That No Longer Exists." No name, no photo. Dilnur cuts it out and slips it into the family's only photo album.`},
+    {t:`Let the family decide; the center stays out of it`,e:{T:1,M:1},r:`Dilnur turns the reporter down. The drawing ends up hanging in the shrine room corridor, because that is where it was made.`},
+    {t:`Hold a "Vanished Places" show, every work unsigned`,e:{H:6,T:3,M:2,D:-300,f:{aynurSafe:1}},r:`The Uyghur graduate student from Baylor brings a photo of her grandmother's courtyard; a Vietnam veteran paints a street in Huế; an elderly Tibetan man hands in a sketch of an old house in Shigatse. There is not one name on the walls. More people come than you expected.`}]});
+E({id:'parinirvana',tag:`Teacher and Lineage`,title:`Parinirvana`,at:'2029-08',
+  pre(){S.f.rinpocheGone=S.turn;log(`Rinpoche passed away.`);},
+  text:()=>`At four in the morning, Lobsang calls. Rinpoche has passed away ${S.f.indiaTibet?`at Tsurphu`:`at his monastery in India`}.\nBefore the end, he says, Rinpoche asked to be helped upright, and he has not lain down since. He is in thukdam, the third day now: his body still warm, his face like someone asleep. The monastery asks students everywhere not to travel, but to practice where they are.${S.f.designated==='lobsang'?`\nLast, Lobsang says that after the cremation he will come back to Waco. "Rinpoche told me to."`:''}`,
+  opts:[{t:`The whole sangha practices guru yoga in the shrine room, seven days without a break`,e:{L:5,M:6,HA:5,B:10,c:{all:5}},r:`For seven days the lamps in the shrine room never go out. On the seventh day Lobsang writes: the thukdam has ended. Rosa carries the last lamp down to the lake.`},
+    {t:`Fly out for the cremation`,req:()=>S.D>=3000,rq:`Requires $3,000`,e:{D:-3000,RT:8,S:4,B:12},r:`On the day of the cremation you stand at the very back of the crowd and see a great many faces you have never seen, all his students. One has come from Brazil. She, too, is looking for somewhere to cry.`},
+    {t:`Lead Sunday practice as usual; change nothing`,e:{L:3,S:3},r:`Your talk is one sentence long: "He told us not to wait for him." Then you lead everyone through the prayer to the guru.`}]});
+E({id:'kailash_hindu',tag:`Neighbors · Fictional History`,title:`The Same Mountain`,ch:[4],w:5,cond:()=>!!S.f.indiaTibet&&!S.f.hinduDone,
+  text:()=>`A family drives down from Irving, devotees at a Hindu temple in the Dallas area. They have just come back from Kailash, "which you can simply go to now." ${S.f.kailash?`They heard someone in Waco had led a pilgrimage group. `:`They heard there was a Tibetan Buddhist center in Waco. `}The father, Vikram, says: for us, that is the home of Shiva and Parvati. He asks you: what is it for you?`,
+  opts:[{t:`Tell them about Chakrasamvara, and the contest between Milarepa and Naro Bönchung`,e:{KN:2,T:2,H:2,f:{hinduDone:1}},r:`When you get to Naro Bönchung flying up on his drum, and Milarepa reaching the summit first on the first ray of sunlight, the youngest son laughs out loud. In their stories, Vikram says, Shiva just sits up there in meditation, and nobody tries to race him.`},
+    {t:`Invite them to circumambulate the stupa with you`,req:()=>S.fac.stupa>0,rq:`Requires the stupa`,e:{T:3,M:3,f:{hinduDone:1}},r:`They walk clockwise, the same as you. After three rounds, Vikram's mother leaves a marigold at the base of the stupa.`},
+    {t:`"The same mountain, different doors."`,e:{T:2,L:1,f:{hinduDone:1}},r:`Vikram thinks about it. "Or perhaps the same door, different mountains." Neither of you takes it further.`}]});
+E({id:'el_yangsi',tag:`Endless · Lineage`,title:`The Reincarnation`,rep:1,cd:999,w:6,cond:()=>EL()&&!!S.f.rinpocheGone&&Y()>=2032&&!S.f.yangsi,
+  text:()=>`A letter from Lobsang. After years of searching, a four-year-old boy has been recognized as Rinpoche's reincarnation. He lives in ${S.f.indiaTibet?`a village near Shigatse`:`a village in Mustang, Nepal`}. The first time he met Lobsang, he reached straight for the mala Rinpoche used to carry.\nThe monastery is raising money for his education. Lobsang asks whether Waco can help.`,
+  opts:[{t:`Cover ten years of his schooling ($6,000)`,req:()=>S.D>=6000,rq:`Requires $6,000`,e:{D:-6000,L:5,RT:8,M:8,ach:'yawn'},fx(){S.f.yangsi=S.turn;S.renown=(S.renown||0)+60;return '';},r:`Lobsang sends a photo: the little boy on a tall throne, in the middle of a yawn.`},
+    {t:`Invite the whole sangha to give`,e:{L:3,RT:5,HA:4,c:{all:3},ach:'yawn'},fx(){S.f.yangsi=S.turn;S.renown=(S.renown||0)+30;return '';},r:`The photo sits beside the donation box. Within a week the box has been emptied twice.`},
+    {t:`Rejoice quietly; give nothing for now`,e:{L:1,ach:'yawn'},fx(){S.f.yangsi=S.turn;return '';},r:`You tape the photo beside the altar and look at it every morning.`}]});
+E({id:'el_yangsi_visit',tag:`Endless · Lineage`,title:`The Young Rinpoche Comes`,rep:1,cd:999,w:8,cond:()=>EL()&&!!S.f.yangsi&&S.turn-S.f.yangsi>=72&&!S.f.yangsiCame,
+  text:()=>`The young Rinpoche is ten now. His tutor brings him to North America, and Lobsang comes too, his hair half grey. At arrivals in Waco, the boy looks up at the sign you are holding and asks Lobsang in Tibetan: "Is this the place with the windmill?"`,
+  opts:[{t:`Ask him to give a long-life empowerment in the shrine room`,e:{D:-1500,L:8,RT:8,M:6,H:8},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.stats.visits++;S.renown=(S.renown||0)+80;return '';},r:`His tutor prompts him in a whisper. When the empowerment is over, the boy climbs down from the throne and goes straight to the window to look at the windmill.`},
+    {t:`No ceremony; take him to play by the lake for a day`,e:{HA:8,M:8,L:3,S:3},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.renown=(S.renown||0)+40;return '';},r:`He catches a crayfish, studies it for a long time, and puts it back in the water. Beside him, Lobsang murmurs something, his eyes red.`}]});
+Object.assign(ACH,{nowruz:[`Seven Grains`,`Cook Nowruz porridge in the center's kitchen`],kora:[`The Mountain Isn't Going Anywhere`,`Turn back below the Drölma La`],yawn:[`Yawn`,`Receive the first photo of Rinpoche's reincarnation`]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Members' Lives",title:"Wants to Leave",qonly:1,
@@ -7140,7 +7289,7 @@ function settle0(){
   // 漂移（月末）
   if(monthEnd){
   const sinceVisit=S.turn-S.lastVisit;
-  if(sinceVisit>(tk('D4')?24:18)) S.L-=.8;
+  if(sinceVisit>(tk('D4')?24:18)&&!(S.f.rinpocheGone&&(S.f.designated||S.f.localGuide||S.f.guide))) S.L-=.8;
   if(on('protector')) S.L+=.5;
   if(on('cabin')&&(S.f.guide||S.f.localGuide)) S.L+=.3;
   if(S.self<30) S.RT-=.5;
@@ -7196,6 +7345,7 @@ function ending(){
   if(S.L<=40&&S.f.brookeAlly&&S.D>=12000) hard.push('brand');
   if(S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&done>=1) hard.push('samye');
   if(S.T>=70&&S.f.councilSeat&&S.L>=30) hard.push('bridge');
+  if(refugeOK()) hard.push('refuge');
   return (hard.length?hard:Object.keys(sc)).sort((x,y)=>sc[y]-sc[x])[0];
 }
 const ENDINGS={
@@ -7204,7 +7354,7 @@ const ENDINGS={
   bridge:{n:"The Bridge",en:'THE BRIDGE',img:"At Thanksgiving dinner, a Baptist pastor and a lama share a table and spend five minutes politely insisting the other say grace first.",
     t:()=>`The lineage has thinned a little, but Waco is different because of you. The nameplate on the interfaith council reads "${S.center}."`},
   brand:{n:"The Brand",en:'THE BRAND',img:"The center has become \"Lake Waco Wellness Retreat.\" You are an employee here; your badge reads Head of Authenticity.",
-    t:()=>`There's $${Math.round(S.D).toLocaleString()} in the account. Weekend retreats are booked through next April. The thangkas in the shrine room have been swapped for high-resolution reproductions; the originals hang in Brooke's office.`},
+    t:()=>`There's $${Math.round(S.D).toLocaleString()} in the account. Weekend retreats are booked through next April. ${S.f.brookeAlly?`The thangkas in the shrine room have been swapped for high-resolution reproductions; the originals hang in Brooke's office.`:`The thangkas in the shrine room have been swapped for high-resolution reproductions; the originals are in the management company's storage unit.`}`},
   diss:{n:"Dissolution",en:'DISSOLUTION',img:"Once again only a few people are left in the living room. They are doing prostrations.",
     t:()=>{const d=act().filter(x=>x.done);return d.length?`Only ${act().length} remain, but ${d.map(x=>x.n).join(", ")} completed all five hundred-thousands. Whether this is failure or victory is for you to decide.`:`Only ${act().length} remain, and none of them has finished ngöndro. You still gather every Sunday. Perhaps that's all there is.`;}},
   exile:{n:"Exile",en:'EXILE',img:"You are forced to move to Austin. On a Waco forum, someone posts about missing that white stupa.",
@@ -7463,6 +7613,22 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
   land_P3:'paleo',land_P4:'warden',warbler_fine:'warden',land_P5:'wade',land_P6:'@player',pond_flood:'@player',land_P7:'corps',land_P8:'corps',fangsheng:'warden',
   ortiz:'ortiz',guadalupe:'ortiz',bishop:'ortiz',ortiz_end:'ortiz',icu:'okonkwo',chaplain:'okonkwo',hospice:'okonkwo',sonam:'sonam',sonam_lobsang:'sonam',sonam_retreat:'sonam',
   tex:'tex',tex_rodeo:'tex',tex_end:'tex',shirley:'shirley',juneteenth:'shirley',kyle:'kyle',kyle_nil:'kyle',garza:'garza',seder:'feld',vandal:'joykim',joykim:'joykim',drought:'@player'});
+
+/* v25：新人物头像、事件头像、结局与后记 */
+Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang'});
+ENDINGS.refuge={n:`Sanctuary`,en:'SANCTUARY',img:`On the lawn at Nowruz, the imam, Marcus and you share one picnic blanket. Dilnur's daughter is spooning polo onto everyone's plate.`,t:()=>`Later, when people in Waco talk about this place, they no longer say "that Buddhist group." They say "the place by the lake that kept its door open when it all happened."${S.f.uyGarden?` This year, a few very sour bunches hang from Ablikim's trellis.`:''}`};
+function epilogue(){const o=[],f=S.f,t=mem('tenzin');
+  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`Tenzin opened a small teahouse in Shigatse. A photo of the Waco sangha hangs on the wall.`);else if(t&&!t.left&&f.designated!=='tenzin')o.push(`Tenzin still works at H-E-B and leads the chanting on Sundays.`);
+  if(f.uyghurFamily)o.push(`Dilnur's family were granted asylum. Aynur's drawing still hangs in the shrine room corridor.`);
+  if(S.seen.dawson_fall!=null)o.push((S.npc.dawson||0)>=8?`Dawson drives a truck for the county food bank, and one Saturday a month he sweeps the center's parking lot.`:`Dawson moved to Oklahoma and left no forwarding address.`);
+  if(f.merged)o.push(`Chad still makes the Sunday tea. His Tibetan has improved.`);
+  if(f.harvestLeak||f.harvestWarn)o.push(`Lin Yue graduated and went back to Wuhan, where she teaches Sunday school in a house church.`);
+  if(f.koraDone)o.push(`The kora group photo hangs at the end of the corridor. One person is missing from it: the one holding the camera.`);
+  if(f.rinpocheGone&&!f.yangsi)o.push(`Lobsang says the search party for the reincarnation has already set out.`);
+  if(f.democracy)o.push(`The board still meets. This year's topic is, once again, the parking lot.`);
+  return o;}
+function epilogueHTML(){const o=epilogue();return o.length?`<div class="label" style="margin-top:12px">Afterwards</div>${o.map(x=>`<p style="margin:4px 0">${esc(x)}</p>`).join('')}`:'';}
 
 /* --- 买地触发 --- */
 E({id:'land_P1',tag:"Land · East Pasture",title:"Cattle Across the Line",qonly:1,
@@ -9014,13 +9180,13 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)+(100-S.L)*.6+(S.f.brookeAlly?15:0),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f',"Fates"],['e',"Events"],['p',"Hearts"],['b',"Ledger"]];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">Intel: numbers the game usually keeps out of sight. For the Abbot's eyes only.</p>`;
   if(cur==='f'){
     const sc=endingScores(),mx=Math.max(...Object.values(sc),1),now=ending();
-    const conds=[[act().length<5,"Fewer than 5 members → Dissolution"],[S.L>=60&&S.T<=32,"Lineage ≥60, Trust ≤32 → Exile"],[S.L<=40&&S.f.brookeAlly&&S.D>=12000,"Lineage ≤40, allied with Brooke, ≥$12,000 in the bank → The Brand"],[S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&act().some(x=>x.done),"Lineage ≥70, Trust ≥40, a retreat guide, certification, someone finished ngöndro → Samye"],[S.T>=70&&S.f.councilSeat&&S.L>=30,"Trust ≥70, a council seat, Lineage ≥30 → The Bridge"]];
+    const conds=[[act().length<5,"Fewer than 5 members → Dissolution"],[S.L>=60&&S.T<=32,"Lineage ≥60, Trust ≤32 → Exile"],[S.L<=40&&S.f.brookeAlly&&S.D>=12000,"Lineage ≤40, allied with Brooke, ≥$12,000 in the bank → The Brand"],[S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&act().some(x=>x.done),"Lineage ≥70, Trust ≥40, a retreat guide, certification, someone finished ngöndro → Samye"],[S.T>=70&&S.f.councilSeat&&S.L>=30,"Trust ≥70, a council seat, Lineage ≥30 → The Bridge"],[refugeOK(),`Took in Ablikim's family, Trust ≥55, Merit ≥40, deeds ≥3 → Sanctuary`]];
     const exp=expenses(),et=exp.reduce((a,b)=>a+b[1],0);
     h+=`<section class="panel"><h3>If it ended now <small>${ENDINGS[now].n} · ${ENDINGS[now].en}</small></h3>
       ${Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="ebar ${k===now?'on':''}"><span>${ENDINGS[k].n}</span><div class="bar"><i style="width:${clamp(v/mx*100,2,100)}%;color:${k===now?'var(--gold)':'var(--line2)'}"></i></div><span class="num">${Math.round(v)}</span></div>`).join('')}
@@ -9216,7 +9382,7 @@ function renderEnd(){
   app.innerHTML='';
   const tabs=[['e',"Ending"],['d',"Data"],['p',"Who Stayed"],['a',"Feats"]];const cur=sub('end',tabs);
   let body='';
-  if(cur==='e') body=`<div class="label">December ${Y()} · Ten Years</div><h1>${e.n}</h1><div class="en" style="letter-spacing:.3em;color:var(--mute);font-size:12px">${e.en}</div><p class="img">${esc(e.img)}</p><p>${esc(e.t())}</p>`;
+  if(cur==='e') body=`<div class="label">December ${Y()} · Ten Years</div><h1>${e.n}</h1><div class="en" style="letter-spacing:.3em;color:var(--mute);font-size:12px">${e.en}</div><p class="img">${esc(e.img)}</p><p>${esc(e.t())}</p>${epilogueHTML()}`;
   if(cur==='d') body=`<div class="rep" style="margin:10px 0">
       <div><span>Lineage Purity</span><span>${Math.round(S.L)}</span></div><div><span>Community Trust</span><span>${Math.round(S.T)}</span></div>
       <div><span>Dana</span><span>${fmt$(S.D)}</span></div><div><span>Members</span><span>${act().length}</span></div>
@@ -9667,7 +9833,7 @@ E({id:'el_branch',tag:"Endless · Branch",title:"An Invitation from Austin",rep:
     {t:"Give your blessing; let them do it themselves",e:{L:1,T:1},fx(){S.f.branch=1;const n=Math.min(6,act().length-10);act().filter(m=>m.gen||m.ros).slice(0,n).forEach(m=>leave(m,"left to run the Austin branch"));return `${n} members went to Austin. You are the mother center now.`;}},
     {t:"Wait another two years",e:{},r:"They keep driving up every week."}]});
 E({id:'el_karmapa',tag:"Endless · Lineage",title:"The Karmapa Visits",rep:1,cd:60,w:3,cond:()=>EL()&&S.L>=60&&S.RT>=55&&!S.f.karmapaCame,
-  text:()=>`A letter from Rinpoche: the Karmapa is touring North America and would like to stop with you for a day. Security, hospitality, parking for three thousand.`,
+  text:()=>`A letter from ${S.f.rinpocheGone?'Lobsang':'Rinpoche'}: the Karmapa is touring North America and would like to stop with you for a day. Security, hospitality, parking for three thousand.`,
   opts:[{t:"Host it in full",e:{D:-3000,L:8,H:20,T:3,B:20,M:10},fx(){S.f.karmapaCame=1;S.renown+=150;treGain('karmapa_signed',"in the Karmapa's hand");return "Two thousand cars parked by the lake that day. The Baptist church lent its lot. Pastor Dawson directed traffic at the gate.";}},
     {t:"Hold a small private audience",e:{D:-800,L:4,RT:5,M:5},fx(){S.f.karmapaCame=1;S.renown+=60;return "The Karmapa sat in the farmhouse living room for an hour and asked about the windmill.";}}]});
 E({id:'el_docu',tag:"Endless · Media",title:"Documentary",rep:1,cd:48,w:4,cond:()=>EL()&&S.H>=20,
@@ -9720,7 +9886,7 @@ const WIKI_CONCEPTS=[
   ["Media Heat","Media attention. Amplifies how events hit Trust, brings visitors and newcomers, and brings risk. Cools on its own."],
   ["Rinpoche's Trust","Your teacher's trust in you. Rises with self-practice, retreats and doing things properly; falls when you practice too little. Gates empowerments and certification."],
   ["Commitment","Each member's investment in the center. Drifts toward how well Sunday matches their preferred depth; stuck below 25 for too long, they think about leaving."],
-  ["Depth","How deep Sunday practice goes (0 mindfulness and stress relief ～ 100 full Tibetan liturgy). Trust and Learning set the ceiling Waco allows. Shallow draws crowds but drains Lineage."],
+  ["Depth","How deep Sunday practice goes (0 mindfulness and stress relief – 100 full Tibetan liturgy). Trust and Learning set the ceiling Waco allows. Shallow draws crowds but drains Lineage."],
   ["Ngöndro","Each member's practice progress: a hundred thousand each of prostrations, refuge, Vajrasattva, mandala offering and guru yoga. Higher commitment goes faster; completion qualifies them for yidam practice."],
   ["Capacity and Attendance","Shrine room area × 0.8 = seats. Attendance is limited by capacity, commitment and visitors (parking)."],
   ["Connected","Buildings and road-side venues must link by gravel road or footpath to the highway on the far right, or they do nothing."],
@@ -9775,7 +9941,7 @@ function openWiki(){
   if(cur==='t')body=pager('wk_t',TECH,n,x=>row(`${x.n} · ${TBR.find(b=>b[0]===x.br)[1]}${tk(x.id)?' ✓':''}`,`${x.k} Effect: ${x.fx}`));
   if(cur==='p'){const ids=Object.keys(TRAITS).map(k=>'tr:'+k).concat(Object.keys(MT)).concat(Object.keys(CH).filter(k=>!MT[k]&&!ORIGINS[k]));const met=S.members.map(m=>m.id);body=pager('wk_p',ids,n,id=>{if(id.startsWith('tr:')){const t=TRAITS[id.slice(3)];const k=here().filter(m=>m.tag===id.slice(3)).length;return row(`Specialty · ${t.n}${k?` ×${k}`:''}`,`${t.d}. Active for enrolled members with Commitment ≥40, stacking up to three.`);}const m=MT[id],c=CH[id];const seen=met.includes(id)||(S.seen&&Object.keys(S.seen).some(e=>EVENT_WHO[e]===id));return `<div class="wk who2">${c?pimg(c):''}<div><b>${esc(seen?(m?m.n:c.n):"???")}</b><span>${esc(seen?(m?m.r:''):"Not met yet")}</span></div></div>`;});}
   if(cur==='v'){const evs=Object.values(EV).filter(e=>e.title&&e.tag);const seen=evs.filter(e=>S.seen[e.id]!=null);body=`<p class="label" style="margin:0">${seen.length} / ${evs.length} event cards encountered</p>`+pager('wk_v',evs.sort((a,b)=>(S.seen[b.id]!=null)-(S.seen[a.id]!=null)||(a.tag||'').localeCompare(b.tag||'')),n,e=>row(S.seen[e.id]!=null?e.title:"???",S.seen[e.id]!=null?`${e.tag} · first seen ${ds(S.seen[e.id])}`:e.tag));}
-  if(cur==='n')body=pager('wk_n',Object.entries(ENDINGS),n,([k,e])=>row(`${e.n} · ${e.en}`,({samye:"Lineage ≥70, Trust ≥40, a local retreat guide, Rinpoche's certification, someone finished ngöndro",bridge:"Trust ≥70, a seat on the interfaith council, Lineage ≥30",brand:"Lineage ≤40, allied with Brooke, ≥$12,000 in the bank",exile:"Lineage ≥60, Trust ≤32",diss:"Fewer than 5 members, or too few actions and too much debt",succ:"In the final chapter, step down and hand the center to a member",mila:"In the final chapter, enter the three-year retreat: self-practice ≥85, Lineage ≥60, Merit ≥35"})[k]||''));
+  if(cur==='n')body=pager('wk_n',Object.entries(ENDINGS),n,([k,e])=>row(`${e.n} · ${e.en}`,({samye:"Lineage ≥70, Trust ≥40, a local retreat guide, Rinpoche's certification, someone finished ngöndro",bridge:"Trust ≥70, a seat on the interfaith council, Lineage ≥30",brand:"Lineage ≤40, allied with Brooke, ≥$12,000 in the bank",exile:"Lineage ≥60, Trust ≤32",diss:"Fewer than 5 members, or too few actions and too much debt",succ:"In the final chapter, step down and hand the center to a member",mila:"In the final chapter, enter the three-year retreat: self-practice ≥85, Lineage ≥60, Merit ≥35",refuge:`Took in Ablikim's family, Trust ≥55, Merit ≥40, and stood by the disaster-stricken at least three times`})[k]||''));
   if(cur==='g')body=pager('wk_g',WIKI_TERMS,n,([a,b])=>row(a,b));
   ovEl.innerHTML=`<div class="ov"><div class="box wiki"><div class="ph"><h2>Wiki</h2><button class="iconbtn" data-x="1">Close</button></div>${subtabs('wiki',tabs)}<div class="wkl">${body}</div></div></div>`;
   UI.ovRe=openWiki;
@@ -12589,8 +12755,8 @@ E({id:'dam',tag:"Mundo · História fictícia",title:"A jusante de Yichang",at:'
   text:()=>{const asian=S.origin==='asian';const m=chineseMember();
     return `A Barragem das Três Gargantas cedeu. A cheia desce o Yangtzé: Yichang, Jingzhou, a região do lago Dongting, Wuhan, uma cidade atrás da outra. O número de mortos é atualizado de hora a hora, e ninguém acredita nele.
 ${asian?"Há três dias que não consegues ligar para a terra da tua mãe, em Hubei. ":m?`A tia de ${m.n} vive em Jingzhou. Veio este domingo e sentou-se na última fila, com o telemóvel sempre aceso. `:"À porta da mercearia chinesa de Waco, alguém montou uma mesa de donativos, e a fila estende-se até ao parque de estacionamento. "}${has('hanh')?"A avó dos Nguyen diz que, com tantos que partiram, alguém tem de entoar por eles.":''}`;},
-  opts:[{t:"Enviar as oferendas deste mês para o socorro às vítimas",e:{D:-1500,T:4,M:6},r:"Colas o recibo na porta da sala do santuário. Ninguém pergunta para onde foi o dinheiro."},
-    {t:"Fazer uma grande puja memorial com os Nguyen",req:()=>has('hanh'),rq:"Requer os Nguyen",e:{L:2,T:3,M:4,c:{hanh:8}},r:"Os cânticos em tibetano, vietnamita e mandarim alternam-se. Vêm muitas famílias chinesas que nunca tinham vindo."},
+  opts:[{t:"Enviar as oferendas deste mês para o socorro às vítimas",e:{D:-1500,T:4,M:6,f:{damRelief:1}},r:"Colas o recibo na porta da sala do santuário. Ninguém pergunta para onde foi o dinheiro."},
+    {t:"Fazer uma grande puja memorial com os Nguyen",req:()=>has('hanh'),rq:"Requer os Nguyen",e:{L:2,T:3,M:4,c:{hanh:8},f:{damRelief:1}},r:"Os cânticos em tibetano, vietnamita e mandarim alternam-se. Vêm muitas famílias chinesas que nunca tinham vindo."},
     {t:"Dedicar o mérito apenas na sala do santuário",e:{L:1,M:2},r:"Cento e oito lamparinas de manteiga ardem a noite inteira."},
     {t:"Voar para a China à procura da família",req:()=>S.origin==='asian'&&S.D>=2500,rq:"Só Abade asiático · Requer $2,500",e:{D:-2500,B:15,S:-3,f:{wentChina:1}},r:"Procuras nos abrigos temporários de Wuhan durante nove dias. De volta a Waco, ficas muito tempo sentado na sala do santuário antes de conseguires falar."}]});
 E({id:'hunan',tag:"Mundo · História fictícia",title:"Transferência para Hunan",at:'2027-07',
@@ -12641,7 +12807,7 @@ E({id:'pham',tag:"Pessoas",title:'Mrs. Pham',at:'2028-11',cond:()=>has('hanh'),
     {t:"Sobretudo ritos da Terra Pura",e:{L:-1,T:2,c:{hanh:16}},r:"A tua pronúncia de Amitabha melhorou muito desde a primeira vez. A Hạnh diz que a avó se teria rido."},
     {t:"Combinar os dois",req:()=>S.D>=1200,rq:"Requer $1,200",e:{D:-1200,L:2,T:3,c:{hanh:12}},r:"Os cânticos tibetanos e vietnamitas alternam-se. Ninguém acha estranho."}]});
 E({id:'dawson_fall',tag:"Arco 2 · Igreja-espelho",title:"Uma chávena de chá de manteiga",at:'2029-02',
-  text:()=>`A Abundant Life Church desmorona-se num escândalo financeiro: um jato privado, contas offshore, um fundo «Desafio da Oferta» sem auditoria há três anos. O Pastor Dawson aparece à porta da tua sala do santuário sem fato. Fica sentado na última fila a tarde toda.`,
+  text:()=>`A Abundant Life Church desmorona-se num escândalo financeiro: um jato privado, contas offshore, um fundo «Desafio da Oferta» sem auditoria há três anos. O Pastor Dawson aparece à porta da tua sala do santuário sem fato. Fica sentado na última fila a tarde toda.${S.f.harvestLeak?` O primeiro fio a soltar-se foi aquele vídeo da Kayleigh que quase ninguém viu.`:''}${S.f.harvestWarn?` Antes de se sentar, diz apenas: «Tu avisaste-me.»`:''}`,
   opts:[{t:"Convidá-lo a ficar",e:{T:3,r:{dawson:10},H:6},r:"Pergunta se pode ajudar em alguma coisa. Dás-lhe uma vassoura."},
     {t:"Pedir-lhe educadamente que saia",e:{T:-1},r:"Acena com a cabeça. «Compreendo. Eu fazia o mesmo.»"},
     {t:"Dar-lhe só uma chávena de chá de manteiga",e:{M:4},r:"Bebe um gole, franze o sobrolho, bebe outro. «Isto é melhor do que os lattes do nosso café.»"}],
@@ -12665,7 +12831,7 @@ E({id:'designate',tag:"Mestre e Linhagem",title:"A nomeação",at:'2029-06',
     if(d==='player') return [{t:"Aceitar",e:{L:4,S:4},r:"Pousas a carta no altar e depois vais varrer o chão."}];
     return [{t:"Aceitar a decisão do Rinpoche",e:{L:3,M:3},r:"Quando entregas as chaves de Abade, a tua mão está firme."},{t:"Ressentir-se por dentro",e:{L:-3,B:10},r:"Não o dizes. Mas sabes que a tua prática não foi suficientemente boa."}];}});
 E({id:'final',tag:"Linhagem · Final",title:"O futuro do centro",at:'2029-11',
-  text:()=>`Dez anos. Tens de definir soluções duradouras para este grupo de Dharma. ${act().length} membros esperam que fales.`,
+  text:()=>`${S.f.rinpocheGone?`O Rinpoche partiu há três meses. `:''}Dez anos. Tens de definir soluções duradouras para este grupo de Dharma. ${act().length} membros esperam que fales.`,
   opts:()=>{const o=[
     {t:"Confiar num professor à distância; manter tudo como está",e:{f:{final:'remote'}},r:"Dizes: «Como sempre.»"},
     {t:"Entregar o ensino ao professor local",req:()=>S.f.guide||S.f.localGuide,rq:"Requer um professor local qualificado",e:{L:3,f:{final:'local'}},r:"O professor local dirige sozinho a prática de domingo pela primeira vez. Tu sentas-te na última fila."},
@@ -12673,6 +12839,72 @@ E({id:'final',tag:"Linhagem · Final",title:"O futuro do centro",at:'2029-11',
     ['tenzin','dale','rosa'].forEach(id=>{const m=mem(id);if(m&&!m.left&&m.c>=55)o.push({t:`Retirar-se; passar o testemunho a ${m.n}`,e:{f:{final:'succ',heir:id}},r:"Pousas-lhe as chaves na palma da mão."});});
     o.push({t:"Entrar no retiro de três anos, três meses e três dias; largar toda a gestão",req:()=>S.self>=85&&S.L>=60&&S.M>=35,rq:"Requer Prática pessoal do Abade ≥85, Linhagem ≥60 e Mérito suficiente",e:{f:{final:'mila'}},r:"Entras na cabana de retiro e fechas a porta."});
     return o;}});
+
+/* ===== v25 · 虚构历史线 2028–2029 及之后 ===== */
+function refugeDeeds(){const f=S.f;return ['vigil','damRelief','uyghurFamily','anniv1','nowruz','uyGarden','aynurSafe'].filter(k=>f[k]).length;}
+function refugeOK(){return !!S.f.uyghurFamily&&S.T>=55&&S.M>=40&&refugeDeeds()>=3;}
+function refugeScore(){return S.f.uyghurFamily?S.T*.45+S.M*.55+refugeDeeds()*5-12:-60;}
+E({id:'kashgar_anniv',tag:`Mundo · História fictícia`,title:`Um ano`,at:'2028-02',cond:()=>!!(S.f.vigil||S.f.uyghurFamily),
+  text:()=>`Faz um ano este mês que o oásis a sul de Kashgar desapareceu das imagens de satélite. O imã volta a telefonar: quem veio à vigília do ano passado pergunta se este ano também vai haver.${S.f.uyghurFamily?`\nA Dilnur põe-te na mão uma folha dobrada: os nomes da mãe e dos dois irmãos. «Sei que vocês dedicam o mérito aos mortos», diz. «Nós não fazemos assim. Nós fazemos du'a por eles.»`:''}`,
+  opts:()=>{const o=[{t:`Uma noite, duas orações: primeiro a mesquita, depois a sala do santuário`,e:{T:4,M:4,H:3,r:{marcus:2},f:{anniv1:1}},r:`Cada uma à sua maneira. No parque de estacionamento, o imã diz-te: «Não precisamos de fingir que somos iguais para estarmos lado a lado.»`}];
+    if(S.f.uyghurFamily)o.push({t:`Entregar os nomes ao imã; a sala do santuário dedica o mérito a todos os mortos`,e:{T:3,M:5,f:{anniv1:1}},r:`A Dilnur acena. Diz que a mãe teria gostado assim: portas diferentes, caminhos diferentes, a mesma noite.`});
+    o.push({t:`Desta vez, dedicar o mérito apenas na sala do santuário`,e:{L:2,M:2},r:`Cento e oito lamparinas. Na manhã seguinte, alguém deixou ao lado delas um pequeno pão naan.`});return o;}});
+E({id:'nowruz',tag:`Pessoas · História fictícia`,title:`Nowruz`,at:'2028-03',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`O dia 21 de março é o Nowruz, o ano novo uigur. A Dilnur conta que em Kashgar se coze neste dia a papa do Nowruz, sete cereais na mesma panela; em Waco não os consegue arranjar todos, o H-E-B não tem aqueles feijões.\nO Ablikim pergunta: podem usar a vossa cozinha e o relvado junto ao lago? «Queremos convidar a mesquita. E queremos convidar-vos a vocês.»`,
+  opts:[{t:`Emprestar a cozinha e o relvado; todos ajudam`,e:{T:4,HA:5,M:3,D:-150,f:{nowruz:1},ach:'nowruz'},r:`No fim, os sete cereais aparecem: alguém vai a uma mercearia indiana em Dallas buscar os dois feijões que faltavam. O Ablikim toca uma melodia no dutar; as crianças batem palmas e o imã trauteia.`},
+    {t:`Emprestar o espaço e deixá-los organizar`,e:{T:2,M:2,f:{nowruz:1}},r:`Passas a tarde à beira do relvado e comes três taças de polo.`},
+    {t:`Há uma puja nessa semana; fica para outra vez`,e:{L:1},r:`Acabam por festejar no parque de estacionamento da mesquita. A filha da Dilnur traz-te uma taça da papa, embrulhada em película aderente.`}]});
+E({id:'harvest_ledger',tag:`Arco 2 · Igreja-espelho`,title:`O contador`,at:'2028-06',
+  text:()=>`O contador «Colheita na China» no ecrã gigante da Abundant Life já passou os quatro milhões. A estudante de Baylor que foi batizada no Brazos no ano passado volta a aparecer; chama-se Lin Yue. A igreja doméstica da terra dela, em Wuhan, nunca recebeu um cêntimo, diz. «O pastor diz que o dinheiro ainda está no canal.»\nPousa um recibo de oferta na tua mesa de centro: 2000 dólares, a favor de uma empresa nas Ilhas Caimão.`,
+  opts:[{t:`Sugerir-lhe que leve isto a um jornalista, ou à Kayleigh`,e:{H:6,T:-1,r:{kayleigh:3},f:{harvestLeak:1}},r:`Três semanas depois, a Kayleigh publica um vídeo de quarenta segundos: «Colheita na China: para onde foi o dinheiro?». As visualizações são modestas, mas um advogado deixa um comentário.`},
+    {t:`Falar com o Dawson em privado`,e:{r:{dawson:4},f:{harvestWarn:1}},r:`O Dawson ouve-te até ao fim e fica a olhar para ti muito tempo. «Achas que eu não sei?», diz. «Só não sei como parar isto.»`},
+    {t:`Isto não é assunto do centro`,e:{L:1,M:-2},r:`A Lin Yue volta a guardar o recibo. «Pensei que fosses diferente.» Depois de ela sair, ficas um bocado sentado diante do altar.`}]});
+E({id:'kailash_kora',tag:`Linhagem · Peregrinação`,title:`A kora`,at:'2028-05',cond:()=>!!S.f.kailash,
+  text:()=>`A peregrinação ao Kailash parte. Na lua cheia de Saga Dawa, quando o grande mastro de bandeiras de oração de Tarboche volta a ser erguido, há mais peregrinos indianos à volta dele do que tibetanos. Para eles, a montanha é o Kailash, a morada de Shiva; para vocês, é a mandala de Chakrasamvara.\nA kora tem cinquenta e dois quilómetros e, no segundo dia, atravessa o passo de Drölma La, acima dos 5600 metros. Antes do amanhecer do segundo dia, um membro do grupo, de sessenta e sete anos, começa a vomitar com uma dor de cabeça violenta. Os lábios estão a ficar azuis.`,
+  opts:[{t:`Descer tu mesmo com ele e desistir da kora`,e:{M:6,HA:4,S:2,f:{koraDone:1},ach:'kora'},r:`Esperam dois dias numa pensão em Darchen. Quando ele recupera, diz: «Não chegaste a acabar.» Respondes: «A montanha não vai a lado nenhum.»`},
+    {t:`Pedir a um guia tibetano que o leve para baixo; os outros continuam`,e:{L:3,RT:3,B:8,f:{koraDone:1}},r:`No alto do Drölma La, deixas uma fotografia de toda a sangha debaixo do monte de bandeiras de oração. Na descida, um velho indiano estende-te meio pão sem dizer palavra.`},
+    {t:`O grupo inteiro volta para trás; talvez para o ano`,e:{L:-1,HA:6,D:-800,f:{koraDone:1},ach:'kora'},r:`Uns ficam desiludidos, outros aliviados. No autocarro de regresso, os cinco membros indo-americanos ensinam a todos um bhajan a Shiva, e o motorista tibetano trauteia com eles.`}]});
+E({id:'wuhan_letter',tag:`Pessoas · História fictícia`,title:`Uma carta de Wuhan`,at:'2028-04',cond:()=>!!S.f.wentChina,
+  text:()=>`Uma carta de Wuhan, sete semanas no correio. É de uma senhora idosa que conheceste no abrigo temporário; foi o neto quem a escreveu por ela. Deram-lhes uma casa pré-fabricada, diz. A rapariga que a ajudaste a procurar naquele dia não era a filha dela, «mas essa rapariga também precisava que alguém a procurasse».\nDentro do envelope vem uma fotografia: o carácter fu, «bênção», escrito à mão e colado na porta do pré-fabricado.`,
+  opts:[{t:`Pôr a fotografia ao lado do altar`,e:{M:4,L:1},r:`Sempre que acendes as lamparinas, olhas para ela.`},
+    {t:`Responder, com algum dinheiro`,e:{D:-300,M:5},r:`Escreves três páginas e envias uma. Ela recebe o dinheiro; na resposta conta que comprou umas sapatilhas ao neto.`},
+    {t:`Ler a carta em voz alta na prática de domingo`,e:{HA:4,T:1,c:{all:2}},r:`Quando chegas a «essa rapariga também precisava que alguém a procurasse», tens de parar um instante. Ninguém te apressa.`}]});
+E({id:'ablikim_garden',tag:`Pessoas · História fictícia`,title:`A latada`,at:'2028-07',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`Em Kashgar, o Ablikim dava aulas numa escola agrícola; em Waco faz o turno da noite na charcutaria do H-E-B. Pergunta se pode arrendar uma faixa de terra na orla da quinta para cultivar melões e montar uma latada de uvas «como em Turpan». Os verões do Texas são mais quentes do que os do sul de Xinjiang, diz. Tanto melhor.`,
+  opts:[{t:`Dar-lhe uma faixa de terra, de graça`,e:{T:3,M:4,f:{uyGarden:1}},r:`No segundo fim de semana a latada já está de pé. As videiras levam três anos a dar uvas. «Eu posso esperar», diz ele.`},
+    {t:`Pedir-lhe que trate de toda a horta, por uma pequena ajuda mensal`,e:{D:-200,T:2,M:2,f:{uyGarden:1,uyGardener:1}},r:`A produção da horta duplica. No barracão das ferramentas, ele afixa uma tabela de rega escrita à mão: uma linha em uigur, outra em inglês.`},
+    {t:`A terra já está toda planeada; perguntar aos vizinhos por ele`,e:{T:1},fx(){if((S.npc.chuy||0)>=4){S.npc.chuy+=2;return `O Chuy dá-lhe um canto junto ao pasto, com a condição de lhe levar um melão todos os verões.`;}return `Acaba por arrendar um talhão numa horta comunitária, a vinte minutos de carro.`;}}]});
+E({id:'tsurphu_call',tag:`Mestre e Linhagem`,title:`Um vídeo de Tsurphu`,at:'2028-10',cond:()=>!!S.f.indiaTibet,
+  text:()=>`O Lobsang envia uma ligação de vídeo. A imagem treme muito: o salão principal de Tsurphu, frescos meio restaurados ao fundo, o Rinpoche numa cadeira de rodas. Pergunta pelo tempo em Waco, pelo joelho da Rosa, se o moinho da quinta ainda gira.\nDepois diz que gostaria de ensinar durante uns minutos.`,
+  opts:[{t:`Projetar na sala do santuário, para todos`,e:{L:4,RT:5,HA:3,c:{all:4}},r:`Ensina sobre o segundo dos quatro pensamentos que transformam a mente: a morte e a impermanência. Ao fim de onze minutos, a ligação cai. Ninguém se levanta.`},
+    {t:`Ver só com alguns dos alunos mais antigos`,e:{L:2,RT:4,S:2},r:`Olha para os poucos rostos do teu lado do ecrã. «Pouca gente, ainda bem», diz. «O que se diz quando há pouca gente costuma ser verdade.»`},
+    {t:`Gravar e traduzir para inglês e espanhol`,e:{KN:3,L:2,T:1},r:`Aqueles onze minutos de vídeo tornam-se mais tarde a primeira aula do curso de introdução.`}]});
+E({id:'aynur_art',tag:`Pessoas · História fictícia`,title:`Um desenho`,at:'2029-03',cond:()=>!!S.f.uyghurFamily,
+  text:()=>`A mesquita que a Aynur, filha da Dilnur, desenhou à porta da sala do santuário foi escolhida para a exposição infantil do condado. Um repórter do Tribune-Herald quer uma fotografia dela com o desenho, «mesmo no sítio onde o desenhou».\nA Dilnur puxa-te para a cozinha e fala muito baixo: no mês passado, a prima dela em Hunan foi chamada «para um chá», e as perguntas eram todas sobre a família na América. Uma fotografia na internet e alguém do outro lado vai vê-la.`,
+  opts:[{t:`Recusar a fotografia: a notícia pode falar do desenho, não da menina`,e:{T:2,M:3,f:{aynurSafe:1}},r:`O título é «Uma mesquita que já não existe». Sem nome, sem fotografia. A Dilnur recorta a notícia e guarda-a no único álbum de fotografias da família.`},
+    {t:`Deixar a família decidir; o centro não se mete`,e:{T:1,M:1},r:`A Dilnur recusa o repórter. O desenho acaba pendurado no corredor da sala do santuário, porque foi ali que nasceu.`},
+    {t:`Organizar uma exposição «Lugares que desapareceram», com todas as obras sem assinatura`,e:{H:6,T:3,M:2,D:-300,f:{aynurSafe:1}},r:`A estudante uigur de Baylor traz uma fotografia do pátio da casa da avó; um veterano do Vietname pinta uma rua de Huế; um tibetano idoso entrega um esboço de uma velha casa de Shigatse. Não há um único nome nas paredes. Vem mais gente do que esperavas.`}]});
+E({id:'parinirvana',tag:`Mestre e Linhagem`,title:`Parinirvana`,at:'2029-08',
+  pre(){S.f.rinpocheGone=S.turn;log(`O Rinpoche faleceu.`);},
+  text:()=>`Às quatro da manhã, o Lobsang telefona. O Rinpoche faleceu ${S.f.indiaTibet?`em Tsurphu`:`no seu mosteiro na Índia`}.\nAntes do fim, conta, o Rinpoche pediu que o ajudassem a sentar-se direito, e desde então não voltou a deitar-se. Está em thukdam, já vai no terceiro dia: o corpo ainda morno, o rosto como o de quem dorme. O mosteiro pede aos discípulos de toda a parte que não viajem, que pratiquem onde estão.${S.f.designated==='lobsang'?`\nPor fim, o Lobsang diz que, depois da cremação, voltará a Waco. «O Rinpoche assim mo pediu.»`:''}`,
+  opts:[{t:`Toda a sangha pratica o guru yoga na sala do santuário, sete dias sem interrupção`,e:{L:5,M:6,HA:5,B:10,c:{all:5}},r:`Durante sete dias as lamparinas da sala do santuário nunca se apagam. No sétimo dia, o Lobsang escreve: o thukdam terminou. A Rosa leva a última lamparina até ao lago.`},
+    {t:`Voar para a cremação`,req:()=>S.D>=3000,rq:`Requer $3,000`,e:{D:-3000,RT:8,S:4,B:12},r:`No dia da cremação, ficas lá atrás, no fim da multidão, e vês imensos rostos que nunca tinhas visto, todos discípulos dele. Uma veio do Brasil. Também ela procura um sítio onde chorar.`},
+    {t:`Dirigir a prática de domingo como sempre; não mudar nada`,e:{L:3,S:3},r:`A tua palestra tem uma frase: «Ele disse-nos que não ficássemos à espera dele.» Depois conduzes todos na prece ao mestre.`}]});
+E({id:'kailash_hindu',tag:`Vizinhos · História fictícia`,title:`A mesma montanha`,ch:[4],w:5,cond:()=>!!S.f.indiaTibet&&!S.f.hinduDone,
+  text:()=>`Uma família vem de carro desde Irving, devotos de um templo hindu da zona de Dallas. Acabam de regressar do Kailash, «aonde agora se pode ir sem mais». ${S.f.kailash?`Ouviram dizer que alguém em Waco tinha organizado uma peregrinação. `:`Ouviram dizer que havia um centro budista tibetano em Waco. `}O pai, Vikram, diz: para nós, é a casa de Shiva e Parvati. E pergunta-te: e para vocês, o que é?`,
+  opts:[{t:`Falar-lhes de Chakrasamvara e da disputa entre Milarepa e Naro Bönchung`,e:{KN:2,T:2,H:2,f:{hinduDone:1}},r:`Quando chegas a Naro Bönchung a voar montado no tambor e a Milarepa a alcançar primeiro o cume no primeiro raio de sol, o filho mais novo ri-se alto. Nas histórias deles, diz o Vikram, Shiva está simplesmente lá em cima a meditar, e ninguém tenta competir com ele.`},
+    {t:`Convidá-los a circum-ambular a stupa convosco`,req:()=>S.fac.stupa>0,rq:`Requer a stupa`,e:{T:3,M:3,f:{hinduDone:1}},r:`Andam no sentido dos ponteiros do relógio, tal como vocês. Ao fim de três voltas, a mãe do Vikram deixa um malmequer na base da stupa.`},
+    {t:`«A mesma montanha, portas diferentes.»`,e:{T:2,L:1,f:{hinduDone:1}},r:`O Vikram pensa um pouco. «Ou talvez a mesma porta, montanhas diferentes.» Nenhum de vocês leva a conversa mais longe.`}]});
+E({id:'el_yangsi',tag:`Infinito · Linhagem`,title:`A reencarnação`,rep:1,cd:999,w:6,cond:()=>EL()&&!!S.f.rinpocheGone&&Y()>=2032&&!S.f.yangsi,
+  text:()=>`Uma carta do Lobsang. Depois de anos de procura, um menino de quatro anos foi reconhecido como a reencarnação do Rinpoche. Vive em ${S.f.indiaTibet?`uma aldeia perto de Shigatse`:`uma aldeia em Mustang, no Nepal`}. Da primeira vez que viu o Lobsang, estendeu logo a mão para o mala que o Rinpoche usava.\nO mosteiro está a angariar fundos para a sua educação. O Lobsang pergunta se Waco pode ajudar.`,
+  opts:[{t:`Pagar dez anos dos seus estudos ($6,000)`,req:()=>S.D>=6000,rq:`Requer $6,000`,e:{D:-6000,L:5,RT:8,M:8,ach:'yawn'},fx(){S.f.yangsi=S.turn;S.renown=(S.renown||0)+60;return '';},r:`O Lobsang envia uma fotografia: o menino sentado num trono alto, a meio de um bocejo.`},
+    {t:`Convidar toda a sangha a contribuir`,e:{L:3,RT:5,HA:4,c:{all:3},ach:'yawn'},fx(){S.f.yangsi=S.turn;S.renown=(S.renown||0)+30;return '';},r:`A fotografia fica ao lado da caixa de donativos. Numa semana, a caixa foi esvaziada duas vezes.`},
+    {t:`Regozijar-se em silêncio; não dar nada por agora`,e:{L:1,ach:'yawn'},fx(){S.f.yangsi=S.turn;return '';},r:`Colas a fotografia ao lado do altar e olhas para ela todas as manhãs.`}]});
+E({id:'el_yangsi_visit',tag:`Infinito · Linhagem`,title:`O jovem Rinpoche chega`,rep:1,cd:999,w:8,cond:()=>EL()&&!!S.f.yangsi&&S.turn-S.f.yangsi>=72&&!S.f.yangsiCame,
+  text:()=>`O jovem Rinpoche tem agora dez anos. O tutor traz-o à América do Norte, e o Lobsang também vem, com o cabelo meio grisalho. Nas chegadas, em Waco, o menino olha para o cartaz que tens na mão e pergunta ao Lobsang, em tibetano: «É aqui o sítio do moinho?»`,
+  opts:[{t:`Pedir-lhe que dê uma iniciação de longa vida na sala do santuário`,e:{D:-1500,L:8,RT:8,M:6,H:8},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.stats.visits++;S.renown=(S.renown||0)+80;return '';},r:`O tutor sopra-lhe as palavras em voz baixa. Quando a iniciação acaba, o menino desce do trono e vai direito à janela ver o moinho.`},
+    {t:`Nenhuma cerimónia; levá-lo a brincar um dia junto ao lago`,e:{HA:8,M:8,L:3,S:3},fx(){S.f.yangsiCame=1;S.lastVisit=S.turn;S.renown=(S.renown||0)+40;return '';},r:`Apanha um lagostim, observa-o muito tempo e volta a pô-lo na água. Ao lado, o Lobsang murmura qualquer coisa, de olhos vermelhos.`}]});
+Object.assign(ACH,{nowruz:[`Sete cereais`,`Cozer a papa do Nowruz na cozinha do centro`],kora:[`A montanha não foge`,`Dar meia-volta antes do Drölma La`],yawn:[`Bocejo`,`Receber a primeira fotografia da reencarnação do Rinpoche`]});
 
 /* ===== 动态事件 ===== */
 E({id:'departure',tag:"Vidas dos membros",title:"Quer ir embora",qonly:1,
@@ -12888,7 +13120,7 @@ function settle0(){
   // 漂移（月末）
   if(monthEnd){
   const sinceVisit=S.turn-S.lastVisit;
-  if(sinceVisit>(tk('D4')?24:18)) S.L-=.8;
+  if(sinceVisit>(tk('D4')?24:18)&&!(S.f.rinpocheGone&&(S.f.designated||S.f.localGuide||S.f.guide))) S.L-=.8;
   if(on('protector')) S.L+=.5;
   if(on('cabin')&&(S.f.guide||S.f.localGuide)) S.L+=.3;
   if(S.self<30) S.RT-=.5;
@@ -12944,6 +13176,7 @@ function ending(){
   if(S.L<=40&&S.f.brookeAlly&&S.D>=12000) hard.push('brand');
   if(S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&done>=1) hard.push('samye');
   if(S.T>=70&&S.f.councilSeat&&S.L>=30) hard.push('bridge');
+  if(refugeOK()) hard.push('refuge');
   return (hard.length?hard:Object.keys(sc)).sort((x,y)=>sc[y]-sc[x])[0];
 }
 const ENDINGS={
@@ -12952,7 +13185,7 @@ const ENDINGS={
   bridge:{n:"A Ponte",en:'THE BRIDGE',img:"No jantar de Ação de Graças, um pastor batista e um lama partilham a mesa e passam cinco minutos a insistir, educadamente, que seja o outro a dar graças primeiro.",
     t:()=>`A linhagem ficou um pouco mais rala, mas Waco é diferente por tua causa. A placa no conselho inter-religioso diz «${S.center}».`},
   brand:{n:"A Marca",en:'THE BRAND',img:"O centro tornou-se o «Lake Waco Wellness Retreat». És aqui funcionário; o teu crachá diz Head of Authenticity.",
-    t:()=>`Há $${Math.round(S.D).toLocaleString()} na conta. Os retiros de fim de semana estão esgotados até ao próximo abril. As thangkas da sala do santuário foram trocadas por reproduções em alta resolução; as originais estão penduradas no gabinete da Brooke.`},
+    t:()=>`Há $${Math.round(S.D).toLocaleString()} na conta. Os retiros de fim de semana estão esgotados até ao próximo abril. ${S.f.brookeAlly?`As thangkas da sala do santuário foram trocadas por reproduções em alta resolução; as originais estão penduradas no gabinete da Brooke.`:`As thangkas da sala do santuário foram trocadas por reproduções em alta resolução; as originais estão no armazém da empresa gestora.`}`},
   diss:{n:"Dissolução",en:'DISSOLUTION',img:"Mais uma vez, restam apenas algumas pessoas na sala de estar. Estão a fazer prostrações.",
     t:()=>{const d=act().filter(x=>x.done);return d.length?`Restam apenas ${act().length}, mas os cinco cem-mil foram completados por ${d.map(x=>x.n).join(", ")}. Se isto é derrota ou vitória, cabe-te a ti decidir.`:`Restam apenas ${act().length}, e nenhum terminou o ngöndro. Continuam a reunir-se todos os domingos. Talvez seja tudo o que há.`;}},
   exile:{n:"Exílio",en:'EXILE',img:"Sois obrigados a mudar-vos para Austin. Num fórum de Waco, alguém escreve que tem saudades daquela stupa branca.",
@@ -13211,6 +13444,22 @@ Object.assign(EVENT_WHO,{land_P1:'chuy',cattle_drought:'chuy',peaches:'lupe',cow
   land_P3:'paleo',land_P4:'warden',warbler_fine:'warden',land_P5:'wade',land_P6:'@player',pond_flood:'@player',land_P7:'corps',land_P8:'corps',fangsheng:'warden',
   ortiz:'ortiz',guadalupe:'ortiz',bishop:'ortiz',ortiz_end:'ortiz',icu:'okonkwo',chaplain:'okonkwo',hospice:'okonkwo',sonam:'sonam',sonam_lobsang:'sonam',sonam_retreat:'sonam',
   tex:'tex',tex_rodeo:'tex',tex_end:'tex',shirley:'shirley',juneteenth:'shirley',kyle:'kyle',kyle_nil:'kyle',garza:'garza',seder:'feld',vandal:'joykim',joykim:'joykim',drought:'@player'});
+
+/* v25：新人物头像、事件头像、结局与后记 */
+Object.assign(CH,{linyue:{n:`Lin Yue`,skin:SK[1],hair:'long',hc:HC.black,top:'#c9b46a'},vikram:{n:`Vikram Iyer`,skin:SK[3],hair:'short',hc:HC.black,top:'#d98b3a',beard:'full',bc:HC.black}});
+Object.assign(EVENT_WHO,{kashgar_anniv:'imam',nowruz:'ablikim',ablikim_garden:'ablikim',aynur_art:'dilnur',harvest_ledger:'linyue',kailash_kora:'@player',wuhan_letter:'@player',tsurphu_call:'rinpoche',parinirvana:'lobsang',kailash_hindu:'vikram',el_yangsi:'lobsang',el_yangsi_visit:'lobsang'});
+ENDINGS.refuge={n:`Refúgio`,en:'SANCTUARY',img:`No relvado, no Nowruz, o imã, o Marcus e tu partilham a mesma toalha de piquenique. A filha da Dilnur serve polo no prato de cada um.`,t:()=>`Mais tarde, quando em Waco se fala deste sítio, já não se diz «aquele grupo budista». Diz-se «a casa junto ao lago que manteve a porta aberta quando tudo aconteceu».${S.f.uyGarden?` Este ano, a latada do Ablikim já tem uns cachos ainda muito azedos.`:''}`};
+function epilogue(){const o=[],f=S.f,t=mem('tenzin');
+  if(t&&t.left&&S.seen.tibet_india!=null)o.push(`O Tenzin abriu uma pequena casa de chá em Shigatse. Na parede está uma fotografia da sangha de Waco.`);else if(t&&!t.left&&f.designated!=='tenzin')o.push(`O Tenzin continua a trabalhar no H-E-B e dirige os cânticos aos domingos.`);
+  if(f.uyghurFamily)o.push(`A família da Dilnur obteve asilo. O desenho da Aynur continua pendurado no corredor da sala do santuário.`);
+  if(S.seen.dawson_fall!=null)o.push((S.npc.dawson||0)>=8?`O Dawson conduz uma carrinha do banco alimentar do condado e, um sábado por mês, varre o parque de estacionamento do centro.`:`O Dawson mudou-se para o Oklahoma e não deixou morada.`);
+  if(f.merged)o.push(`O Chad continua a fazer o chá de domingo. O tibetano dele melhorou.`);
+  if(f.harvestLeak||f.harvestWarn)o.push(`A Lin Yue formou-se e voltou para Wuhan, onde dá catequese numa igreja doméstica.`);
+  if(f.koraDone)o.push(`A fotografia do grupo da kora está ao fundo do corredor. Falta uma pessoa: a que segurava a máquina.`);
+  if(f.rinpocheGone&&!f.yangsi)o.push(`O Lobsang diz que a equipa de busca da reencarnação já partiu.`);
+  if(f.democracy)o.push(`A direção continua a reunir-se. O tema deste ano continua a ser o parque de estacionamento.`);
+  return o;}
+function epilogueHTML(){const o=epilogue();return o.length?`<div class="label" style="margin-top:12px">Depois</div>${o.map(x=>`<p style="margin:4px 0">${esc(x)}</p>`).join('')}`:'';}
 
 /* --- 买地触发 --- */
 E({id:'land_P1',tag:"Terra · Pasto Este",title:"Gado do Outro Lado da Cerca",qonly:1,
@@ -14762,13 +15011,13 @@ function logPage(){
 
 /* ---------- 内参 ---------- */
 function endingScores(){const a=act(),done=a.filter(x=>x.done).length;
-  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)+(100-S.L)*.6+(S.f.brookeAlly?15:0),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
+  return {samye:S.L*1.1+S.T*.3+(S.f.cert?10:0)+done*2+Math.min(10,S.stats.retreat||0)-15,bridge:S.T*1.1+S.L*.2+Math.min(15,(S.stats.council||0)*1.5)+(S.f.councilSeat?12:0)-15,brand:Math.min(S.D/500,60)*(S.f.brookeAlly?1:.35)+(100-S.L)*.6+(S.f.brookeAlly?15:0)+(S.merch||0)*3,refuge:refugeScore(),exile:S.L*.4+(100-S.T)*.8+S.H*.3-20,diss:(14-a.length)*7+done*3+Math.max(0,45-S.L)*.6+Math.max(0,45-S.T)*.6+Math.max(0,600-(S.stats.acts||0))/20+Math.max(0,-S.D)/1000};}
 function intelPage(){
   const tabs=[['f',"Finais"],['e',"Eventos"],['p',"Ânimos"],['b',"Contas"]];const cur=sub('intel',tabs);
   let h=subtabs('intel',tabs)+`<p class="label" style="margin:0">Dossiê: números que o jogo normalmente esconde. Só para os olhos do Abade.</p>`;
   if(cur==='f'){
     const sc=endingScores(),mx=Math.max(...Object.values(sc),1),now=ending();
-    const conds=[[act().length<5,"Menos de 5 membros → Dissolução"],[S.L>=60&&S.T<=32,"Linhagem ≥60, Confiança ≤32 → Exílio"],[S.L<=40&&S.f.brookeAlly&&S.D>=12000,"Linhagem ≤40, aliança com Brooke, ≥$12,000 no banco → A Marca"],[S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&act().some(x=>x.done),"Linhagem ≥70, Confiança ≥40, um guia de retiro, certificação, alguém com o ngöndro concluído → Samye"],[S.T>=70&&S.f.councilSeat&&S.L>=30,"Confiança ≥70, um lugar no conselho, Linhagem ≥30 → A Ponte"]];
+    const conds=[[act().length<5,"Menos de 5 membros → Dissolução"],[S.L>=60&&S.T<=32,"Linhagem ≥60, Confiança ≤32 → Exílio"],[S.L<=40&&S.f.brookeAlly&&S.D>=12000,"Linhagem ≤40, aliança com Brooke, ≥$12,000 no banco → A Marca"],[S.L>=70&&S.T>=40&&(S.f.guide||S.f.localGuide)&&S.f.cert&&act().some(x=>x.done),"Linhagem ≥70, Confiança ≥40, um guia de retiro, certificação, alguém com o ngöndro concluído → Samye"],[S.T>=70&&S.f.councilSeat&&S.L>=30,"Confiança ≥70, um lugar no conselho, Linhagem ≥30 → A Ponte"],[refugeOK(),`Acolheu a família do Ablikim, Confiança ≥55, Mérito ≥40, gestos ≥3 → Refúgio`]];
     const exp=expenses(),et=exp.reduce((a,b)=>a+b[1],0);
     h+=`<section class="panel"><h3>Se acabasse agora <small>${ENDINGS[now].n} · ${ENDINGS[now].en}</small></h3>
       ${Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="ebar ${k===now?'on':''}"><span>${ENDINGS[k].n}</span><div class="bar"><i style="width:${clamp(v/mx*100,2,100)}%;color:${k===now?'var(--gold)':'var(--line2)'}"></i></div><span class="num">${Math.round(v)}</span></div>`).join('')}
@@ -14964,7 +15213,7 @@ function renderEnd(){
   app.innerHTML='';
   const tabs=[['e',"Final"],['d',"Dados"],['p',"Quem ficou"],['a',"Conquistas"]];const cur=sub('end',tabs);
   let body='';
-  if(cur==='e') body=`<div class="label">dezembro de ${Y()} · Dez anos</div><h1>${e.n}</h1><div class="en" style="letter-spacing:.3em;color:var(--mute);font-size:12px">${e.en}</div><p class="img">${esc(e.img)}</p><p>${esc(e.t())}</p>`;
+  if(cur==='e') body=`<div class="label">dezembro de ${Y()} · Dez anos</div><h1>${e.n}</h1><div class="en" style="letter-spacing:.3em;color:var(--mute);font-size:12px">${e.en}</div><p class="img">${esc(e.img)}</p><p>${esc(e.t())}</p>${epilogueHTML()}`;
   if(cur==='d') body=`<div class="rep" style="margin:10px 0">
       <div><span>Pureza da Linhagem</span><span>${Math.round(S.L)}</span></div><div><span>Confiança da Comunidade</span><span>${Math.round(S.T)}</span></div>
       <div><span>Dana</span><span>${fmt$(S.D)}</span></div><div><span>Membros</span><span>${act().length}</span></div>
@@ -15415,7 +15664,7 @@ E({id:'el_branch',tag:"Infinito · Filial",title:"Um convite de Austin",rep:1,cd
     {t:"Dar a tua bênção; que o façam eles",e:{L:1,T:1},fx(){S.f.branch=1;const n=Math.min(6,act().length-10);act().filter(m=>m.gen||m.ros).slice(0,n).forEach(m=>leave(m,"foi gerir a filial de Austin"));return `${n} membros foram para Austin. Agora são o centro-mãe.`;}},
     {t:"Esperar mais dois anos",e:{},r:"Continuam a vir de carro todas as semanas."}]});
 E({id:'el_karmapa',tag:"Infinito · Linhagem",title:"A visita do Karmapa",rep:1,cd:60,w:3,cond:()=>EL()&&S.L>=60&&S.RT>=55&&!S.f.karmapaCame,
-  text:()=>`Uma carta do Rinpoche: o Karmapa anda em digressão pela América do Norte e gostaria de passar um dia convosco. Segurança, acolhimento, estacionamento para três mil.`,
+  text:()=>`Uma carta ${S.f.rinpocheGone?'do Lobsang':'do Rinpoche'}: o Karmapa anda em digressão pela América do Norte e gostaria de passar um dia convosco. Segurança, acolhimento, estacionamento para três mil.`,
   opts:[{t:"Receber em grande",e:{D:-3000,L:8,H:20,T:3,B:20,M:10},fx(){S.f.karmapaCame=1;S.renown+=150;treGain('karmapa_signed',"pela mão do Karmapa");return "Nesse dia, estacionaram dois mil carros junto ao lago. A igreja batista emprestou o parque. O pastor Dawson orientou o trânsito ao portão.";}},
     {t:"Fazer uma pequena audiência privada",e:{D:-800,L:4,RT:5,M:5},fx(){S.f.karmapaCame=1;S.renown+=60;return "O Karmapa esteve uma hora sentado na sala da casa da quinta e fez perguntas sobre o moinho de vento.";}}]});
 E({id:'el_docu',tag:"Infinito · Media",title:"Documentário",rep:1,cd:48,w:4,cond:()=>EL()&&S.H>=20,
@@ -15523,7 +15772,7 @@ function openWiki(){
   if(cur==='t')body=pager('wk_t',TECH,n,x=>row(`${x.n} · ${TBR.find(b=>b[0]===x.br)[1]}${tk(x.id)?' ✓':''}`,`${x.k} Efeito: ${x.fx}`));
   if(cur==='p'){const ids=Object.keys(TRAITS).map(k=>'tr:'+k).concat(Object.keys(MT)).concat(Object.keys(CH).filter(k=>!MT[k]&&!ORIGINS[k]));const met=S.members.map(m=>m.id);body=pager('wk_p',ids,n,id=>{if(id.startsWith('tr:')){const t=TRAITS[id.slice(3)];const k=here().filter(m=>m.tag===id.slice(3)).length;return row(`Especialidade · ${t.n}${k?` ×${k}`:''}`,`${t.d}. Ativa para membros inscritos com Empenho ≥40; acumula até três.`);}const m=MT[id],c=CH[id];const seen=met.includes(id)||(S.seen&&Object.keys(S.seen).some(e=>EVENT_WHO[e]===id));return `<div class="wk who2">${c?pimg(c):''}<div><b>${esc(seen?(m?m.n:c.n):"???")}</b><span>${esc(seen?(m?m.r:''):"Ainda por conhecer")}</span></div></div>`;});}
   if(cur==='v'){const evs=Object.values(EV).filter(e=>e.title&&e.tag);const seen=evs.filter(e=>S.seen[e.id]!=null);body=`<p class="label" style="margin:0">${seen.length} / ${evs.length} cartas de acontecimento encontradas</p>`+pager('wk_v',evs.sort((a,b)=>(S.seen[b.id]!=null)-(S.seen[a.id]!=null)||(a.tag||'').localeCompare(b.tag||'')),n,e=>row(S.seen[e.id]!=null?e.title:"???",S.seen[e.id]!=null?`${e.tag} · visto pela primeira vez ${ds(S.seen[e.id])}`:e.tag));}
-  if(cur==='n')body=pager('wk_n',Object.entries(ENDINGS),n,([k,e])=>row(`${e.n} · ${e.en}`,({samye:"Linhagem ≥70, Confiança ≥40, um guia de retiro local, a certificação do Rinpoche, alguém que concluiu o ngöndro",bridge:"Confiança ≥70, um lugar no conselho inter-religioso, Linhagem ≥30",brand:"Linhagem ≤40, aliança com a Brooke, ≥$12,000 no banco",exile:"Linhagem ≥60, Confiança ≤32",diss:"Menos de 5 membros, ou ações a menos e dívidas a mais",succ:"No capítulo final, renuncia e entrega o centro a um membro",mila:"No capítulo final, entra no retiro de três anos: prática pessoal ≥85, Linhagem ≥60, Mérito ≥35"})[k]||''));
+  if(cur==='n')body=pager('wk_n',Object.entries(ENDINGS),n,([k,e])=>row(`${e.n} · ${e.en}`,({samye:"Linhagem ≥70, Confiança ≥40, um guia de retiro local, a certificação do Rinpoche, alguém que concluiu o ngöndro",bridge:"Confiança ≥70, um lugar no conselho inter-religioso, Linhagem ≥30",brand:"Linhagem ≤40, aliança com a Brooke, ≥$12,000 no banco",exile:"Linhagem ≥60, Confiança ≤32",diss:"Menos de 5 membros, ou ações a menos e dívidas a mais",succ:"No capítulo final, renuncia e entrega o centro a um membro",mila:"No capítulo final, entra no retiro de três anos: prática pessoal ≥85, Linhagem ≥60, Mérito ≥35",refuge:`Acolheu a família do Ablikim, Confiança ≥55, Mérito ≥40, e esteve ao lado das vítimas das catástrofes pelo menos três vezes`})[k]||''));
   if(cur==='g')body=pager('wk_g',WIKI_TERMS,n,([a,b])=>row(a,b));
   ovEl.innerHTML=`<div class="ov"><div class="box wiki"><div class="ph"><h2>Wiki</h2><button class="iconbtn" data-x="1">Fechar</button></div>${subtabs('wiki',tabs)}<div class="wkl">${body}</div></div></div>`;
   UI.ovRe=openWiki;

@@ -8,4 +8,6 @@ A narrative management sim: run a Kagyu Buddhist dharma center on a farm by Lake
 - Works on desktop (two-pane layout) and phones (paged layout).
 - Fictional story, including a fictional alternate history from 2027 on. Not a prediction.
 
+Translation check (all three language scripts must line up string for string, no Chinese left in en/pt): `node tools/check-i18n.js` (needs the `typescript` npm package).
+
 Font: [Fusion Pixel](https://github.com/TakWolf/fusion-pixel-font) (SIL OFL), subset and embedded.
